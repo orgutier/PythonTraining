@@ -21,6 +21,29 @@ examples:
   python tools/cli.py test --all        run the full test suite
 """
 
+# Same PASSED/FAILED-ERROR/separator color scheme as the "pass"/"fail"/"dim"
+# tags in tools/gui.py, so pytest output looks consistent across both tools.
+_ANSI_GREEN = "\033[32m"
+_ANSI_RED = "\033[31m"
+_ANSI_DIM = "\033[2m"
+_ANSI_RESET = "\033[0m"
+
+
+def _colorize_pytest_output(text: str) -> str:
+    if not sys.stdout.isatty():
+        return text
+    lines = []
+    for line in text.splitlines():
+        if "PASSED" in line:
+            lines.append(f"{_ANSI_GREEN}{line}{_ANSI_RESET}")
+        elif "FAILED" in line or "ERROR" in line:
+            lines.append(f"{_ANSI_RED}{line}{_ANSI_RESET}")
+        elif line.startswith("=") or line.startswith("-"):
+            lines.append(f"{_ANSI_DIM}{line}{_ANSI_RESET}")
+        else:
+            lines.append(line)
+    return "\n".join(lines)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -74,7 +97,7 @@ def main():
             )
             sys.exit(1)
 
-        print(result.stdout)
+        print(_colorize_pytest_output(result.stdout))
         if result.stderr:
             print(result.stderr, file=sys.stderr)
         sys.exit(result.returncode)
