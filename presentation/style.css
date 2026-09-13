@@ -19,6 +19,7 @@
   --sage:      #7fae7f;  /* basic tier */
   --rust:      #c17a4a;  /* advanced tier */
   --slate-blue:#6b8fae;  /* internals callout */
+  --violet:    #9a86c4;  /* theory & internals badges */
 
   --font-ui:   -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
@@ -270,9 +271,16 @@ html, body{
   padding: 3px 8px;
   border-radius: var(--radius);
   white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.06s ease;
 }
+.badge:hover{ background: var(--panel); border-color: var(--text-faint); transform: translateY(-1px); }
+.badge:active{ transform: translateY(0); }
 .badge.dunder{ color: var(--slate-blue); border-color: rgba(107,143,174,0.4); }
 .badge.module{ color: var(--sage); border-color: rgba(127,174,127,0.4); }
+.badge.method{ color: var(--amber); border-color: rgba(212,162,76,0.4); }
+.badge.concept{ color: var(--rust); border-color: rgba(193,122,74,0.4); }
+.badge.theory{ color: var(--violet); border-color: rgba(154,134,196,0.4); }
 
 .note{
   max-width: var(--max-line);
@@ -311,4 +319,122 @@ html, body{
     padding: 16px 0 20px;
   }
   .content{ padding: 28px 20px 60px; }
+}
+
+/* ============================================================
+   Glossary drawer — a left-docked panel with the full
+   explanation for whatever badge (keyword, method, dunder,
+   module, concept, or theory item) the reader just clicked.
+   ============================================================ */
+.drawer-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(10,12,15,0.55);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  z-index: 40;
+}
+.drawer-backdrop.visible{ opacity: 1; }
+
+.glossary-drawer{
+  position: fixed;
+  top: 0;
+  left: 300px;
+  width: 380px;
+  max-width: calc(100vw - 300px);
+  height: 100vh;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  box-shadow: 8px 0 24px rgba(0,0,0,0.35);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-110%);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+.glossary-drawer.open{ transform: translateX(0); pointer-events: auto; }
+
+.drawer-header{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.drawer-heading{ display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.drawer-category{
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.drawer-category.cat-method{ color: var(--amber); }
+.drawer-category.cat-dunder{ color: var(--slate-blue); }
+.drawer-category.cat-module{ color: var(--sage); }
+.drawer-category.cat-concept{ color: var(--rust); }
+.drawer-category.cat-theory{ color: var(--violet); }
+.drawer-term{
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  word-break: break-word;
+}
+.drawer-close{
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.drawer-close:hover{ color: var(--text); border-color: var(--text-faint); }
+
+.drawer-body{
+  padding: 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+.drawer-body h3{
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 20px 0 8px;
+}
+.drawer-body h3:first-of-type{ margin-top: 0; }
+.drawer-summary{
+  margin: 0;
+  color: var(--text);
+  font-size: 0.98rem;
+}
+.drawer-body p{ margin: 0; color: var(--text); }
+.drawer-code{
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin: 0;
+}
+.drawer-code code{
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  color: var(--text);
+  white-space: pre;
+}
+.drawer-related{ margin-top: 2px; }
+
+@media (max-width: 860px){
+  .glossary-drawer{ left: 0; width: 100%; max-width: 420px; }
 }

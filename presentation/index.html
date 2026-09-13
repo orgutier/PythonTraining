@@ -31,9 +31,23 @@
     <div id="topicDetail"></div>
   </main>
 
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+
+  <aside class="glossary-drawer" id="glossaryDrawer" aria-hidden="true" aria-label="Term details">
+    <div class="drawer-header">
+      <div class="drawer-heading">
+        <span class="drawer-category" id="drawerCategory"></span>
+        <h2 class="drawer-term" id="drawerTerm"></h2>
+      </div>
+      <button type="button" class="drawer-close" id="drawerClose" aria-label="Close term details">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
 </div>
 
 <script src="data.js"></script>
+<script src="glossary.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

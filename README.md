@@ -84,10 +84,25 @@ gate the commit on the exit code. See `tests/test_week12.py` and
 `presentation/index.html` is a standalone, dependency-free reference (no
 CDN, no build step, no internet required) covering all 14 topics at
 Basic / Mid / Advanced tiers, plus a "Python internals" explanation for
-each one, book and web references, keywords, special methods, and modules.
-It intentionally contains no exercises or answers -- it's meant to sit
-open next to your terminal and editor as a lookup tool, matching the
-actual working environment (cmd + VS Code) the course is delivered in.
+each one, book and web references, and six badge groups: keywords &
+syntax, methods & attributes, special methods (dunders), modules,
+concepts, and theory. It intentionally contains no exercises or
+answers -- it's meant to sit open next to your terminal and editor as a
+lookup tool, matching the actual working environment (cmd + VS Code)
+the course is delivered in.
+
+Click any badge to open a glossary drawer (docked to the left, next to
+the topic list) with a full explanation, when/how to use it, and a
+runnable example -- entries are defined in `presentation/glossary.js`,
+keyed by the exact badge text used in `presentation/data.js`. Adding a
+new badge to a topic means adding a matching entry there too.
+
+There's also a 15th topic, "Appendix: The Tooling Itself", covering
+argparse, subprocess, tkinter, ANSI terminal colors, virtual
+environments, and git hooks -- everything used to build `tools/cli.py`,
+`tools/gui.py`, and `tools/core.py` themselves, so a trainee who works
+through the whole reference has what they need to build a similar
+CLI+GUI test runner from scratch.
 
 Open `presentation/index.html` directly in any browser.
 
