@@ -8,7 +8,6 @@
   const navToggle = document.getElementById("navToggle");
 
   const drawerEl = document.getElementById("glossaryDrawer");
-  const drawerBackdropEl = document.getElementById("drawerBackdrop");
   const drawerCategoryEl = document.getElementById("drawerCategory");
   const drawerTermEl = document.getElementById("drawerTerm");
   const drawerBodyEl = document.getElementById("drawerBody");
@@ -128,7 +127,9 @@
     currentIndex = index;
     renderList();
     renderDetail(TOPICS[index]);
-    closeGlossary();
+    // Deliberately leave the glossary drawer as-is: it's a non-modal
+    // side panel, so switching topics while reading a term shouldn't
+    // yank it closed.
     if (window.innerWidth <= 860) {
       sidebarEl.classList.remove("open");
       navToggle.setAttribute("aria-expanded", "false");
@@ -205,8 +206,6 @@
 
     drawerEl.classList.add("open");
     drawerEl.setAttribute("aria-hidden", "false");
-    drawerBackdropEl.hidden = false;
-    requestAnimationFrame(() => drawerBackdropEl.classList.add("visible"));
     drawerCloseBtn.focus();
   }
 
@@ -214,15 +213,12 @@
     if (!drawerEl.classList.contains("open")) return;
     drawerEl.classList.remove("open");
     drawerEl.setAttribute("aria-hidden", "true");
-    drawerBackdropEl.classList.remove("visible");
-    drawerBackdropEl.hidden = true;
     if (lastFocusedBadge && document.body.contains(lastFocusedBadge)) {
       lastFocusedBadge.focus();
     }
   }
 
   drawerCloseBtn.addEventListener("click", closeGlossary);
-  drawerBackdropEl.addEventListener("click", closeGlossary);
 
   searchEl.addEventListener("input", (e) => filterList(e.target.value));
 
