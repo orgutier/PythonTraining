@@ -203,6 +203,68 @@ html, body{
   font-size: 1rem;
 }
 
+/* ============================================================
+   Week schedule — day-by-day rows for delivering this topic.
+   ============================================================ */
+.schedule{
+  margin-bottom: 32px;
+}
+.schedule h2{
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--amber);
+  margin: 0 0 10px;
+  letter-spacing: 0.02em;
+}
+.schedule-table{
+  width: 100%;
+  max-width: 900px;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.schedule-table thead th{
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-faint);
+  padding: 0 12px 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.schedule-table td{
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text);
+}
+.schedule-table tr:last-child td{ border-bottom: none; }
+.schedule-day{
+  font-family: var(--font-mono);
+  color: var(--amber);
+  white-space: nowrap;
+  width: 1%;
+}
+.schedule-title{
+  font-weight: 600;
+  white-space: nowrap;
+  width: 1%;
+  color: var(--text);
+}
+
+@media (max-width: 700px){
+  .schedule-table, .schedule-table tbody, .schedule-table tr, .schedule-table td{ display: block; width: auto; }
+  .schedule-table thead{ display: none; }
+  .schedule-table tr{
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .schedule-table tr:last-child{ border-bottom: none; }
+  .schedule-table td{ border-bottom: none; padding: 2px 0; white-space: normal; }
+  .schedule-day{ font-size: 0.8rem; }
+  .schedule-title{ font-size: 1rem; }
+}
+
 .tier{
   max-width: var(--max-line);
   padding: 4px 0 4px 18px;

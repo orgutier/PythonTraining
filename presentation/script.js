@@ -92,6 +92,19 @@
     return row;
   }
 
+  function scheduleBlock(schedule) {
+    if (!schedule || !schedule.length) return "";
+    let html = '<div class="schedule"><h2>Week schedule</h2><table class="schedule-table">';
+    html += '<thead><tr><th scope="col">Day</th><th scope="col">Focus</th><th scope="col">What to cover</th></tr></thead><tbody>';
+    schedule.forEach((row) => {
+      html += "<tr><td class='schedule-day'>" + escapeHtml(row.day) + "</td>" +
+        "<td class='schedule-title'>" + escapeHtml(row.title) + "</td>" +
+        "<td>" + escapeHtml(row.details) + "</td></tr>";
+    });
+    html += "</tbody></table></div>";
+    return html;
+  }
+
   function renderDetail(topic) {
     let html = "";
     html += '<div class="topic-head">';
@@ -99,6 +112,8 @@
     html += "<h1>" + escapeHtml(topic.title) + "</h1>";
     html += '<div class="sub">' + escapeHtml(topic.sub) + "</div>";
     html += "</div>";
+
+    html += scheduleBlock(topic.schedule);
 
     html += tierBlock("basic", "Basic knowledge", topic.basic);
     html += tierBlock("mid", "Mid-level knowledge", topic.mid);

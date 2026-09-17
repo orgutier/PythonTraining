@@ -91,6 +91,18 @@ answers -- it's meant to sit open next to your terminal and editor as a
 lookup tool, matching the actual working environment (cmd + VS Code)
 the course is delivered in.
 
+Each of the 14 topics also opens with a **week schedule**: five
+day-by-day rows (`schedule` in `presentation/data.js`) naming what to
+cover each day so a week maps onto a standard 5-day training week. Day
+1 of Week 1 (Python Fundamentals) is reserved entirely for environment
+setup -- installing Python, creating the virtual environment, running
+`tools/cli.py` for the first time, and touring the repo -- so no actual
+topic content is taught that day; every other week's five days split
+across basic tier, mid tier, advanced tier + internals, exercises, and
+a practice/review day. Week 14 (Capstone) uses a project-shaped
+schedule (kickoff, build, build, polish, demo) instead of tiers, since
+it has no new content of its own.
+
 Click any badge to open a glossary drawer (docked to the left, next to
 the topic list) with a full explanation, when/how to use it, and a
 runnable example -- entries are defined in `presentation/glossary.js`,

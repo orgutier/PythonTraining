@@ -4,6 +4,13 @@
 const TOPICS = [
 {
   n: 1, title: "Python Fundamentals", sub: "variables, types, operators",
+  schedule: [
+    { day: "Day 1", title: "Environment & tooling setup", details: "Install Python 3.11+, create and activate a virtual environment (python -m venv .venv), pip install -r requirements.txt, and open the repo in VS Code. Run python tools/cli.py list and python tools/cli.py test week01 to see the starter tests fail, try tools/gui.py, and do a git basics pass (status/add/commit). Tour exercises/, reference_solutions/, tests/, and open presentation/index.html to keep alongside the editor all course long." },
+    { day: "Day 2", title: "Basic tier", details: "Variables & assignment; int/float/str/bool/None; arithmetic & comparison operators; print()/input(); basic type casting; type hints for variables." },
+    { day: "Day 3", title: "Mid tier", details: "Operator precedence & chained comparisons; f-strings; // vs / and float imprecision; the walrus operator (:=); augmented assignment. Start exercises/week01/solution.py." },
+    { day: "Day 4", title: "Advanced tier & internals", details: "Arbitrary-precision integers; IEEE-754 float caveats; string interning; identity vs equality; Decimal/Fraction. Cover the PyObject / small-integer-caching internals note." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week01/solution.py, run python tools/cli.py test week01 until it's green, and review anything the group is still shaky on." }
+  ],
   basic: {
     text: "Variables & assignment; int/float/str/bool/None; arithmetic & comparison operators; print()/input(); basic type casting; type hints for variables (x: int = 5).",
     ref: "Book — Python Distilled, §1.1–1.6"
@@ -26,6 +33,13 @@ const TOPICS = [
 },
 {
   n: 2, title: "Control Flow", sub: "conditionals, loops",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "if/elif/else; while; for + range(); break/continue/pass; nested loops." },
+    { day: "Day 2", title: "Mid tier", details: "for...else / while...else; short-circuit and/or; ternary expressions; zip() for parallel iteration." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "Writing a custom iterable/iterator class; itertools patterns; loop-style performance. Cover the iterator protocol (iter/next/StopIteration)." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week02/solution.py, applying this week's conditionals and loop constructs." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week02/solution.py, run python tools/cli.py test week02 until green, and review." }
+  ],
   basic: {
     text: "if/elif/else; while; for + range(); break/continue/pass; nested loops.",
     ref: "Book — Python Distilled, §1.5, 1.12; Ch3"
@@ -48,6 +62,13 @@ const TOPICS = [
 },
 {
   n: 3, title: "Functions", sub: "parameters, scope, recursion",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "def, parameters, return, default args, *args/**kwargs, return type hints, basic recursion, lambda." },
+    { day: "Day 2", title: "Mid tier", details: "Keyword-only and positional-only arguments; docstrings & introspection; closures; writing a simple decorator." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "functools (wraps, lru_cache, partial); generator functions (yield); recursion limits. Cover LEGB scoping and the mutable-default-argument bug." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week03/solution.py." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week03/solution.py, run python tools/cli.py test week03 until green, and review." }
+  ],
   basic: {
     text: "def, parameters, return, default args, *args/**kwargs, return type hints (->), basic recursion, lambda.",
     ref: "Book — Python Distilled, §1.13; Ch5"
@@ -70,6 +91,13 @@ const TOPICS = [
 },
 {
   n: 4, title: "Data Structures", sub: "lists, tuples, dicts, sets",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "list/tuple/dict/set creation, indexing, slicing, common methods; list & dict comprehensions." },
+    { day: "Day 2", title: "Mid tier", details: "Nested structures; sorting with key=; set operations; namedtuple/dataclasses as lightweight records." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "collections (defaultdict, Counter, deque, OrderedDict); array/deque vs list performance; frozenset/tuple as keys. Cover dynamic-array and hash-table internals." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week04/solution.py." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week04/solution.py, run python tools/cli.py test week04 until green, and review." }
+  ],
   basic: {
     text: "list/tuple/dict/set — creation, indexing, slicing, common methods; list & dict comprehensions.",
     ref: "Book — Python Distilled, §1.8–1.11"
@@ -92,6 +120,13 @@ const TOPICS = [
 },
 {
   n: 5, title: "Files, Exceptions, Regex", sub: "I/O, error handling, pattern matching",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "open/with/read/write; try/except/finally/raise; custom exception classes; re.search/match/findall/sub." },
+    { day: "Day 2", title: "Mid tier", details: "Exception chaining (raise ... from ...); exception hierarchies; contextlib beyond files; regex groups, named groups, re.compile." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "Custom context managers; regex lookahead/lookbehind; catastrophic-backtracking traps. Cover traceback propagation and the backtracking regex engine." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week05/solution.py." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week05/solution.py, run python tools/cli.py test week05 until green, and review." }
+  ],
   basic: {
     text: "open/with/read/write; try/except/finally/raise; custom exception classes; re.search/match/findall/sub.",
     ref: "Book — Python Distilled, §1.7, 1.14; Ch9"
@@ -114,6 +149,13 @@ const TOPICS = [
 },
 {
   n: 6, title: "OOP I", sub: "classes, encapsulation, properties",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "class/__init__/self; instance vs class attributes; _protected/__private convention; @property/@staticmethod/@classmethod." },
+    { day: "Day 2", title: "Mid tier", details: "__slots__ for memory savings; property with computed/cached values; cls vs self in practice." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "Writing a custom descriptor; metaclass basics; __init_subclass__ hook. Cover attribute lookup order and the descriptor protocol." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week06/solution.py." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week06/solution.py, run python tools/cli.py test week06 until green, and review." }
+  ],
   basic: {
     text: "class/__init__/self; instance vs class attributes; _protected/__private convention; @property/@staticmethod/@classmethod.",
     ref: "Book — Python Distilled, Ch7 §7.1–7.4, 7.15–7.17"
@@ -136,6 +178,13 @@ const TOPICS = [
 },
 {
   n: 7, title: "OOP II", sub: "inheritance, polymorphism, abstraction",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "class Child(Parent), super(), method overriding, duck typing." },
+    { day: "Day 2", title: "Mid tier", details: "Multiple inheritance basics; composition-vs-inheritance judgment; the abc module, @abstractmethod." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "Method Resolution Order & diamond inheritance; mixins; typing.Protocol for structural typing. Cover C3 linearization." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week07/solution.py." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week07/solution.py, run python tools/cli.py test week07 until green, and review." }
+  ],
   basic: {
     text: "class Child(Parent), super(), method overriding, duck typing.",
     ref: "Book — Python Distilled, Ch7 §7.7"
@@ -158,6 +207,13 @@ const TOPICS = [
 },
 {
   n: 8, title: "The Python Data Model", sub: "special methods, protocols",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "__init__, __repr__, __str__, __eq__." },
+    { day: "Day 2", title: "Mid tier", details: "__add__ and other operator dunders; __len__/__getitem__/__iter__/__contains__; __call__; __bool__." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "__enter__/__exit__ context managers; reflected operators (__radd__) and NotImplemented; __hash__'s relationship to __eq__. Cover why dunder lookup happens on the type, not the instance." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week08/solution.py." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week08/solution.py, run python tools/cli.py test week08 until green, and review." }
+  ],
   basic: {
     text: "__init__, __repr__, __str__, __eq__.",
     ref: "Book — Fluent Python, Ch1 (The Python Data Model)"
@@ -180,6 +236,13 @@ const TOPICS = [
 },
 {
   n: 9, title: "OS, JSON, Datetime, XML", sub: "everyday stdlib modules",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "os.listdir/os.path; json.load/dump; datetime.now(); basic XML parsing with ElementTree." },
+    { day: "Day 2", title: "Mid tier", details: "pathlib as the modern os.path alternative; json custom encoders (default=); timezone-aware vs naive datetimes; ElementTree.findall()." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "os.walk for recursive traversal; datetime arithmetic & timedelta/DST edge cases; building/modifying XML trees. Cover JSON's recursive-descent parser and DOM-style XML parsing." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week09/solution.py." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week09/solution.py, run python tools/cli.py test week09 until green, and review." }
+  ],
   basic: {
     text: "os.listdir/os.path; json.load/dump; datetime.now(); basic XML parsing with ElementTree.",
     ref: "Web — Python docs: os, json, datetime, xml.etree.ElementTree — neither priority book covers these stdlib modules in depth"
@@ -202,6 +265,13 @@ const TOPICS = [
 },
 {
   n: 10, title: "Pandas", sub: "data analysis",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "DataFrame/Series basics; read_csv; .head()/.info()/.describe()." },
+    { day: "Day 2", title: "Mid tier", details: "Boolean-indexing filters; groupby + aggregation; sorting; merging/joining DataFrames." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "Vectorized operations vs .apply() performance; multi-indexing; dtype-based memory optimization; pivot tables. Cover columnar NumPy-backed storage." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week10/solution.py." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week10/solution.py, run python tools/cli.py test week10 until green, and review." }
+  ],
   basic: {
     text: "DataFrame/Series basics; read_csv; .head()/.info()/.describe().",
     ref: "Web — pandas docs, \u201c10 minutes to pandas\u201d (pandas.pydata.org/docs/user_guide/10min.html)"
@@ -225,6 +295,13 @@ const TOPICS = [
 },
 {
   n: 11, title: "OpenCV", sub: "images as arrays",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "cv2.imread/imwrite; cv2.cvtColor (color conversion); cv2.resize; basic drawing (rectangle/circle/line)." },
+    { day: "Day 2", title: "Mid tier", details: "Thresholding; simple edge detection (Canny); cropping via array slicing; video capture from a file/webcam." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "Contour detection; blur/sharpen filtering (convolution); Haar cascades. Cover images-as-NumPy-arrays and BGR vs RGB channel order." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week11/solution.py." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week11/solution.py, run python tools/cli.py test week11 until green, and review." }
+  ],
   basic: {
     text: "cv2.imread/imwrite; cv2.cvtColor (color conversion); cv2.resize; basic drawing (rectangle/circle/line).",
     ref: "Web — OpenCV-Python official tutorials, \u201cGetting Started with Images\u201d (docs.opencv.org/4.x/d6/d00/tutorial_py_root.html)"
@@ -248,6 +325,13 @@ const TOPICS = [
 },
 {
   n: 12, title: "Requests + Threading", sub: "HTTP clients, concurrency",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "requests.get/post; response.json()/.status_code; threading.Thread — create/start/join." },
+    { day: "Day 2", title: "Mid tier", details: "Headers/auth/query params/timeouts; raise_for_status(); Lock for protecting shared state between threads." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "requests.Session for connection reuse; retry/backoff strategies; ThreadPoolExecutor; race conditions and deadlocks. Cover the GIL and I/O-bound vs CPU-bound concurrency." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week12/solution.py. The tests mock requests.get — never point them at a live endpoint." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week12/solution.py, run python tools/cli.py test week12 until green, and review." }
+  ],
   basic: {
     text: "requests.get/post; response.json()/.status_code; threading.Thread — create/start/join.",
     ref: "Web — requests Quickstart + Python docs threading (docs.python.org/3/library/threading.html)"
@@ -270,6 +354,13 @@ const TOPICS = [
 },
 {
   n: 13, title: "Local API Endpoints", sub: "FastAPI",
+  schedule: [
+    { day: "Day 1", title: "Basic tier", details: "FastAPI app instance; @app.get()/@app.post() routes; path & query parameters; returning a dict (auto-serialized to JSON)." },
+    { day: "Day 2", title: "Mid tier", details: "Pydantic models for request/response validation; automatic interactive docs (/docs); status codes; basic dependency injection (Depends)." },
+    { day: "Day 3", title: "Advanced tier & internals", details: "async def endpoints; middleware; background tasks; testing with TestClient. Cover ASGI vs WSGI." },
+    { day: "Day 4", title: "Exercises", details: "Work through exercises/week13/solution.py. Tests use TestClient in-process — no real server or port needed." },
+    { day: "Day 5", title: "Practice & review", details: "Finish exercises/week13/solution.py, run python tools/cli.py test week13 until green, and review." }
+  ],
   basic: {
     text: "FastAPI app instance; @app.get()/@app.post() routes; path & query parameters; returning a dict (auto-serialized to JSON).",
     ref: "Web — FastAPI Tutorial, \u201cFirst Steps\u201d (fastapi.tiangolo.com/tutorial/first-steps)"
@@ -292,6 +383,13 @@ const TOPICS = [
 },
 {
   n: 14, title: "Capstone", sub: "putting it all together",
+  schedule: [
+    { day: "Day 1", title: "Project kickoff", details: "Pick a capstone idea that combines two or more earlier topics (e.g. pandas + requests, or OpenCV + FastAPI); scope it down to something finishable in four days and sketch a short plan." },
+    { day: "Day 2", title: "Build — core logic", details: "Implement the core data handling / processing logic for the chosen idea." },
+    { day: "Day 3", title: "Build — integration", details: "Wire in the second module (API, GUI, file I/O, etc.) and start adding basic tests or sanity checks." },
+    { day: "Day 4", title: "Polish", details: "Add error handling, write a short README for the capstone, and run python tools/cli.py test --all as a full sanity check across every week." },
+    { day: "Day 5", title: "Demo & review", details: "Present the capstone to the group, retro on the course, and point interested trainees at the optional deeper books noted in the main README." }
+  ],
   basic: { text: "Synthesis of Topics 1-13 into one small project. No new knowledge tier here — this week is applied review.", ref: "" },
   mid: { text: "", ref: "" },
   advanced: { text: "", ref: "" },
