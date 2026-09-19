@@ -17,9 +17,17 @@ PythonTraining/
 ├── reference_solutions/  Fully worked answer key, one folder per week --
 │   └── weekNN/            not visible to trainees during the course.
 │       └── solution.py
+│   └── challenges/        Worked answers for challenges/, same idea.
+│       └── challengeNN/solution.py
 ├── tests/                 Staff-authored pytest files, one per week.
 │   └── test_weekNN.py     Kept separate from exercises/ so trainees can't
-│                          edit the tests themselves.
+│                          edit the tests themselves. challenges/ has no
+│                          matching tests/test_challengeNN.py by design --
+│                          see challenges/README.md for why.
+├── challenges/            5 interview-style coding challenges, separate
+│   └── challengeNN/        from the graded weekly exercises. See
+│       ├── README.md        challenges/README.md for what these are, and
+│       └── solution.py      which week each one follows.
 ├── tools/                 The test runner (see below).
 │   ├── core.py             Shared logic
 │   ├── cli.py              Command-line interface
@@ -91,6 +99,13 @@ answers -- it's meant to sit open next to your terminal and editor as a
 lookup tool, matching the actual working environment (cmd + VS Code)
 the course is delivered in.
 
+Every tier's explanation (`basic`/`mid`/`advanced` in `presentation/data.js`)
+is written as full explanatory prose, not a bare list of keywords -- each
+one covers what a concept is, why it matters, and how to actually use it,
+so the reference doubles as documentation a trainer can teach straight
+from and a student can self-study from without anyone standing over their
+shoulder to fill in the gaps.
+
 Each of the 14 topics also opens with a **week schedule**: five
 day-by-day rows (`schedule` in `presentation/data.js`) naming what to
 cover each day so a week maps onto a standard 5-day training week. Day
@@ -103,11 +118,16 @@ a practice/review day. Week 14 (Capstone) uses a project-shaped
 schedule (kickoff, build, build, polish, demo) instead of tiers, since
 it has no new content of its own.
 
-Click any badge to open a glossary drawer (docked to the left, next to
-the topic list) with a full explanation, when/how to use it, and a
-runnable example -- entries are defined in `presentation/glossary.js`,
-keyed by the exact badge text used in `presentation/data.js`. Adding a
-new badge to a topic means adding a matching entry there too.
+Click any badge to open a glossary drawer (docked to the right, non-modal --
+the sidebar and content stay fully usable while it's open) with a full
+explanation, when/how to use it, and a runnable example -- entries are
+defined in `presentation/glossary.js`, keyed by the exact badge text used
+in `presentation/data.js`. Adding a new badge to a topic means adding a
+matching entry there too.
+
+Five of the topics (Data Structures, OOP I, Pandas, Requests + Threading,
+and FastAPI) also show an **Interview Challenge** callout -- a pointer to
+one of the interview-style problems in `challenges/`, described below.
 
 There's also a 15th topic, "Appendix: The Tooling Itself", covering
 argparse, subprocess, tkinter, ANSI terminal colors, virtual
@@ -117,6 +137,30 @@ through the whole reference has what they need to build a similar
 CLI+GUI test runner from scratch.
 
 Open `presentation/index.html` directly in any browser.
+
+## Interview Challenges
+
+`challenges/` holds 5 standalone, interview-style coding problems --
+separate from the graded weekly exercises in `exercises/`, and **not**
+run by pytest or wired into `tools/cli.py`. Each one is the kind of
+problem an engineer actually gets asked to write live in a technical
+interview: more code than a weekly exercise, a real specification instead
+of one function signature, and explicit constraints on *how* to write the
+solution (a required technique, a forbidden shortcut, or a mandated
+interface) plus a demand for a comprehensive, written-out list of the
+edge cases handled -- exactly the two things pytest can't grade.
+
+| Challenge | Title | Do it after |
+|---|---|---|
+| `challenge01` | Group Anagrams | Week 04 -- Data Structures |
+| `challenge02` | LRU Cache | Week 06 -- OOP I |
+| `challenge03` | Sales Data Analyzer | Week 10 -- Pandas |
+| `challenge04` | Rate Limiter (Token Bucket) | Week 12 -- Requests + Threading |
+| `challenge05` | URL Shortener API | Week 13 -- FastAPI |
+
+See `challenges/README.md` for the full picture, and each
+`challenges/challengeNN/README.md` for that problem's statement and
+constraints. Worked answers are in `reference_solutions/challenges/`.
 
 ## On book references
 

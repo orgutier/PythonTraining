@@ -105,6 +105,17 @@
     return html;
   }
 
+  function challengeBlock(challenge) {
+    if (!challenge) return "";
+    let html = '<div class="challenge">';
+    html += '<div class="challenge-tag">Interview Challenge &mdash; ' + escapeHtml(challenge.id) + '</div>';
+    html += "<h2>" + escapeHtml(challenge.title) + "</h2>";
+    html += "<p>" + escapeHtml(challenge.blurb) + "</p>";
+    html += '<p class="challenge-path"><code>' + escapeHtml(challenge.path) + '</code> &mdash; not pytest-tested; grade it yourself against the constraints in its README.</p>';
+    html += "</div>";
+    return html;
+  }
+
   function renderDetail(topic) {
     let html = "";
     html += '<div class="topic-head">';
@@ -114,6 +125,7 @@
     html += "</div>";
 
     html += scheduleBlock(topic.schedule);
+    html += challengeBlock(topic.challenge);
 
     html += tierBlock("basic", "Basic knowledge", topic.basic);
     html += tierBlock("mid", "Mid-level knowledge", topic.mid);

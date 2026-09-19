@@ -20,6 +20,7 @@
   --rust:      #c17a4a;  /* advanced tier */
   --slate-blue:#6b8fae;  /* internals callout */
   --violet:    #9a86c4;  /* theory & internals badges */
+  --rose:      #d9748f;  /* interview challenge callout */
 
   --font-ui:   -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
@@ -263,6 +264,48 @@ html, body{
   .schedule-table td{ border-bottom: none; padding: 2px 0; white-space: normal; }
   .schedule-day{ font-size: 0.8rem; }
   .schedule-title{ font-size: 1rem; }
+}
+
+/* ============================================================
+   Interview challenge callout — an optional, ungraded,
+   interview-style problem assigned to this week.
+   ============================================================ */
+.challenge{
+  max-width: var(--max-line);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--rose);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 32px;
+}
+.challenge-tag{
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 6px;
+}
+.challenge h2{
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.challenge p{ margin: 0 0 8px; color: var(--text); }
+.challenge p:last-child{ margin-bottom: 0; }
+.challenge-path{
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.challenge-path code{
+  font-family: var(--font-mono);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1px 6px;
+  color: var(--rose);
 }
 
 .tier{
