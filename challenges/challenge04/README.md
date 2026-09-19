@@ -1,7 +1,7 @@
 # Challenge 04 — Rate Limiter (Token Bucket)
 
 **Do this after:** Week 12 (Requests + Threading)
-**Not pytest-tested.** Grade it yourself against the constraints below.
+**Correctness is pytest-tested:** `python tools/cli.py test challenge04` (or `pytest tests/test_challenge04.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
@@ -58,10 +58,12 @@ class RateLimiter:
    count (rounded to 2 decimal places) so the limiter's state is
    debuggable at a glance.
 
-## Prove it's actually thread-safe
+## Check your work
 
-Write a short manual check (not a pytest test -- run it yourself, e.g. in a
-`python -i` session or a scratch script) that starts several threads
-hammering `allow_request()` at once on a limiter with a small capacity, and
-confirms the total number of `True` results never exceeds what the bucket's
-capacity and elapsed time should allow.
+`python tools/cli.py test challenge04` runs `tests/test_challenge04.py`,
+which includes a real concurrency check: several threads hammer
+`allow_request()` at once on a limiter with a small capacity, and the test
+asserts the total number of `True` results never exceeds that capacity --
+so a solution that isn't actually thread-safe (or a race that only shows
+up under real contention) has a real chance of getting caught, not just a
+happy-path sequential check.

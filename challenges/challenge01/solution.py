@@ -1,6 +1,7 @@
 """
 Challenge 01 - Group Anagrams
-Interview-style challenge, not pytest-tested. See README.md in this folder
+Interview-style challenge. Correctness is pytest-tested (see
+tests/test_challenge01.py / `python tools/cli.py test challenge01`); see README.md in this folder
 for the full problem statement and the constraints your solution must follow
 (no collections.Counter/defaultdict, a comprehension for the per-word
 signature, full type hints, and a docstring listing the edge cases handled).

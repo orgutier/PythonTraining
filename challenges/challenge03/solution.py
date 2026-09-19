@@ -1,6 +1,7 @@
 """
 Challenge 03 - Sales Data Analyzer
-Interview-style challenge, not pytest-tested. See README.md in this folder
+Interview-style challenge. Correctness is pytest-tested (see
+tests/test_challenge03.py / `python tools/cli.py test challenge03`); see README.md in this folder
 for the full problem statement, the expected DataFrame columns, and the
 constraints your solution must follow (no row-by-row loops, documented
 assumptions, and exact return types).

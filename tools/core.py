@@ -9,6 +9,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WEEKS = [f"week{n:02d}" for n in range(1, 15)]
+CHALLENGES = [f"challenge{n:02d}" for n in range(1, 6)]
 
 WEEK_TOPICS = {
     "week01": "Python Fundamentals",

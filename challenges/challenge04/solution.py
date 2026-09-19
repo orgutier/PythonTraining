@@ -1,6 +1,7 @@
 """
 Challenge 04 - Rate Limiter (Token Bucket)
-Interview-style challenge, not pytest-tested. See README.md in this folder
+Interview-style challenge. Correctness is pytest-tested (see
+tests/test_challenge04.py / `python tools/cli.py test challenge04`); see README.md in this folder
 for the full problem statement and the constraints your solution must follow
 (thread safety with threading.Lock, a from-scratch token bucket driven by
 time.monotonic(), a comprehensive docstring, and a debuggable __repr__).

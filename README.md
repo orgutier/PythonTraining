@@ -19,15 +19,14 @@ PythonTraining/
 │       └── solution.py
 │   └── challenges/        Worked answers for challenges/, same idea.
 │       └── challengeNN/solution.py
-├── tests/                 Staff-authored pytest files, one per week.
-│   └── test_weekNN.py     Kept separate from exercises/ so trainees can't
-│                          edit the tests themselves. challenges/ has no
-│                          matching tests/test_challengeNN.py by design --
-│                          see challenges/README.md for why.
+├── tests/                 Staff-authored pytest files, one per week --
+│   ├── test_weekNN.py      plus one per challenge (test_challengeNN.py).
+│   └── test_challengeNN.py Kept separate from exercises/ and challenges/
+│                          so trainees can't edit the tests themselves.
 ├── challenges/            5 interview-style coding challenges, separate
-│   └── challengeNN/        from the graded weekly exercises. See
-│       ├── README.md        challenges/README.md for what these are, and
-│       └── solution.py      which week each one follows.
+│   └── challengeNN/        from the graded weekly exercises but tested
+│       ├── README.md        the same way. See challenges/README.md for
+│       └── solution.py      what these are and which week each follows.
 ├── tools/                 The test runner (see below).
 │   ├── core.py             Shared logic
 │   ├── cli.py              Command-line interface
@@ -62,9 +61,10 @@ point of the GUI. Both tools call the same underlying test-running code
 
 **CLI** (from the repo root):
 ```bash
-python tools/cli.py list              # see all 14 weeks
+python tools/cli.py list              # see all 14 weeks + 5 challenges
 python tools/cli.py test week01       # run one week
-python tools/cli.py test --all        # run everything
+python tools/cli.py test challenge01  # run one interview challenge
+python tools/cli.py test --all        # run everything (weeks + challenges)
 ```
 
 **GUI** (from the repo root):
@@ -72,7 +72,9 @@ python tools/cli.py test --all        # run everything
 python tools/gui.py
 ```
 Pick a week from the dropdown, click "Run Tests", read the colored
-pass/fail output. No command-line knowledge required.
+pass/fail output. No command-line knowledge required. The GUI's dropdown
+is weeks-only -- run challenge tests from the CLI (`test challengeNN`) or
+let a `test --all` pick them up.
 
 ## Git hook integration
 
@@ -141,14 +143,22 @@ Open `presentation/index.html` directly in any browser.
 ## Interview Challenges
 
 `challenges/` holds 5 standalone, interview-style coding problems --
-separate from the graded weekly exercises in `exercises/`, and **not**
-run by pytest or wired into `tools/cli.py`. Each one is the kind of
-problem an engineer actually gets asked to write live in a technical
-interview: more code than a weekly exercise, a real specification instead
-of one function signature, and explicit constraints on *how* to write the
-solution (a required technique, a forbidden shortcut, or a mandated
-interface) plus a demand for a comprehensive, written-out list of the
-edge cases handled -- exactly the two things pytest can't grade.
+separate from the graded weekly exercises in `exercises/`, but tested the
+same way:
+
+```bash
+python tools/cli.py test challenge01       # run one challenge's tests
+python tools/cli.py test --all             # runs every week's AND every challenge's tests
+```
+
+Each one is the kind of problem an engineer actually gets asked to write
+live in a technical interview: more code than a weekly exercise, and a
+real specification instead of one function signature. `tests/test_challengeNN.py`
+grades correctness and the documented edge cases automatically, same as a
+week's exercise -- but each challenge's `README.md` also imposes explicit
+constraints on *how* to write the solution (a required technique, a
+forbidden shortcut, or a mandated interface), which pytest can't check.
+Grade those by reading the code.
 
 | Challenge | Title | Do it after |
 |---|---|---|
@@ -160,7 +170,8 @@ edge cases handled -- exactly the two things pytest can't grade.
 
 See `challenges/README.md` for the full picture, and each
 `challenges/challengeNN/README.md` for that problem's statement and
-constraints. Worked answers are in `reference_solutions/challenges/`.
+constraints. Worked answers are in `reference_solutions/challenges/`,
+verified against the same tests before being committed.
 
 ## On book references
 

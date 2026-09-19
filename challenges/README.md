@@ -9,9 +9,13 @@ weekly exercises in `exercises/`. They exist for a different purpose:
 - **Challenges** (`challenges/challengeNN/`) are the kind of problem an
   engineer is actually asked to write live in a technical interview: more
   code, fewer hints, and a real specification instead of a single function
-  signature. They are **not** run by pytest and **not** wired into
-  `tools/cli.py` -- grade them by code review against the constraints in
-  each challenge's `README.md`, not by a green checkmark.
+  signature. **Correctness** is graded the same way as a weekly exercise
+  -- `tests/test_challengeNN.py` via `python tools/cli.py test challengeNN`
+  -- but a green checkmark there only proves the happy path and the
+  documented edge cases work. Each challenge's `README.md` also mandates
+  specific implementation choices (a required technique, a forbidden
+  shortcut, a specific interface) that pytest has no way to check; grade
+  those by reading the code.
 
 Each `challengeNN/` folder has the same shape as a week's exercise:
 
@@ -21,7 +25,9 @@ challenges/challengeNN/
   solution.py     Stub with signatures/docstrings, raises NotImplementedError
 ```
 
-with a matching worked answer in `reference_solutions/challenges/challengeNN/`.
+with a matching pytest suite in `tests/test_challengeNN.py` and a worked
+answer in `reference_solutions/challenges/challengeNN/` (both written and
+verified against the same tests before being committed).
 
 ## Where each challenge fits in the course
 
@@ -42,6 +48,9 @@ Every challenge's `README.md` doesn't just describe *what* to build -- it
 also mandates *how* to build it (a required technique, a forbidden
 shortcut, or a specific interface), and asks for a comprehensive, written-out
 list of the edge cases your solution handles. That's deliberate: a real
-interview is judged on the same two things pytest can't check --
+interview is judged on the same two things pytest can only partly check --
 implementation choices and edge-case awareness -- not just on whether the
-happy path returns the right answer.
+happy path returns the right answer. The pytest suite for each challenge
+covers correctness and the documented edge cases; it does not (and can't,
+in general) verify that you avoided the forbidden shortcut or used the
+required technique -- that part is still a code-review job.

@@ -1,7 +1,7 @@
 # Challenge 02 — LRU Cache
 
 **Do this after:** Week 06 (OOP I)
-**Not pytest-tested.** Grade it yourself against the constraints below.
+**Correctness is pytest-tested:** `python tools/cli.py test challenge02` (or `pytest tests/test_challenge02.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 

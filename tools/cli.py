@@ -4,6 +4,7 @@ Command-line interface for the Python Training test suite.
 Usage (run from the repo root):
     python tools/cli.py list
     python tools/cli.py test week01
+    python tools/cli.py test challenge01
     python tools/cli.py test --all
 """
 import argparse
@@ -11,14 +12,15 @@ import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from core import run_week_tests, run_all_tests, WEEKS, WEEK_TOPICS
+from core import run_week_tests, run_all_tests, WEEKS, WEEK_TOPICS, CHALLENGES
 
 
 EXAMPLES = """\
 examples:
   python tools/cli.py list              list all 14 weeks and their topics
   python tools/cli.py test week01       run the tests for week01 only
-  python tools/cli.py test --all        run the full test suite
+  python tools/cli.py test challenge01  run one interview challenge's tests
+  python tools/cli.py test --all        run the full test suite (weeks + challenges)
 """
 
 # Same PASSED/FAILED-ERROR/separator color scheme as the "pass"/"fail"/"dim"
@@ -53,46 +55,53 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    subparsers.add_parser("list", help="List all available weeks and their topics")
+    subparsers.add_parser("list", help="List all available weeks, and the interview challenges")
 
     test_parser = subparsers.add_parser(
         "test",
-        help="Run tests for one week or all weeks",
-        description="Run tests for one week or all weeks.",
+        help="Run tests for one week, one challenge, or everything",
+        description="Run tests for one week, one interview challenge, or everything.",
         epilog=(
             "examples:\n"
             "  python tools/cli.py test week01       run only week01's tests\n"
-            "  python tools/cli.py test --all        run every week's tests\n"
+            "  python tools/cli.py test challenge01   run only challenge01's tests\n"
+            "  python tools/cli.py test --all        run every week's + challenge's tests\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    test_parser.add_argument("week", nargs="?", help="e.g. week01 (see 'python tools/cli.py list')")
-    test_parser.add_argument("--all", action="store_true", help="Run every week's tests")
+    test_parser.add_argument("week", nargs="?", help="e.g. week01 or challenge01 (see 'python tools/cli.py list')")
+    test_parser.add_argument("--all", action="store_true", help="Run every week's and challenge's tests")
 
     args = parser.parse_args()
 
     if args.command == "list":
         for w in WEEKS:
             print(f"{w}  -  {WEEK_TOPICS[w]}")
+        print()
+        print("Interview challenges (see challenges/README.md):")
+        for c in CHALLENGES:
+            print(f"{c}")
         return
 
     if args.command == "test":
+        valid_targets = WEEKS + CHALLENGES
         if args.all:
             result = run_all_tests()
         elif args.week:
-            if args.week not in WEEKS:
+            if args.week not in valid_targets:
                 print(
-                    f"Unknown week: {args.week!r}. Expected one of week01-week14 "
-                    f"(run 'python tools/cli.py list' to see topics).\n"
+                    f"Unknown target: {args.week!r}. Expected one of week01-week14 or "
+                    f"challenge01-challenge05 (run 'python tools/cli.py list' to see them all).\n"
                     f"Example: python tools/cli.py test week01"
                 )
                 sys.exit(1)
             result = run_week_tests(args.week)
         else:
             print(
-                "Specify a week or pass --all.\n"
+                "Specify a week/challenge or pass --all.\n"
                 "Examples:\n"
                 "  python tools/cli.py test week01\n"
+                "  python tools/cli.py test challenge01\n"
                 "  python tools/cli.py test --all"
             )
             sys.exit(1)

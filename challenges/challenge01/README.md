@@ -1,7 +1,7 @@
 # Challenge 01 — Group Anagrams
 
 **Do this after:** Week 04 (Data Structures)
-**Not pytest-tested.** Grade it yourself against the constraints below.
+**Correctness is pytest-tested:** `python tools/cli.py test challenge01` (or `pytest tests/test_challenge01.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 

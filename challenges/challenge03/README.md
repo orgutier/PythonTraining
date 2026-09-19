@@ -1,7 +1,7 @@
 # Challenge 03 — Sales Data Analyzer
 
 **Do this after:** Week 10 (Pandas)
-**Not pytest-tested.** Grade it yourself against the constraints below.
+**Correctness is pytest-tested:** `python tools/cli.py test challenge03` (or `pytest tests/test_challenge03.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
@@ -54,9 +54,9 @@ def revenue_drop_alerts(orders: pd.DataFrame, threshold: float = 0.20) -> list[s
    `pd.DataFrame`, `list[str]`) so the functions are usable by other code
    without extra conversion.
 
-## Try it yourself
+## Check your work
 
-There's no fixture CSV provided on purpose -- build a small DataFrame by
-hand (or with `pd.DataFrame({...})`) covering at least: three customers
-across three months, one month with a >20% revenue drop, and one month
-with no orders at all, to prove your functions handle every case above.
+`python tools/cli.py test challenge03` runs `tests/test_challenge03.py`,
+which builds small DataFrames covering the cases above (multiple
+customers across multiple months, a >20% revenue drop, an absent month)
+and checks your three functions against them.

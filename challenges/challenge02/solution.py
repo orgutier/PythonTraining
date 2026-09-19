@@ -1,6 +1,7 @@
 """
 Challenge 02 - LRU Cache
-Interview-style challenge, not pytest-tested. See README.md in this folder
+Interview-style challenge. Correctness is pytest-tested (see
+tests/test_challenge02.py / `python tools/cli.py test challenge02`); see README.md in this folder
 for the full problem statement and the constraints your solution must follow
 (O(1) get/put, no collections.OrderedDict, a hand-built doubly linked list,
 full docstrings, and a documented list of edge cases).

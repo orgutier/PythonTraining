@@ -1,6 +1,7 @@
 """
 Challenge 05 - URL Shortener API
-Interview-style challenge, not pytest-tested. See README.md in this folder
+Interview-style challenge. Correctness is pytest-tested (see
+tests/test_challenge05.py / `python tools/cli.py test challenge05`); see README.md in this folder
 for the full problem statement (POST /shorten, GET /{code}, GET /stats/{code})
 and the constraints your solution must follow (Pydantic request/response
 models, proper 4xx on invalid input, idempotent shortening, collision-free

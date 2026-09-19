@@ -1,7 +1,7 @@
 # Challenge 05 — URL Shortener API
 
 **Do this after:** Week 13 (FastAPI)
-**Not pytest-tested.** Grade it yourself against the constraints below.
+**Correctness is pytest-tested:** `python tools/cli.py test challenge05` (or `pytest tests/test_challenge05.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
@@ -46,11 +46,11 @@ restarts.
    created, and `GET /stats` on a code that exists but has never been
    clicked (clicks should read 0, not error).
 
-## Try it yourself
+## Check your work
 
-FastAPI's `TestClient` (Week 13) calls the app in-process -- use it in a
-scratch script (not a pytest file, per this challenge's rules) to walk
-through: shorten a URL, redirect through it twice, check `/stats` shows 2
-clicks, submit the same URL again and confirm you get the same code back,
-and confirm an invalid URL and an unknown code both come back as errors
-instead of crashing the server.
+`python tools/cli.py test challenge05` runs `tests/test_challenge05.py`,
+which uses FastAPI's `TestClient` (Week 13) to walk through exactly this:
+shorten a URL, redirect through it twice, check `/stats` shows 2 clicks,
+submit the same URL again and confirm you get the same code back, and
+confirm an invalid URL, a missing `url` field, and an unknown code all
+come back as proper error responses instead of crashing the server.
