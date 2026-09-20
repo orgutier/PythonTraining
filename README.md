@@ -23,19 +23,26 @@ PythonTraining/
 │   ├── test_weekNN.py      plus one per challenge (test_challengeNN.py).
 │   └── test_challengeNN.py Kept separate from exercises/ and challenges/
 │                          so trainees can't edit the tests themselves.
-├── challenges/            5 interview-style coding challenges, separate
-│   └── challengeNN/        from the graded weekly exercises but tested
-│       ├── README.md        the same way. See challenges/README.md for
-│       └── solution.py      what these are and which week each follows.
+├── challenges/            10 interview-style coding challenges (two per
+│   └── challengeNN/        assigned week), separate from the graded
+│       ├── README.md        weekly exercises but tested the same way.
+│       └── solution.py      See challenges/README.md for what these are.
 ├── tools/                 The test runner (see below).
 │   ├── core.py             Shared logic
 │   ├── cli.py              Command-line interface
 │   └── gui.py               Tkinter GUI
 ├── presentation/          Open presentation/index.html in a browser.
-│                          Topic reference only (theory, keywords, dunders,
-│                          modules, book/web references) -- no exercises.
-│                          Keep it open in a second window/monitor next to
-│                          your editor and terminal.
+│                          Topic reference (documentation-grade prose,
+│                          keywords, dunders, modules, a clickable "day
+│                          guide" deep dive per schedule day, book/web
+│                          references) -- no graded exercises. Keep it
+│                          open in a second window/monitor next to your
+│                          editor and terminal.
+│   ├── data.js              Topics, schedules, tier text, challenges
+│   ├── glossary.js          One entry per clickable badge
+│   ├── dayguides.js         Day-guide deep dives (2 verified examples each)
+│   ├── highlight.js         Dependency-free VS Code-style syntax highlighter
+│   └── script.js / style.css
 ├── conftest.py            Makes `from exercises.weekNN.solution import ...`
 │                          work from pytest.
 ├── requirements.txt
@@ -127,9 +134,21 @@ defined in `presentation/glossary.js`, keyed by the exact badge text used
 in `presentation/data.js`. Adding a new badge to a topic means adding a
 matching entry there too.
 
+The **Week schedule** table itself is also clickable: every Basic/Mid/
+Advanced-tier day (not the setup/exercises/review days, which have no new
+topic content) opens the same drawer with a "day guide" -- a deeper dive
+than the tier prose above it, built around runnable examples rather than
+more explanation. Each one has at least two examples, every example shown
+with real VS Code Dark+-style syntax highlighting (a small dependency-free
+tokenizer in `presentation/highlight.js` -- still no CDN) and its actual,
+executed output underneath, not a hand-typed guess. This content lives in
+`presentation/dayguides.js`, keyed by `weekNN-basic` / `-mid` / `-advanced`
+to match each schedule row's `guideKey`. The single-example code blocks in
+the regular glossary drawer are syntax-highlighted the same way.
+
 Five of the topics (Data Structures, OOP I, Pandas, Requests + Threading,
-and FastAPI) also show an **Interview Challenge** callout -- a pointer to
-one of the interview-style problems in `challenges/`, described below.
+and FastAPI) also show two **Interview Challenge** callouts each -- pointers
+to the interview-style problems in `challenges/`, described below.
 
 There's also a 15th topic, "Appendix: The Tooling Itself", covering
 argparse, subprocess, tkinter, ANSI terminal colors, virtual
@@ -142,9 +161,9 @@ Open `presentation/index.html` directly in any browser.
 
 ## Interview Challenges
 
-`challenges/` holds 5 standalone, interview-style coding problems --
-separate from the graded weekly exercises in `exercises/`, but tested the
-same way:
+`challenges/` holds 10 standalone, interview-style coding problems (two
+per assigned week) -- separate from the graded weekly exercises in
+`exercises/`, but tested the same way:
 
 ```bash
 python tools/cli.py test challenge01       # run one challenge's tests
@@ -153,20 +172,27 @@ python tools/cli.py test --all             # runs every week's AND every challen
 
 Each one is the kind of problem an engineer actually gets asked to write
 live in a technical interview: more code than a weekly exercise, and a
-real specification instead of one function signature. `tests/test_challengeNN.py`
-grades correctness and the documented edge cases automatically, same as a
+real specification instead of one function signature. Half of them are
+straight from LeetCode (cited by number below); the rest are original,
+realistic tasks in the same spirit. `tests/test_challengeNN.py` grades
+correctness and the documented edge cases automatically, same as a
 week's exercise -- but each challenge's `README.md` also imposes explicit
 constraints on *how* to write the solution (a required technique, a
 forbidden shortcut, or a mandated interface), which pytest can't check.
 Grade those by reading the code.
 
-| Challenge | Title | Do it after |
-|---|---|---|
-| `challenge01` | Group Anagrams | Week 04 -- Data Structures |
-| `challenge02` | LRU Cache | Week 06 -- OOP I |
-| `challenge03` | Sales Data Analyzer | Week 10 -- Pandas |
-| `challenge04` | Rate Limiter (Token Bucket) | Week 12 -- Requests + Threading |
-| `challenge05` | URL Shortener API | Week 13 -- FastAPI |
+| Challenge | Title | LeetCode | Do it after |
+|---|---|---|---|
+| `challenge01` | Group Anagrams | #49 | Week 04 -- Data Structures |
+| `challenge06` | Longest Consecutive Sequence | #128 | Week 04 -- Data Structures |
+| `challenge02` | LRU Cache | #146 | Week 06 -- OOP I |
+| `challenge07` | Min Stack | #155 | Week 06 -- OOP I |
+| `challenge03` | Sales Data Analyzer | -- | Week 10 -- Pandas |
+| `challenge08` | Two Sum, Pandas-Style | #1 | Week 10 -- Pandas |
+| `challenge04` | Rate Limiter (Token Bucket) | -- | Week 12 -- Requests + Threading |
+| `challenge09` | Bounded Blocking Queue | #1188 | Week 12 -- Requests + Threading |
+| `challenge05` | URL Shortener API | -- | Week 13 -- FastAPI |
+| `challenge10` | Underground System API | #1396 | Week 13 -- FastAPI |
 
 See `challenges/README.md` for the full picture, and each
 `challenges/challengeNN/README.md` for that problem's statement and

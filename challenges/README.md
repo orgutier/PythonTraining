@@ -1,7 +1,8 @@
 # Interview Challenges
 
-Five standalone, interview-style coding problems, separate from the graded
-weekly exercises in `exercises/`. They exist for a different purpose:
+Ten standalone, interview-style coding problems (two per assigned week),
+separate from the graded weekly exercises in `exercises/`. They exist for
+a different purpose:
 
 - **Weekly exercises** (`exercises/weekNN/`) are scoped tightly to that
   week's topic and are graded automatically by `tests/test_weekNN.py` via
@@ -31,16 +32,22 @@ verified against the same tests before being committed).
 
 ## Where each challenge fits in the course
 
-| Challenge | Title | Do it after | Why then |
-|---|---|---|---|
-| `challenge01` | Group Anagrams | Week 04 -- Data Structures | needs dicts, lists, and hashing, nothing more |
-| `challenge02` | LRU Cache | Week 06 -- OOP I | needs classes, `__init__`, encapsulation |
-| `challenge03` | Sales Data Analyzer | Week 10 -- Pandas | needs groupby/vectorized pandas, not raw loops |
-| `challenge04` | Rate Limiter (Token Bucket) | Week 12 -- Requests + Threading | needs `threading.Lock` and real concurrency safety |
-| `challenge05` | URL Shortener API | Week 13 -- FastAPI | needs routes, Pydantic models, and in-memory state |
+| Challenge | Title | LeetCode | Do it after | Why then |
+|---|---|---|---|---|
+| `challenge01` | Group Anagrams | #49 | Week 04 -- Data Structures | needs dicts, lists, and hashing, nothing more |
+| `challenge06` | Longest Consecutive Sequence | #128 | Week 04 -- Data Structures | needs a set for the O(n) trick, no new topics |
+| `challenge02` | LRU Cache | #146 | Week 06 -- OOP I | needs classes, `__init__`, encapsulation |
+| `challenge07` | Min Stack | #155 | Week 06 -- OOP I | needs a class tracking state across calls |
+| `challenge03` | Sales Data Analyzer | -- | Week 10 -- Pandas | needs groupby/vectorized pandas, not raw loops |
+| `challenge08` | Two Sum, Pandas-Style | #1 | Week 10 -- Pandas | needs a vectorized/Series-based approach |
+| `challenge04` | Rate Limiter (Token Bucket) | -- | Week 12 -- Requests + Threading | needs `threading.Lock` and real concurrency safety |
+| `challenge09` | Bounded Blocking Queue | #1188 | Week 12 -- Requests + Threading | needs `threading.Condition`, producer/consumer safety |
+| `challenge05` | URL Shortener API | -- | Week 13 -- FastAPI | needs routes, Pydantic models, and in-memory state |
+| `challenge10` | Underground System API | #1396 | Week 13 -- FastAPI | needs routes, Pydantic models, and stateful logic |
 
-The web reference (`presentation/index.html`) surfaces each challenge as a
-callout on its assigned topic's page, with a link back to this folder.
+The web reference (`presentation/index.html`) surfaces both of a week's
+challenges as callouts on its assigned topic's page, each with a link
+back to this folder.
 
 ## Why the constraints matter
 

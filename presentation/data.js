@@ -6,9 +6,9 @@ const TOPICS = [
   n: 1, title: "Python Fundamentals", sub: "variables, types, operators",
   schedule: [
     { day: "Day 1", title: "Environment & tooling setup", details: "Install Python 3.11+, create and activate a virtual environment (python -m venv .venv), pip install -r requirements.txt, and open the repo in VS Code. Run python tools/cli.py list and python tools/cli.py test week01 to see the starter tests fail, try tools/gui.py, and do a git basics pass (status/add/commit). Tour exercises/, reference_solutions/, tests/, and open presentation/index.html to keep alongside the editor all course long." },
-    { day: "Day 2", title: "Basic tier", details: "Variables & assignment; int/float/str/bool/None; arithmetic & comparison operators; print()/input(); basic type casting; type hints for variables." },
-    { day: "Day 3", title: "Mid tier", details: "Operator precedence & chained comparisons; f-strings; // vs / and float imprecision; the walrus operator (:=); augmented assignment. Start exercises/week01/solution.py." },
-    { day: "Day 4", title: "Advanced tier & internals", details: "Arbitrary-precision integers; IEEE-754 float caveats; string interning; identity vs equality; Decimal/Fraction. Cover the PyObject / small-integer-caching internals note." },
+    { day: "Day 2", title: "Basic tier", guideKey: "week01-basic", details: "Variables & assignment; int/float/str/bool/None; arithmetic & comparison operators; print()/input(); basic type casting; type hints for variables." },
+    { day: "Day 3", title: "Mid tier", guideKey: "week01-mid", details: "Operator precedence & chained comparisons; f-strings; // vs / and float imprecision; the walrus operator (:=); augmented assignment. Start exercises/week01/solution.py." },
+    { day: "Day 4", title: "Advanced tier & internals", guideKey: "week01-advanced", details: "Arbitrary-precision integers; IEEE-754 float caveats; string interning; identity vs equality; Decimal/Fraction. Cover the PyObject / small-integer-caching internals note." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week01/solution.py, run python tools/cli.py test week01 until it's green, and review anything the group is still shaky on." }
   ],
   basic: {
@@ -34,9 +34,9 @@ const TOPICS = [
 {
   n: 2, title: "Control Flow", sub: "conditionals, loops",
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "if/elif/else; while; for + range(); break/continue/pass; nested loops." },
-    { day: "Day 2", title: "Mid tier", details: "for...else / while...else; short-circuit and/or; ternary expressions; zip() for parallel iteration." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "Writing a custom iterable/iterator class; itertools patterns; loop-style performance. Cover the iterator protocol (iter/next/StopIteration)." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week02-basic", details: "if/elif/else; while; for + range(); break/continue/pass; nested loops." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week02-mid", details: "for...else / while...else; short-circuit and/or; ternary expressions; zip() for parallel iteration." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week02-advanced", details: "Writing a custom iterable/iterator class; itertools patterns; loop-style performance. Cover the iterator protocol (iter/next/StopIteration)." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week02/solution.py, applying this week's conditionals and loop constructs." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week02/solution.py, run python tools/cli.py test week02 until green, and review." }
   ],
@@ -63,9 +63,9 @@ const TOPICS = [
 {
   n: 3, title: "Functions", sub: "parameters, scope, recursion",
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "def, parameters, return, default args, *args/**kwargs, return type hints, basic recursion, lambda." },
-    { day: "Day 2", title: "Mid tier", details: "Keyword-only and positional-only arguments; docstrings & introspection; closures; writing a simple decorator." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "functools (wraps, lru_cache, partial); generator functions (yield); recursion limits. Cover LEGB scoping and the mutable-default-argument bug." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week03-basic", details: "def, parameters, return, default args, *args/**kwargs, return type hints, basic recursion, lambda." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week03-mid", details: "Keyword-only and positional-only arguments; docstrings & introspection; closures; writing a simple decorator." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week03-advanced", details: "functools (wraps, lru_cache, partial); generator functions (yield); recursion limits. Cover LEGB scoping and the mutable-default-argument bug." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week03/solution.py." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week03/solution.py, run python tools/cli.py test week03 until green, and review." }
   ],
@@ -91,16 +91,24 @@ const TOPICS = [
 },
 {
   n: 4, title: "Data Structures", sub: "lists, tuples, dicts, sets",
-  challenge: {
-    id: "challenge01",
-    title: "Group Anagrams",
-    blurb: "A real, frequently-asked interview question (LeetCode #49): group every string in a list with its anagrams, using a dict you manage yourself -- no collections.Counter or defaultdict allowed, and the per-word signature must be built with a comprehension.",
-    path: "challenges/challenge01/"
-  },
+  challenges: [
+    {
+      id: "challenge01",
+      title: "Group Anagrams",
+      blurb: "A real, frequently-asked interview question (LeetCode #49): group every string in a list with its anagrams, using a dict you manage yourself -- no collections.Counter or defaultdict allowed, and the per-word signature must be built with a comprehension.",
+      path: "challenges/challenge01/"
+    },
+    {
+      id: "challenge06",
+      title: "Longest Consecutive Sequence",
+      blurb: "LeetCode #128: find the length of the longest run of consecutive integers in an unsorted list -- in O(n) using a set, with sorting explicitly banned so the set-based technique is the only way through.",
+      path: "challenges/challenge06/"
+    }
+  ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "list/tuple/dict/set creation, indexing, slicing, common methods; list & dict comprehensions." },
-    { day: "Day 2", title: "Mid tier", details: "Nested structures; sorting with key=; set operations; namedtuple/dataclasses as lightweight records." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "collections (defaultdict, Counter, deque, OrderedDict); array/deque vs list performance; frozenset/tuple as keys. Cover dynamic-array and hash-table internals." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week04-basic", details: "list/tuple/dict/set creation, indexing, slicing, common methods; list & dict comprehensions." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week04-mid", details: "Nested structures; sorting with key=; set operations; namedtuple/dataclasses as lightweight records." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week04-advanced", details: "collections (defaultdict, Counter, deque, OrderedDict); array/deque vs list performance; frozenset/tuple as keys. Cover dynamic-array and hash-table internals." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week04/solution.py." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week04/solution.py, run python tools/cli.py test week04 until green, and review." }
   ],
@@ -127,9 +135,9 @@ const TOPICS = [
 {
   n: 5, title: "Files, Exceptions, Regex", sub: "I/O, error handling, pattern matching",
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "open/with/read/write; try/except/finally/raise; custom exception classes; re.search/match/findall/sub." },
-    { day: "Day 2", title: "Mid tier", details: "Exception chaining (raise ... from ...); exception hierarchies; contextlib beyond files; regex groups, named groups, re.compile." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "Custom context managers; regex lookahead/lookbehind; catastrophic-backtracking traps. Cover traceback propagation and the backtracking regex engine." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week05-basic", details: "open/with/read/write; try/except/finally/raise; custom exception classes; re.search/match/findall/sub." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week05-mid", details: "Exception chaining (raise ... from ...); exception hierarchies; contextlib beyond files; regex groups, named groups, re.compile." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week05-advanced", details: "Custom context managers; regex lookahead/lookbehind; catastrophic-backtracking traps. Cover traceback propagation and the backtracking regex engine." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week05/solution.py." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week05/solution.py, run python tools/cli.py test week05 until green, and review." }
   ],
@@ -155,16 +163,24 @@ const TOPICS = [
 },
 {
   n: 6, title: "OOP I", sub: "classes, encapsulation, properties",
-  challenge: {
-    id: "challenge02",
-    title: "LRU Cache",
-    blurb: "One of the most common interview problems at every level (LeetCode #146): build a fixed-capacity least-recently-used cache with O(1) get/put, using a hand-built doubly linked list -- collections.OrderedDict is off-limits, since building the list yourself is the actual point.",
-    path: "challenges/challenge02/"
-  },
+  challenges: [
+    {
+      id: "challenge02",
+      title: "LRU Cache",
+      blurb: "One of the most common interview problems at every level (LeetCode #146): build a fixed-capacity least-recently-used cache with O(1) get/put, using a hand-built doubly linked list -- collections.OrderedDict is off-limits, since building the list yourself is the actual point.",
+      path: "challenges/challenge02/"
+    },
+    {
+      id: "challenge07",
+      title: "Min Stack",
+      blurb: "LeetCode #155: a stack that also tracks its minimum in O(1) -- the naive min(stack) approach is O(n), so the challenge is maintaining a running minimum incrementally without ever calling the min() builtin.",
+      path: "challenges/challenge07/"
+    }
+  ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "class/__init__/self; instance vs class attributes; _protected/__private convention; @property/@staticmethod/@classmethod." },
-    { day: "Day 2", title: "Mid tier", details: "__slots__ for memory savings; property with computed/cached values; cls vs self in practice." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "Writing a custom descriptor; metaclass basics; __init_subclass__ hook. Cover attribute lookup order and the descriptor protocol." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week06-basic", details: "class/__init__/self; instance vs class attributes; _protected/__private convention; @property/@staticmethod/@classmethod." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week06-mid", details: "__slots__ for memory savings; property with computed/cached values; cls vs self in practice." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week06-advanced", details: "Writing a custom descriptor; metaclass basics; __init_subclass__ hook. Cover attribute lookup order and the descriptor protocol." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week06/solution.py." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week06/solution.py, run python tools/cli.py test week06 until green, and review." }
   ],
@@ -191,9 +207,9 @@ const TOPICS = [
 {
   n: 7, title: "OOP II", sub: "inheritance, polymorphism, abstraction",
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "class Child(Parent), super(), method overriding, duck typing." },
-    { day: "Day 2", title: "Mid tier", details: "Multiple inheritance basics; composition-vs-inheritance judgment; the abc module, @abstractmethod." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "Method Resolution Order & diamond inheritance; mixins; typing.Protocol for structural typing. Cover C3 linearization." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week07-basic", details: "class Child(Parent), super(), method overriding, duck typing." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week07-mid", details: "Multiple inheritance basics; composition-vs-inheritance judgment; the abc module, @abstractmethod." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week07-advanced", details: "Method Resolution Order & diamond inheritance; mixins; typing.Protocol for structural typing. Cover C3 linearization." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week07/solution.py." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week07/solution.py, run python tools/cli.py test week07 until green, and review." }
   ],
@@ -220,9 +236,9 @@ const TOPICS = [
 {
   n: 8, title: "The Python Data Model", sub: "special methods, protocols",
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "__init__, __repr__, __str__, __eq__." },
-    { day: "Day 2", title: "Mid tier", details: "__add__ and other operator dunders; __len__/__getitem__/__iter__/__contains__; __call__; __bool__." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "__enter__/__exit__ context managers; reflected operators (__radd__) and NotImplemented; __hash__'s relationship to __eq__. Cover why dunder lookup happens on the type, not the instance." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week08-basic", details: "__init__, __repr__, __str__, __eq__." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week08-mid", details: "__add__ and other operator dunders; __len__/__getitem__/__iter__/__contains__; __call__; __bool__." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week08-advanced", details: "__enter__/__exit__ context managers; reflected operators (__radd__) and NotImplemented; __hash__'s relationship to __eq__. Cover why dunder lookup happens on the type, not the instance." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week08/solution.py." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week08/solution.py, run python tools/cli.py test week08 until green, and review." }
   ],
@@ -249,9 +265,9 @@ const TOPICS = [
 {
   n: 9, title: "OS, JSON, Datetime, XML", sub: "everyday stdlib modules",
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "os.listdir/os.path; json.load/dump; datetime.now(); basic XML parsing with ElementTree." },
-    { day: "Day 2", title: "Mid tier", details: "pathlib as the modern os.path alternative; json custom encoders (default=); timezone-aware vs naive datetimes; ElementTree.findall()." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "os.walk for recursive traversal; datetime arithmetic & timedelta/DST edge cases; building/modifying XML trees. Cover JSON's recursive-descent parser and DOM-style XML parsing." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week09-basic", details: "os.listdir/os.path; json.load/dump; datetime.now(); basic XML parsing with ElementTree." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week09-mid", details: "pathlib as the modern os.path alternative; json custom encoders (default=); timezone-aware vs naive datetimes; ElementTree.findall()." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week09-advanced", details: "os.walk for recursive traversal; datetime arithmetic & timedelta/DST edge cases; building/modifying XML trees. Cover JSON's recursive-descent parser and DOM-style XML parsing." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week09/solution.py." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week09/solution.py, run python tools/cli.py test week09 until green, and review." }
   ],
@@ -277,16 +293,24 @@ const TOPICS = [
 },
 {
   n: 10, title: "Pandas", sub: "data analysis",
-  challenge: {
-    id: "challenge03",
-    title: "Sales Data Analyzer",
-    blurb: "A realistic data-engineer interview task: given a DataFrame of orders, report monthly revenue, the top N customers, and month-over-month revenue drops -- with zero explicit row-by-row loops allowed, only groupby and vectorized pandas.",
-    path: "challenges/challenge03/"
-  },
+  challenges: [
+    {
+      id: "challenge03",
+      title: "Sales Data Analyzer",
+      blurb: "A realistic data-engineer interview task: given a DataFrame of orders, report monthly revenue, the top N customers, and month-over-month revenue drops -- with zero explicit row-by-row loops allowed, only groupby and vectorized pandas.",
+      path: "challenges/challenge03/"
+    },
+    {
+      id: "challenge08",
+      title: "Two Sum, Pandas-Style",
+      blurb: "LeetCode #1, the most famous interview question there is -- but solved as a pandas.Series operation returning index labels, with no nested comparison loop allowed.",
+      path: "challenges/challenge08/"
+    }
+  ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "DataFrame/Series basics; read_csv; .head()/.info()/.describe()." },
-    { day: "Day 2", title: "Mid tier", details: "Boolean-indexing filters; groupby + aggregation; sorting; merging/joining DataFrames." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "Vectorized operations vs .apply() performance; multi-indexing; dtype-based memory optimization; pivot tables. Cover columnar NumPy-backed storage." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week10-basic", details: "DataFrame/Series basics; read_csv; .head()/.info()/.describe()." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week10-mid", details: "Boolean-indexing filters; groupby + aggregation; sorting; merging/joining DataFrames." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week10-advanced", details: "Vectorized operations vs .apply() performance; multi-indexing; dtype-based memory optimization; pivot tables. Cover columnar NumPy-backed storage." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week10/solution.py." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week10/solution.py, run python tools/cli.py test week10 until green, and review." }
   ],
@@ -314,9 +338,9 @@ const TOPICS = [
 {
   n: 11, title: "OpenCV", sub: "images as arrays",
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "cv2.imread/imwrite; cv2.cvtColor (color conversion); cv2.resize; basic drawing (rectangle/circle/line)." },
-    { day: "Day 2", title: "Mid tier", details: "Thresholding; simple edge detection (Canny); cropping via array slicing; video capture from a file/webcam." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "Contour detection; blur/sharpen filtering (convolution); Haar cascades. Cover images-as-NumPy-arrays and BGR vs RGB channel order." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week11-basic", details: "cv2.imread/imwrite; cv2.cvtColor (color conversion); cv2.resize; basic drawing (rectangle/circle/line)." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week11-mid", details: "Thresholding; simple edge detection (Canny); cropping via array slicing; video capture from a file/webcam." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week11-advanced", details: "Contour detection; blur/sharpen filtering (convolution); Haar cascades. Cover images-as-NumPy-arrays and BGR vs RGB channel order." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week11/solution.py." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week11/solution.py, run python tools/cli.py test week11 until green, and review." }
   ],
@@ -343,16 +367,24 @@ const TOPICS = [
 },
 {
   n: 12, title: "Requests + Threading", sub: "HTTP clients, concurrency",
-  challenge: {
-    id: "challenge04",
-    title: "Rate Limiter (Token Bucket)",
-    blurb: "A staple of backend/systems interviews: build a thread-safe token-bucket rate limiter from scratch, protected by threading.Lock and driven by time.monotonic() -- then prove it's actually thread-safe by hammering it from several threads at once.",
-    path: "challenges/challenge04/"
-  },
+  challenges: [
+    {
+      id: "challenge04",
+      title: "Rate Limiter (Token Bucket)",
+      blurb: "A staple of backend/systems interviews: build a thread-safe token-bucket rate limiter from scratch, protected by threading.Lock and driven by time.monotonic() -- then prove it's actually thread-safe by hammering it from several threads at once.",
+      path: "challenges/challenge04/"
+    },
+    {
+      id: "challenge09",
+      title: "Bounded Blocking Queue",
+      blurb: "LeetCode #1188: a fixed-capacity queue whose enqueue/dequeue block instead of failing -- built with threading.Condition (not a sleep-and-poll loop), correct under multiple producers and consumers at once.",
+      path: "challenges/challenge09/"
+    }
+  ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "requests.get/post; response.json()/.status_code; threading.Thread — create/start/join." },
-    { day: "Day 2", title: "Mid tier", details: "Headers/auth/query params/timeouts; raise_for_status(); Lock for protecting shared state between threads." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "requests.Session for connection reuse; retry/backoff strategies; ThreadPoolExecutor; race conditions and deadlocks. Cover the GIL and I/O-bound vs CPU-bound concurrency." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week12-basic", details: "requests.get/post; response.json()/.status_code; threading.Thread — create/start/join." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week12-mid", details: "Headers/auth/query params/timeouts; raise_for_status(); Lock for protecting shared state between threads." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week12-advanced", details: "requests.Session for connection reuse; retry/backoff strategies; ThreadPoolExecutor; race conditions and deadlocks. Cover the GIL and I/O-bound vs CPU-bound concurrency." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week12/solution.py. The tests mock requests.get — never point them at a live endpoint." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week12/solution.py, run python tools/cli.py test week12 until green, and review." }
   ],
@@ -378,16 +410,24 @@ const TOPICS = [
 },
 {
   n: 13, title: "Local API Endpoints", sub: "FastAPI",
-  challenge: {
-    id: "challenge05",
-    title: "URL Shortener API",
-    blurb: "A classic \"design + code it live\" exercise: build POST /shorten, GET /{code}, and GET /stats/{code} with in-memory storage, Pydantic request/response models, idempotent shortening, and proper 4xx responses for invalid input.",
-    path: "challenges/challenge05/"
-  },
+  challenges: [
+    {
+      id: "challenge05",
+      title: "URL Shortener API",
+      blurb: "A classic \"design + code it live\" exercise: build POST /shorten, GET /{code}, and GET /stats/{code} with in-memory storage, Pydantic request/response models, idempotent shortening, and proper 4xx responses for invalid input.",
+      path: "challenges/challenge05/"
+    },
+    {
+      id: "challenge10",
+      title: "Underground System API",
+      blurb: "LeetCode #1396, adapted to FastAPI: track rider check-ins/check-outs and report average travel time between stations, with Pydantic models and proper 4xx errors for a checkout with no check-in or a route with no data.",
+      path: "challenges/challenge10/"
+    }
+  ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", details: "FastAPI app instance; @app.get()/@app.post() routes; path & query parameters; returning a dict (auto-serialized to JSON)." },
-    { day: "Day 2", title: "Mid tier", details: "Pydantic models for request/response validation; automatic interactive docs (/docs); status codes; basic dependency injection (Depends)." },
-    { day: "Day 3", title: "Advanced tier & internals", details: "async def endpoints; middleware; background tasks; testing with TestClient. Cover ASGI vs WSGI." },
+    { day: "Day 1", title: "Basic tier", guideKey: "week13-basic", details: "FastAPI app instance; @app.get()/@app.post() routes; path & query parameters; returning a dict (auto-serialized to JSON)." },
+    { day: "Day 2", title: "Mid tier", guideKey: "week13-mid", details: "Pydantic models for request/response validation; automatic interactive docs (/docs); status codes; basic dependency injection (Depends)." },
+    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week13-advanced", details: "async def endpoints; middleware; background tasks; testing with TestClient. Cover ASGI vs WSGI." },
     { day: "Day 4", title: "Exercises", details: "Work through exercises/week13/solution.py. Tests use TestClient in-process — no real server or port needed." },
     { day: "Day 5", title: "Practice & review", details: "Finish exercises/week13/solution.py, run python tools/cli.py test week13 until green, and review." }
   ],

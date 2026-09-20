@@ -93,54 +93,104 @@
   }
 
   function scheduleBlock(schedule) {
-    if (!schedule || !schedule.length) return "";
-    let html = '<div class="schedule"><h2>Week schedule</h2><table class="schedule-table">';
-    html += '<thead><tr><th scope="col">Day</th><th scope="col">Focus</th><th scope="col">What to cover</th></tr></thead><tbody>';
+    if (!schedule || !schedule.length) return null;
+    const wrap = document.createElement("div");
+    wrap.className = "schedule";
+
+    const h2 = document.createElement("h2");
+    h2.textContent = "Week schedule";
+    wrap.appendChild(h2);
+
+    const table = document.createElement("table");
+    table.className = "schedule-table";
+    table.insertAdjacentHTML("beforeend",
+      '<thead><tr><th scope="col">Day</th><th scope="col">Focus</th><th scope="col">What to cover</th></tr></thead>');
+    const tbody = document.createElement("tbody");
+
     schedule.forEach((row) => {
-      html += "<tr><td class='schedule-day'>" + escapeHtml(row.day) + "</td>" +
-        "<td class='schedule-title'>" + escapeHtml(row.title) + "</td>" +
-        "<td>" + escapeHtml(row.details) + "</td></tr>";
+      const tr = document.createElement("tr");
+
+      const tdDay = document.createElement("td");
+      tdDay.className = "schedule-day";
+      tdDay.textContent = row.day;
+      tr.appendChild(tdDay);
+
+      const tdTitle = document.createElement("td");
+      tdTitle.className = "schedule-title";
+      if (row.guideKey) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "schedule-title-btn";
+        btn.textContent = row.title;
+        btn.title = "Click for a deep-dive with runnable examples";
+        btn.addEventListener("click", () => openDayGuide(row.guideKey, btn));
+        tdTitle.appendChild(btn);
+      } else {
+        tdTitle.textContent = row.title;
+      }
+      tr.appendChild(tdTitle);
+
+      const tdDetails = document.createElement("td");
+      tdDetails.textContent = row.details;
+      tr.appendChild(tdDetails);
+
+      tbody.appendChild(tr);
     });
-    html += "</tbody></table></div>";
-    return html;
+
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    return wrap;
   }
 
-  function challengeBlock(challenge) {
-    if (!challenge) return "";
-    let html = '<div class="challenge">';
-    html += '<div class="challenge-tag">Interview Challenge &mdash; ' + escapeHtml(challenge.id) + '</div>';
-    html += "<h2>" + escapeHtml(challenge.title) + "</h2>";
-    html += "<p>" + escapeHtml(challenge.blurb) + "</p>";
-    html += '<p class="challenge-path"><code>' + escapeHtml(challenge.path) + '</code> &mdash; not pytest-tested; grade it yourself against the constraints in its README.</p>';
-    html += "</div>";
-    return html;
+  function challengeCard(challenge) {
+    const div = document.createElement("div");
+    div.className = "challenge";
+    div.innerHTML =
+      '<div class="challenge-tag">Interview Challenge &mdash; ' + escapeHtml(challenge.id) + "</div>" +
+      "<h2>" + escapeHtml(challenge.title) + "</h2>" +
+      "<p>" + escapeHtml(challenge.blurb) + "</p>" +
+      '<p class="challenge-path"><code>' + escapeHtml(challenge.path) +
+      "</code> &mdash; pytest-tested (correctness &amp; edge cases); the style constraints in its README are graded by reading the code.</p>";
+    return div;
+  }
+
+  function challengeList(topic) {
+    const list = topic.challenges || (topic.challenge ? [topic.challenge] : []);
+    return list.map(challengeCard);
   }
 
   function renderDetail(topic) {
-    let html = "";
-    html += '<div class="topic-head">';
-    html += '<div class="num">Topic ' + String(topic.n).padStart(2, "0") + " of " + TOPICS.length + "</div>";
-    html += "<h1>" + escapeHtml(topic.title) + "</h1>";
-    html += '<div class="sub">' + escapeHtml(topic.sub) + "</div>";
-    html += "</div>";
+    detailEl.innerHTML = "";
 
-    html += scheduleBlock(topic.schedule);
-    html += challengeBlock(topic.challenge);
+    detailEl.insertAdjacentHTML("beforeend",
+      '<div class="topic-head">' +
+      '<div class="num">Topic ' + String(topic.n).padStart(2, "0") + " of " + TOPICS.length + "</div>" +
+      "<h1>" + escapeHtml(topic.title) + "</h1>" +
+      '<div class="sub">' + escapeHtml(topic.sub) + "</div>" +
+      "</div>"
+    );
 
-    html += tierBlock("basic", "Basic knowledge", topic.basic);
-    html += tierBlock("mid", "Mid-level knowledge", topic.mid);
-    html += tierBlock("advanced", "Advanced knowledge", topic.advanced);
+    const scheduleNode = scheduleBlock(topic.schedule);
+    if (scheduleNode) detailEl.appendChild(scheduleNode);
+
+    challengeList(topic).forEach((node) => detailEl.appendChild(node));
+
+    detailEl.insertAdjacentHTML("beforeend",
+      tierBlock("basic", "Basic knowledge", topic.basic) +
+      tierBlock("mid", "Mid-level knowledge", topic.mid) +
+      tierBlock("advanced", "Advanced knowledge", topic.advanced)
+    );
 
     if (topic.internals) {
-      html += '<div class="internals"><h2>Python internals — how it actually works</h2><p>' +
-        escapeHtml(topic.internals) + "</p></div>";
+      detailEl.insertAdjacentHTML("beforeend",
+        '<div class="internals"><h2>Python internals — how it actually works</h2><p>' +
+        escapeHtml(topic.internals) + "</p></div>"
+      );
     }
 
     if (topic.note) {
-      html += '<div class="note">' + escapeHtml(topic.note) + "</div>";
+      detailEl.insertAdjacentHTML("beforeend", '<div class="note">' + escapeHtml(topic.note) + "</div>");
     }
-
-    detailEl.innerHTML = html;
 
     const metaRow = buildMetaRow(topic);
     if (metaRow) {
@@ -186,8 +236,31 @@
   }
 
   /* ------------------------------------------------------------ */
-  /* Glossary drawer                                                */
+  /* Glossary drawer + day-guide deep dives                        */
   /* ------------------------------------------------------------ */
+
+  function codeBlockHtml(code, filename) {
+    const highlighted = (typeof highlightPython === "function") ? highlightPython(code) : escapeHtml(code);
+    return '<div class="vscode-block">' +
+      '<div class="vscode-titlebar">' +
+      '<span class="vscode-dot red"></span><span class="vscode-dot yellow"></span><span class="vscode-dot green"></span>' +
+      '<span class="vscode-filename">' + escapeHtml(filename || "example.py") + "</span>" +
+      "</div>" +
+      '<pre class="vscode-code"><code>' + highlighted + "</code></pre>" +
+      "</div>";
+  }
+
+  function outputBlockHtml(output) {
+    if (!output) return "";
+    return '<div class="vscode-output"><div class="output-label">Output</div><pre>' +
+      escapeHtml(output) + "</pre></div>";
+  }
+
+  function openDrawer() {
+    drawerEl.classList.add("open");
+    drawerEl.setAttribute("aria-hidden", "false");
+    drawerCloseBtn.focus();
+  }
 
   function renderGlossaryBody(term, entry) {
     let html = "";
@@ -196,7 +269,7 @@
       html += "<h3>How &amp; when to use it</h3><p>" + escapeHtml(entry.usage) + "</p>";
     }
     if (entry.example) {
-      html += "<h3>Example</h3><pre class='drawer-code'><code>" + escapeHtml(entry.example) + "</code></pre>";
+      html += "<h3>Example</h3>" + codeBlockHtml(entry.example, term + ".py");
     }
     if (entry.related && entry.related.length) {
       html += "<h3>Related</h3><div class='badges drawer-related' id='drawerRelated'></div>";
@@ -231,9 +304,30 @@
         escapeHtml(term) + "</strong>. Check the official Python docs for details.</p>";
     }
 
-    drawerEl.classList.add("open");
-    drawerEl.setAttribute("aria-hidden", "false");
-    drawerCloseBtn.focus();
+    openDrawer();
+  }
+
+  function renderDayGuideBody(guide) {
+    let html = "<p class='drawer-summary'>" + escapeHtml(guide.summary) + "</p>";
+    guide.examples.forEach((ex, i) => {
+      html += "<div class='example-caption'>Example " + (i + 1) + ": " + escapeHtml(ex.caption) + "</div>";
+      html += codeBlockHtml(ex.code, guide.week ? ("week" + String(guide.week).padStart(2, "0") + "_example" + (i + 1) + ".py") : undefined);
+      html += outputBlockHtml(ex.output);
+    });
+    drawerBodyEl.innerHTML = html;
+  }
+
+  function openDayGuide(key, triggerEl) {
+    const guide = (typeof DAY_GUIDES !== "undefined") && DAY_GUIDES[key];
+    lastFocusedBadge = triggerEl || lastFocusedBadge;
+    if (!guide) return;
+
+    drawerTermEl.textContent = guide.title;
+    drawerCategoryEl.textContent = "Day guide — " + guide.tierLabel;
+    drawerCategoryEl.className = "drawer-category cat-dayguide";
+    renderDayGuideBody(guide);
+
+    openDrawer();
   }
 
   function closeGlossary() {

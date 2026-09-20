@@ -21,6 +21,18 @@
   --slate-blue:#6b8fae;  /* internals callout */
   --violet:    #9a86c4;  /* theory & internals badges */
   --rose:      #d9748f;  /* interview challenge callout */
+  --cyan:      #5fb3b3;  /* day-guide (schedule deep-dive) callout */
+
+  /* VS Code Dark+ inspired token colors, for the syntax highlighter */
+  --code-bg:      #1e1e1e;
+  --code-fg:      #d4d4d4;
+  --code-kw:      #c586c0;
+  --code-str:     #ce9178;
+  --code-com:     #6a9955;
+  --code-num:     #b5cea8;
+  --code-func:    #dcdcaa;
+  --code-self:    #9cdcfe;
+  --code-builtin: #4ec9b0;
 
   --font-ui:   -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
@@ -252,6 +264,21 @@ html, body{
   width: 1%;
   color: var(--text);
 }
+.schedule-title-btn{
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: inherit;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--cyan);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(95,179,179,0.4);
+  text-underline-offset: 3px;
+}
+.schedule-title-btn:hover{ text-decoration-color: var(--cyan); }
+.schedule-title-btn::after{ content: " \25B8"; font-size: 0.8em; opacity: 0.7; }
 
 @media (max-width: 700px){
   .schedule-table, .schedule-table tbody, .schedule-table tr, .schedule-table td{ display: block; width: auto; }
@@ -475,6 +502,7 @@ html, body{
 .drawer-category.cat-module{ color: var(--sage); }
 .drawer-category.cat-concept{ color: var(--rust); }
 .drawer-category.cat-theory{ color: var(--violet); }
+.drawer-category.cat-dayguide{ color: var(--cyan); }
 .drawer-term{
   margin: 0;
   font-family: var(--font-mono);
@@ -532,6 +560,95 @@ html, body{
   white-space: pre;
 }
 .drawer-related{ margin-top: 2px; }
+
+/* ============================================================
+   VS Code-style code blocks -- used for every runnable example
+   in the drawer (glossary terms and day-guide deep dives alike),
+   plus the "Output" block shown underneath a day-guide example.
+   ============================================================ */
+.vscode-block{
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin: 0 0 4px;
+}
+.vscode-titlebar{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #2d2d2d;
+  border-bottom: 1px solid #3c3c3c;
+}
+.vscode-dot{ width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.vscode-dot.red{ background: #ec6a5e; }
+.vscode-dot.yellow{ background: #f4bf4f; }
+.vscode-dot.green{ background: #61c454; }
+.vscode-filename{
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #969696;
+}
+.vscode-code{
+  background: var(--code-bg);
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin: 0;
+}
+.vscode-code code{
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  color: var(--code-fg);
+  white-space: pre;
+}
+.tok-kw{ color: var(--code-kw); }
+.tok-str{ color: var(--code-str); }
+.tok-com{ color: var(--code-com); font-style: italic; }
+.tok-num{ color: var(--code-num); }
+.tok-func{ color: var(--code-func); }
+.tok-dec{ color: var(--code-func); }
+.tok-self{ color: var(--code-self); }
+.tok-builtin{ color: var(--code-builtin); }
+
+.example-caption{
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin: 18px 0 8px;
+}
+.example-caption:first-of-type{ margin-top: 0; }
+
+.vscode-output{
+  background: #0c0c0c;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin: 0 0 4px;
+  padding: 10px 14px;
+}
+.vscode-output .output-label{
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6a9955;
+  margin-bottom: 4px;
+}
+.vscode-output pre{
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: #d4d4d4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.day-guide-summary{
+  margin: 0 0 18px;
+  color: var(--text);
+  font-size: 0.98rem;
+}
 
 @media (max-width: 860px){
   .glossary-drawer{ width: 100%; max-width: 420px; }
