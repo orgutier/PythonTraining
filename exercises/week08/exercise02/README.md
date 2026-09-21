@@ -1,0 +1,14 @@
+# Deck: A Collection Protocol
+
+Implement `Deck`, a thin wrapper around a list of cards that behaves like a built-in collection:
+
+- `__init__(self, cards: list)` -- store `self.cards = list(cards)` (a copy, so mutating the caller's original list later doesn't affect the deck).
+- `__repr__(self) -> str` -- `f"Deck({self.cards!r})"`.
+- `__str__(self) -> str` -- `f"Deck of {len(self.cards)} cards"`.
+- `__len__(self) -> int` -- `len(self.cards)`.
+- `__getitem__(self, index)` -- `self.cards[index]` (this alone makes `deck[0]` and slicing like `deck[:3]` work).
+- `__iter__(self)` -- `iter(self.cards)` (an explicit iterator, even though `__getitem__` alone would let old-style iteration work too).
+- `__contains__(self, card) -> bool` -- `card in self.cards`.
+- `__add__(self, other)` -- if `other` is a `Deck`, return a new `Deck(self.cards + other.cards)` (concatenation); else `NotImplemented`.
+
+See the Study Reference presentation, Topic 8, for the theory.

@@ -7,22 +7,29 @@ automated test runner (CLI + GUI), and an in-editor reference presentation.
 
 ```
 PythonTraining/
-├── exercises/            One folder per week. Trainees edit solution.py here.
-│   └── weekNN/
-│       ├── README.md      Exercise description
-│       └── solution.py    Stub with signatures + docstrings, raises
-│                          NotImplementedError until filled in. No
-│                          `if __name__ == "__main__":` block by design --
-│                          this stays a plain importable module.
-├── reference_solutions/  Fully worked answer key, one folder per week --
-│   └── weekNN/            not visible to trainees during the course.
-│       └── solution.py
+├── exercises/            One folder per week, one subfolder per exercise --
+│   └── weekNN/            trainees edit each exercise's own solution.py.
+│       ├── README.md      Week overview + list of that week's exercises
+│       └── exerciseXX/
+│           ├── README.md    That exercise's own problem statement
+│           └── solution.py  Stub with signatures + docstrings, raises
+│                            NotImplementedError until filled in. No
+│                            `if __name__ == "__main__":` block by design --
+│                            this stays a plain importable module. Add a
+│                            helper submodule (e.g. helpers.py) right next
+│                            to it if you want to split your solution up --
+│                            solution.py just has to stay the entry point.
+├── reference_solutions/  Fully worked answer key, mirroring exercises/'s
+│   └── weekNN/             weekNN/exerciseXX/ layout exactly -- not
+│       └── exerciseXX/      visible to trainees during the course.
+│           └── solution.py
 │   └── challenges/        Worked answers for challenges/, same idea.
 │       └── challengeNN/solution.py
-├── tests/                 Staff-authored pytest files, one per week --
-│   ├── test_weekNN.py      plus one per challenge (test_challengeNN.py).
-│   └── test_challengeNN.py Kept separate from exercises/ and challenges/
-│                          so trainees can't edit the tests themselves.
+├── tests/                 Staff-authored pytest files, one per week -- each
+│   ├── test_weekNN.py      aggregates ALL of that week's exercises' tests
+│   └── test_challengeNN.py into a single file (plus one per challenge).
+│                          Kept separate from exercises/ and challenges/ so
+│                          trainees can't edit the tests themselves.
 ├── challenges/            10 interview-style coding challenges (two per
 │   └── challengeNN/        assigned week), separate from the graded
 │       ├── README.md        weekly exercises but tested the same way.
@@ -35,9 +42,9 @@ PythonTraining/
 │   └── install-git-hooks.sh    same, for macOS/Linux
 ├── .githooks/             Tracked hook scripts the installers point git at
 │   ├── pre-commit           (git config core.hooksPath .githooks). Only
-│   ├── pre-push              test the solution.py files that actually
-│   └── run-tests-for-changed-files.sh  changed -- see "Git hook
-│                          integration" below.
+│   ├── pre-push              test the weeks/challenges whose solution.py
+│   └── run-tests-for-changed-files.sh  (or a helper submodule next to one)
+│                          actually changed -- see "Git hook integration".
 ├── presentation/          Open presentation/index.html in a browser.
 │                          Topic reference (documentation-grade prose,
 │                          keywords, dunders, modules, a clickable "day
@@ -50,14 +57,27 @@ PythonTraining/
 │   ├── dayguides.js         Day-guide deep dives (2 verified examples each)
 │   ├── highlight.js         Dependency-free VS Code-style syntax highlighter
 │   └── script.js / style.css
-├── conftest.py            Makes `from exercises.weekNN.solution import ...`
-│                          work from pytest.
+├── conftest.py            Makes `from exercises.weekNN.exerciseXX.solution
+│                          import ...` work from pytest (plain implicit
+│                          namespace packages, no __init__.py anywhere).
 ├── requirements.txt
 └── generate.py            Re-generates exercises/, reference_solutions/,
                            and tests/ from scratch if you ever need to reset
-                           the starter state (this does NOT touch anything
-                           a trainee has already written unless you run it).
+                           the starter state -- orchestrates the per-week
+                           content modules in generator/weekNN.py (this does
+                           NOT touch anything a trainee has already written
+                           unless you run it).
 ```
+
+Every week's exercises are designed so that every keyword, builtin, dunder,
+stdlib module, and named concept from that week's presentation topic
+(`presentation/data.js`) gets exercised by the trainee's own code in **at
+least three separate places** within that week -- not just demonstrated
+once and moved past. That's why most weeks have five to eight exercises
+instead of one: the extra exercises exist specifically to revisit the same
+handful of constructs from a different angle, not to introduce new scope.
+Week 14 (Capstone) is the one exception -- see `generator/week14.py` for
+why.
 
 ## Setup
 
@@ -75,7 +95,7 @@ point of the GUI. Both tools call the same underlying test-running code
 
 **CLI** (from the repo root):
 ```bash
-python tools/cli.py list              # see all 14 weeks + 5 challenges
+python tools/cli.py list              # see all 14 weeks + 10 challenges
 python tools/cli.py test week01       # run one week
 python tools/cli.py test challenge01  # run one interview challenge
 python tools/cli.py test --all        # run everything (weeks + challenges)
@@ -93,14 +113,18 @@ let a `test --all` pick them up.
 ## Git hook integration
 
 A ready-to-run pre-commit + pre-push hook is included. Both are
-**targeted, not blanket**: they look at which `exercises/weekNN/solution.py`
-or `challenges/challengeNN/solution.py` files are staged (pre-commit) or
-differ from the remote (pre-push), and run `python tools/cli.py test
+**targeted, not blanket**: they look at which
+`exercises/weekNN/exerciseXX/*.py` files (`solution.py` itself, or a helper
+submodule you added next to it) or `challenges/challengeNN/solution.py`
+files are staged (pre-commit) or differ from the remote (pre-push), map
+each one back to its week/challenge id, and run `python tools/cli.py test
 <id>` once per affected week/challenge -- not the full suite, and not
-`test --all`. A commit or push that doesn't touch any `solution.py`
-(docs, tests, the presentation, anything else) passes straight through
-untested, since there's nothing new to check. Install it once per local
-clone:
+`test --all`. Touching any exercise within a week runs that **whole**
+week's aggregated test file (`tests/test_weekNN.py` covers every exercise
+in that week), since that's the granularity the test runner operates at.
+A commit or push that doesn't touch any exercise/challenge file (docs,
+tests, the presentation, anything else) passes straight through untested,
+since there's nothing new to check. Install it once per local clone:
 
 ```bash
 tools\install-git-hooks.bat     # Windows
@@ -119,8 +143,8 @@ install both in a trainee's own working copy as they fill in
 `exercises/` week by week, and on this template repo itself: editing an
 unrelated file (like this README) is never blocked by some other
 week's stub still raising `NotImplementedError`. It only blocks a
-commit/push when the specific `solution.py` you just changed doesn't
-pass its own tests yet.
+commit/push when the specific week (or challenge) whose exercise files
+you just changed doesn't pass its own tests yet.
 
 See `tests/test_week12.py` and `tests/test_week13.py` for the two
 exceptions that need special handling if you extend this further:
