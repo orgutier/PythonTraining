@@ -294,6 +294,56 @@ See `challenges/README.md` for the full picture, and each
 constraints. Worked answers are in `reference_solutions/challenges/`,
 verified against the same tests before being committed.
 
+## Progress Reports
+
+Each student works on their own branch, named `<group>/<user_id>` --
+e.g. `group1/orgutier` (`group1` here is just whatever label you use to
+tell one cohort/section apart from another; `orgutier` is the student's
+own identifier, typically their GitHub username). `tools/report.py`
+fetches every branch matching that shape, grades each one, and writes
+the results into a single `report.xlsx` you can hand to shareholders:
+
+```bash
+python tools/report.py                                        # fetch + grade every group/user_id branch on origin
+python tools/report.py --pattern "cohort2025-*/*"              # only that cohort's branches
+python tools/report.py --output cohort2025.xlsx --workers 8    # faster, custom filename
+python tools/report.py --local                                 # grade branches you already have locally, skip fetching
+```
+
+The output workbook has three sheets:
+
+- **Summary** -- one row per student (Group, User, Branch, exercises
+  solved/total/%, challenges solved/total/%, Status), color-scaled so the
+  weakest and strongest students stand out at a glance.
+- **Exercises** -- one row per student, one column per exercise, grouped
+  under a merged "Week NN" header, with a class-wide "Solved by" count
+  along the bottom of each column.
+- **Challenges** -- the same shape, for the (optional, not-must-do)
+  interview challenges, kept on its own sheet so it never gets averaged
+  into the required exercise total.
+
+For each matching branch, the script checks it out into a throwaway `git
+worktree` (your own working copy is never touched), overlays **this
+checkout's own `tests/` and `conftest.py`** on top of the student's
+`exercises/`/`challenges/` trees, and runs every exercise's and
+challenge's own test file against it -- a student's branch is graded by
+the current, canonical test suite, never by whatever copy of `tests/`
+happens to be sitting in their own branch (they're not supposed to edit
+it, but this makes sure a stale or modified copy can't skew their grade
+either way). A branch that predates some exercise/challenge (e.g. it was
+created before Week 14 existed) simply doesn't have that folder yet, so
+it's counted as not solved -- this reports what currently passes, not
+intent or timing.
+
+By default it excludes `main`, `master`, `HEAD`, and a few common
+non-student prefixes (`claude/*`, `dependabot/*`, `renovate/*`,
+`gh-pages`) so it's safe to run with no arguments even against this
+template repo's own branches; scope `--pattern` to your actual group
+keyword(s) for a large, busy repo. Grading ~100 exercises/challenges
+takes roughly 20-30 seconds per student sequentially -- `--workers` (a
+handful of branches at a time is a reasonable default) parallelizes
+across students, each in its own worktree.
+
 ## On book references
 
 Every topic's reference prioritizes *Python Distilled* and *Fluent Python*.
