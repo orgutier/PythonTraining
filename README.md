@@ -34,8 +34,10 @@ PythonTraining/
 │   ├── install-git-hooks.bat  Installs the pre-commit/pre-push hooks (Windows)
 │   └── install-git-hooks.sh    same, for macOS/Linux
 ├── .githooks/             Tracked hook scripts the installers point git at
-│   ├── pre-commit           (git config core.hooksPath .githooks)
-│   └── pre-push              -- see "Git hook integration" below.
+│   ├── pre-commit           (git config core.hooksPath .githooks). Only
+│   ├── pre-push              test the solution.py files that actually
+│   └── run-tests-for-changed-files.sh  changed -- see "Git hook
+│                          integration" below.
 ├── presentation/          Open presentation/index.html in a browser.
 │                          Topic reference (documentation-grade prose,
 │                          keywords, dunders, modules, a clickable "day
@@ -90,10 +92,15 @@ let a `test --all` pick them up.
 
 ## Git hook integration
 
-A ready-to-run pre-commit + pre-push hook is included: both run the full
-test suite (every week's exercise tests **and** every interview
-challenge's tests) via `python tools/cli.py test --all`, and block the
-commit/push if anything fails. Install it once per local clone:
+A ready-to-run pre-commit + pre-push hook is included. Both are
+**targeted, not blanket**: they look at which `exercises/weekNN/solution.py`
+or `challenges/challengeNN/solution.py` files are staged (pre-commit) or
+differ from the remote (pre-push), and run `python tools/cli.py test
+<id>` once per affected week/challenge -- not the full suite, and not
+`test --all`. A commit or push that doesn't touch any `solution.py`
+(docs, tests, the presentation, anything else) passes straight through
+untested, since there's nothing new to check. Install it once per local
+clone:
 
 ```bash
 tools\install-git-hooks.bat     # Windows
@@ -103,23 +110,20 @@ sh tools/install-git-hooks.sh   # macOS/Linux
 This points git at the tracked `.githooks/` folder (`git config
 core.hooksPath .githooks`) instead of copying files into the untracked
 `.git/hooks/`, so the hooks stay in sync with the repo automatically.
-Skip a single check when you need to with `git commit --no-verify` /
-`git push --no-verify`.
+The matching logic lives in `.githooks/run-tests-for-changed-files.sh`,
+shared by both hooks. Skip a single check when you need to with
+`git commit --no-verify` / `git push --no-verify`.
 
-**This is meant for a trainee's own working copy**, installed once
-they've started filling in `exercises/`, not for this template repo as
-shipped -- every exercise stub still raises `NotImplementedError` by
-design, so the hooks will (correctly) block every commit until there's
-real code to test. Staff maintaining this template repo itself should
-leave the hooks uninstalled (or use `--no-verify`) rather than fighting
-that by design failure.
+Because only *staged*/*pushed* solutions get tested, this is safe to
+install both in a trainee's own working copy as they fill in
+`exercises/` week by week, and on this template repo itself: editing an
+unrelated file (like this README) is never blocked by some other
+week's stub still raising `NotImplementedError`. It only blocks a
+commit/push when the specific `solution.py` you just changed doesn't
+pass its own tests yet.
 
-If you'd rather wire something narrower yourself -- e.g. only testing
-whichever `exercises/weekNN/` changed in the commit -- call
-`python tools/cli.py test weekNN` (or import `tools/core.py` directly)
-per changed week instead of `test --all`. See `tests/test_week12.py` and
-`tests/test_week13.py` for the two exceptions that need special handling
-either way:
+See `tests/test_week12.py` and `tests/test_week13.py` for the two
+exceptions that need special handling if you extend this further:
 
 - **Week 12 (requests + threading):** the test mocks `requests.get` --
   never point a hook at the live `jsonplaceholder.typicode.com` endpoint.

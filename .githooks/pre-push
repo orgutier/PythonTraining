@@ -3,16 +3,44 @@
 # tools/install-git-hooks.sh (macOS/Linux). See README.md, section
 # "Git hook integration".
 #
-# Runs the full test suite -- every week's exercise tests AND every
-# interview challenge's tests -- before allowing a push.
+# Only tests what's actually changing on the remote: for each
+# exercises/weekNN/solution.py or challenges/challengeNN/solution.py
+# that differs between the remote ref and what's being pushed, runs
+# "python tools/cli.py test <id>" for that one week/challenge -- not
+# the whole suite. A push that doesn't touch any solution.py passes
+# through untested (nothing to check).
+#
+# Git feeds this hook one line per ref being pushed on stdin:
+#   <local ref> <local sha1> <remote ref> <remote sha1>
 
-echo "pre-push: running the full test suite (python tools/cli.py test --all)..."
-python tools/cli.py test --all
-status=$?
+HOOK_DIR=$(dirname "$0")
+ZERO="0000000000000000000000000000000000000000"
+overall_status=0
 
-if [ $status -ne 0 ]; then
+while read -r local_ref local_sha remote_ref remote_sha; do
+    if [ "$local_sha" = "$ZERO" ]; then
+        continue  # deleting the remote ref -- nothing to test
+    fi
+
+    if [ "$remote_sha" = "$ZERO" ]; then
+        # Brand-new ref on the remote: nothing to diff against, so
+        # every solution.py that exists at this commit counts as "changed".
+        changed=$(git ls-tree -r --name-only "$local_sha")
+    else
+        changed=$(git diff --name-only --diff-filter=ACM "$remote_sha" "$local_sha")
+    fi
+
+    echo "pre-push: checking solution.py files changing on $remote_ref..."
+    echo "$changed" | sh "$HOOK_DIR/run-tests-for-changed-files.sh"
+    status=$?
+    if [ $status -ne 0 ]; then
+        overall_status=1
+    fi
+done
+
+if [ $overall_status -ne 0 ]; then
     echo ""
-    echo "pre-push: tests failed (exit $status) -- push aborted."
+    echo "pre-push: tests failed -- push aborted."
     echo "Fix the failing tests, then push again, or skip this check once with:"
     echo "    git push --no-verify"
     exit 1

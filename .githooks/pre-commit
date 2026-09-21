@@ -3,16 +3,21 @@
 # tools/install-git-hooks.sh (macOS/Linux). See README.md, section
 # "Git hook integration".
 #
-# Runs the full test suite -- every week's exercise tests AND every
-# interview challenge's tests -- before allowing a commit.
+# Only tests what's actually staged: for each staged
+# exercises/weekNN/solution.py or challenges/challengeNN/solution.py,
+# runs "python tools/cli.py test <id>" for that one week/challenge --
+# not the whole suite. A commit that doesn't touch any solution.py
+# passes through untested (nothing to check).
 
-echo "pre-commit: running the full test suite (python tools/cli.py test --all)..."
-python tools/cli.py test --all
+HOOK_DIR=$(dirname "$0")
+
+echo "pre-commit: checking staged solution.py files..."
+git diff --cached --name-only --diff-filter=ACM | sh "$HOOK_DIR/run-tests-for-changed-files.sh"
 status=$?
 
 if [ $status -ne 0 ]; then
     echo ""
-    echo "pre-commit: tests failed (exit $status) -- commit aborted."
+    echo "pre-commit: tests failed -- commit aborted."
     echo "Fix the failing tests, then commit again, or skip this check once with:"
     echo "    git commit --no-verify"
     exit 1
