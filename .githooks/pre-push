@@ -1,0 +1,21 @@
+#!/bin/sh
+# Installed via tools/install-git-hooks.bat (Windows) or
+# tools/install-git-hooks.sh (macOS/Linux). See README.md, section
+# "Git hook integration".
+#
+# Runs the full test suite -- every week's exercise tests AND every
+# interview challenge's tests -- before allowing a push.
+
+echo "pre-push: running the full test suite (python tools/cli.py test --all)..."
+python tools/cli.py test --all
+status=$?
+
+if [ $status -ne 0 ]; then
+    echo ""
+    echo "pre-push: tests failed (exit $status) -- push aborted."
+    echo "Fix the failing tests, then push again, or skip this check once with:"
+    echo "    git push --no-verify"
+    exit 1
+fi
+
+exit 0
