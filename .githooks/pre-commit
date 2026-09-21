@@ -1,0 +1,27 @@
+#!/bin/sh
+# Installed via tools/install-git-hooks.bat (Windows) or
+# tools/install-git-hooks.sh (macOS/Linux). See README.md, section
+# "Git hook integration".
+#
+# Atomic, per exercise: for each staged exercises/weekNN/exerciseXX/*.py
+# (or challenges/challengeNN/solution.py), runs "python tools/cli.py test
+# <id>" for that ONE exercise/challenge -- not its whole week, and not the
+# whole suite. A commit that doesn't touch any exercise/challenge file
+# passes through untested (nothing to check). See pre-push for the
+# whole-week check that runs before code actually leaves your machine.
+
+HOOK_DIR=$(dirname "$0")
+
+echo "pre-commit: checking staged exercise/challenge files (per-exercise)..."
+git diff --cached --name-only --diff-filter=ACM | sh "$HOOK_DIR/run-tests-for-changed-files.sh" exercise
+status=$?
+
+if [ $status -ne 0 ]; then
+    echo ""
+    echo "pre-commit: tests failed -- commit aborted."
+    echo "Fix the failing tests, then commit again, or skip this check once with:"
+    echo "    git commit --no-verify"
+    exit 1
+fi
+
+exit 0

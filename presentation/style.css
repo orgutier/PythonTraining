@@ -19,6 +19,20 @@
   --sage:      #7fae7f;  /* basic tier */
   --rust:      #c17a4a;  /* advanced tier */
   --slate-blue:#6b8fae;  /* internals callout */
+  --violet:    #9a86c4;  /* theory & internals badges */
+  --rose:      #d9748f;  /* interview challenge callout */
+  --cyan:      #5fb3b3;  /* day-guide (schedule deep-dive) callout */
+
+  /* VS Code Dark+ inspired token colors, for the syntax highlighter */
+  --code-bg:      #1e1e1e;
+  --code-fg:      #d4d4d4;
+  --code-kw:      #c586c0;
+  --code-str:     #ce9178;
+  --code-com:     #6a9955;
+  --code-num:     #b5cea8;
+  --code-func:    #dcdcaa;
+  --code-self:    #9cdcfe;
+  --code-builtin: #4ec9b0;
 
   --font-ui:   -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
@@ -202,6 +216,125 @@ html, body{
   font-size: 1rem;
 }
 
+/* ============================================================
+   Week schedule — day-by-day rows for delivering this topic.
+   ============================================================ */
+.schedule{
+  margin-bottom: 32px;
+}
+.schedule h2{
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--amber);
+  margin: 0 0 10px;
+  letter-spacing: 0.02em;
+}
+.schedule-table{
+  width: 100%;
+  max-width: 900px;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.schedule-table thead th{
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-faint);
+  padding: 0 12px 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.schedule-table td{
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text);
+}
+.schedule-table tr:last-child td{ border-bottom: none; }
+.schedule-day{
+  font-family: var(--font-mono);
+  color: var(--amber);
+  white-space: nowrap;
+  width: 1%;
+}
+.schedule-title{
+  font-weight: 600;
+  white-space: nowrap;
+  width: 1%;
+  color: var(--text);
+}
+.schedule-title-btn{
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: inherit;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--cyan);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(95,179,179,0.4);
+  text-underline-offset: 3px;
+}
+.schedule-title-btn:hover{ text-decoration-color: var(--cyan); }
+.schedule-title-btn::after{ content: " \25B8"; font-size: 0.8em; opacity: 0.7; }
+
+@media (max-width: 700px){
+  .schedule-table, .schedule-table tbody, .schedule-table tr, .schedule-table td{ display: block; width: auto; }
+  .schedule-table thead{ display: none; }
+  .schedule-table tr{
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .schedule-table tr:last-child{ border-bottom: none; }
+  .schedule-table td{ border-bottom: none; padding: 2px 0; white-space: normal; }
+  .schedule-day{ font-size: 0.8rem; }
+  .schedule-title{ font-size: 1rem; }
+}
+
+/* ============================================================
+   Interview challenge callout — an optional, ungraded,
+   interview-style problem assigned to this week.
+   ============================================================ */
+.challenge{
+  max-width: var(--max-line);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--rose);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 32px;
+}
+.challenge-tag{
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 6px;
+}
+.challenge h2{
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.challenge p{ margin: 0 0 8px; color: var(--text); }
+.challenge p:last-child{ margin-bottom: 0; }
+.challenge-path{
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.challenge-path code{
+  font-family: var(--font-mono);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1px 6px;
+  color: var(--rose);
+}
+
 .tier{
   max-width: var(--max-line);
   padding: 4px 0 4px 18px;
@@ -270,9 +403,16 @@ html, body{
   padding: 3px 8px;
   border-radius: var(--radius);
   white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.06s ease;
 }
+.badge:hover{ background: var(--panel); border-color: var(--text-faint); transform: translateY(-1px); }
+.badge:active{ transform: translateY(0); }
 .badge.dunder{ color: var(--slate-blue); border-color: rgba(107,143,174,0.4); }
 .badge.module{ color: var(--sage); border-color: rgba(127,174,127,0.4); }
+.badge.method{ color: var(--amber); border-color: rgba(212,162,76,0.4); }
+.badge.concept{ color: var(--rust); border-color: rgba(193,122,74,0.4); }
+.badge.theory{ color: var(--violet); border-color: rgba(154,134,196,0.4); }
 
 .note{
   max-width: var(--max-line);
@@ -311,4 +451,205 @@ html, body{
     padding: 16px 0 20px;
   }
   .content{ padding: 28px 20px 60px; }
+}
+
+/* ============================================================
+   Glossary drawer — a right-docked, non-modal panel with the
+   full explanation for whatever badge (keyword, method, dunder,
+   module, concept, or theory item) the reader just clicked.
+   It never covers the topic sidebar and never blocks the rest
+   of the page: no backdrop, so the reader can keep navigating
+   (switch topics, search, click another badge) with it open.
+   ============================================================ */
+.glossary-drawer{
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 440px;
+  max-width: 92vw;
+  height: 100vh;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 24px rgba(0,0,0,0.35);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(110%);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+.glossary-drawer.open{ transform: translateX(0); pointer-events: auto; }
+
+.drawer-header{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.drawer-heading{ display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.drawer-category{
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.drawer-category.cat-method{ color: var(--amber); }
+.drawer-category.cat-dunder{ color: var(--slate-blue); }
+.drawer-category.cat-module{ color: var(--sage); }
+.drawer-category.cat-concept{ color: var(--rust); }
+.drawer-category.cat-theory{ color: var(--violet); }
+.drawer-category.cat-dayguide{ color: var(--cyan); }
+.drawer-term{
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  word-break: break-word;
+}
+.drawer-close{
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.drawer-close:hover{ color: var(--text); border-color: var(--text-faint); }
+
+.drawer-body{
+  padding: 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+.drawer-body h3{
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 20px 0 8px;
+}
+.drawer-body h3:first-of-type{ margin-top: 0; }
+.drawer-summary{
+  margin: 0;
+  color: var(--text);
+  font-size: 0.98rem;
+}
+.drawer-body p{ margin: 0; color: var(--text); }
+.drawer-code{
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin: 0;
+}
+.drawer-code code{
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  color: var(--text);
+  white-space: pre;
+}
+.drawer-related{ margin-top: 2px; }
+
+/* ============================================================
+   VS Code-style code blocks -- used for every runnable example
+   in the drawer (glossary terms and day-guide deep dives alike),
+   plus the "Output" block shown underneath a day-guide example.
+   ============================================================ */
+.vscode-block{
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin: 0 0 4px;
+}
+.vscode-titlebar{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #2d2d2d;
+  border-bottom: 1px solid #3c3c3c;
+}
+.vscode-dot{ width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.vscode-dot.red{ background: #ec6a5e; }
+.vscode-dot.yellow{ background: #f4bf4f; }
+.vscode-dot.green{ background: #61c454; }
+.vscode-filename{
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #969696;
+}
+.vscode-code{
+  background: var(--code-bg);
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin: 0;
+}
+.vscode-code code{
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  color: var(--code-fg);
+  white-space: pre;
+}
+.tok-kw{ color: var(--code-kw); }
+.tok-str{ color: var(--code-str); }
+.tok-com{ color: var(--code-com); font-style: italic; }
+.tok-num{ color: var(--code-num); }
+.tok-func{ color: var(--code-func); }
+.tok-dec{ color: var(--code-func); }
+.tok-self{ color: var(--code-self); }
+.tok-builtin{ color: var(--code-builtin); }
+
+.example-caption{
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin: 18px 0 8px;
+}
+.example-caption:first-of-type{ margin-top: 0; }
+
+.vscode-output{
+  background: #0c0c0c;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin: 0 0 4px;
+  padding: 10px 14px;
+}
+.vscode-output .output-label{
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6a9955;
+  margin-bottom: 4px;
+}
+.vscode-output pre{
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: #d4d4d4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.day-guide-summary{
+  margin: 0 0 18px;
+  color: var(--text);
+  font-size: 0.98rem;
+}
+
+@media (max-width: 860px){
+  .glossary-drawer{ width: 100%; max-width: 420px; }
 }
