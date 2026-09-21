@@ -1,71 +1,71 @@
-import uuid
-
-from fastapi.testclient import TestClient
-
-from challenges.challenge05.solution import app
-
-client = TestClient(app)
-
-
-def _unique_url() -> str:
-    # A fresh URL per test avoids any dependency on shared in-memory state
-    # being reset between tests (it isn't, by design -- see the app's
-    # module-level storage).
-    return f"https://example.com/{uuid.uuid4()}"
+import pytest
+from challenges.challenge05.solution import (
+    make_pipeline,
+    count_calls,
+    memoize,
+    cached_expensive,
+)
 
 
-def test_shorten_then_redirect():
-    url = _unique_url()
-    response = client.post("/shorten", json={"url": url})
-    assert response.status_code == 200
-    body = response.json()
-    code = body["code"]
-    assert body["short_url"] == f"/{code}"
+def test_pipeline_register_and_run():
+    register, run = make_pipeline()
 
-    redirect = client.get(f"/{code}", follow_redirects=False)
-    assert redirect.status_code == 307
-    assert redirect.headers["location"] == url
+    @register("double")
+    def double(x):
+        return x * 2
+
+    assert run("double", 5) == 10
+    assert double.__name__ == "double"
 
 
-def test_stats_tracks_click_count():
-    url = _unique_url()
-    code = client.post("/shorten", json={"url": url}).json()["code"]
-
-    client.get(f"/{code}", follow_redirects=False)
-    client.get(f"/{code}", follow_redirects=False)
-
-    stats = client.get(f"/stats/{code}")
-    assert stats.status_code == 200
-    data = stats.json()
-    assert data["clicks"] == 2
-    assert data["url"] == url
+def test_pipeline_run_missing_handler_raises_keyerror():
+    register, run = make_pipeline()
+    with pytest.raises(KeyError):
+        run("missing")
 
 
-def test_shortening_the_same_url_twice_returns_the_same_code():
-    url = _unique_url()
-    first = client.post("/shorten", json={"url": url}).json()["code"]
-    second = client.post("/shorten", json={"url": url}).json()["code"]
-    assert first == second
+def test_pipeline_instances_are_independent():
+    register_a, run_a = make_pipeline()
+    register_b, run_b = make_pipeline()
+
+    @register_a("greet")
+    def greet(name):
+        return f"hi {name}"
+
+    assert run_a("greet", "Ada") == "hi Ada"
+    with pytest.raises(KeyError):
+        run_b("greet", "Ada")
 
 
-def test_invalid_url_is_rejected_with_422():
-    response = client.post("/shorten", json={"url": "not-a-url"})
-    assert response.status_code == 422
+def test_count_calls_tracks_count_and_kwargs():
+    @count_calls
+    def add(a, b=0):
+        return a + b
+
+    assert add(1, b=2) == 3
+    assert add(1) == 1
+    assert add.call_count == 2
 
 
-def test_missing_url_field_is_rejected_with_422():
-    response = client.post("/shorten", json={})
-    assert response.status_code == 422
+def test_memoize_caches_by_args_and_kwargs():
+    calls = []
+
+    @memoize
+    def slow_add(a, b=0):
+        calls.append((a, b))
+        return a + b
+
+    assert slow_add(1, 2) == 3
+    assert slow_add(1, 2) == 3
+    assert slow_add(1, b=2) == 3
+    assert len(calls) == 2  # (1,2) positional cached separately from b=2 keyword
 
 
-def test_unknown_code_returns_404_for_redirect_and_stats():
-    unknown = "this-short-code-should-never-exist-abc123"
-    assert client.get(f"/{unknown}", follow_redirects=False).status_code == 404
-    assert client.get(f"/stats/{unknown}").status_code == 404
+def test_cached_expensive_correctness_and_caching():
+    assert cached_expensive(16) == 4.0
+    assert hasattr(cached_expensive, "cache_info")
 
 
-def test_never_clicked_code_reports_zero_clicks():
-    url = _unique_url()
-    code = client.post("/shorten", json={"url": url}).json()["code"]
-    stats = client.get(f"/stats/{code}")
-    assert stats.json()["clicks"] == 0
+def test_cached_expensive_precision_is_keyword_only():
+    with pytest.raises(TypeError):
+        cached_expensive(16, 3)

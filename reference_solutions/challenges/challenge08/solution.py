@@ -1,30 +1,50 @@
-# Time: O(n), Space: O(n). A single pass over the Series (via .items(),
-# which is pandas' label-aware iterator) with a value -> index-label
-# lookup dict -- the same one-pass hash technique as the classic Two Sum,
-# just index-label-aware instead of position-based, and with no nested
-# comparison loop.
-import pandas as pd
+import collections
+
+Run = collections.namedtuple("Run", ["start", "length"])
 
 
-def two_sum(numbers: pd.Series, target: int):
+def all_runs(numbers: list) -> list:
     """
-    Return the (index_a, index_b) pair of index LABELS such that
-    numbers[index_a] + numbers[index_b] == target, or None if no such
-    pair exists.
+    Every maximal consecutive run in numbers, as Run records sorted by start.
 
     Edge cases handled:
-      - No pair sums to target -> returns None.
-      - A repeated value provides the pair (e.g. two entries equal to 4
-        with target=8): the first occurrence is recorded in `seen`
-        before the second is checked, so the second correctly finds the
-        first as its complement -- an index is never paired with itself.
-      - A single-element Series -> the loop body runs once with an empty
-        `seen`, so no complement can be found and None is returned.
+      - Empty numbers -> returns [].
+      - Duplicate numbers -> deduplicated first (via set()), so they don't
+        inflate a run's length.
+      - Negative numbers -> runs work identically on either side of zero,
+        since only relative order (n, n+1, n+2, ...) matters.
     """
-    seen: dict[int, object] = {}
-    for idx, value in numbers.items():
-        complement = target - value
-        if complement in seen:
-            return (seen[complement], idx)
-        seen[value] = idx
-    return None
+    if not numbers:
+        return []
+
+    uniq = sorted(set(numbers))
+    runs = []
+    start = uniq[0]
+    prev = uniq[0]
+    for n in uniq[1:]:
+        if n != prev + 1:
+            runs.append(Run(start=start, length=prev - start + 1))
+            start = n
+        prev = n
+    runs.append(Run(start=start, length=prev - start + 1))
+    return runs
+
+
+def longest_consecutive_run(numbers: list) -> Run:
+    runs = all_runs(numbers)
+    if not runs:
+        raise ValueError("numbers must not be empty")
+    return max(runs, key=lambda r: r.length)
+
+
+def runs_overlap(run_a: Run, run_b: Run) -> bool:
+    a_end = run_a.start + run_a.length
+    b_end = run_b.start + run_b.length
+    return run_a.start < b_end and run_b.start < a_end
+
+
+def unique_numbers_covered(runs: list) -> set:
+    covered = set()
+    for run in runs:
+        covered |= set(range(run.start, run.start + run.length))
+    return covered

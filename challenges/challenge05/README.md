@@ -1,56 +1,66 @@
-# Challenge 05 — URL Shortener API
+# Challenge 05 — Pluggable Event Pipeline
 
-**Do this after:** Week 13 (FastAPI)
+**Do this after:** Week 03 (Functions)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge05` (or `pytest tests/test_challenge05.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
-Build a minimal URL-shortener REST API -- "write me a URL shortener" is one
-of the most common "design + code it live" interview exercises, because it
-compresses routing, data modeling, validation, and a real design decision
-(how do you generate a short code?) into something codeable in under an
-hour.
+Plugin/handler registries built from closures and decorators are
+everywhere in real Python codebases (web framework routes, CLI
+subcommands, event buses). This challenge builds a tiny one, plus two
+flavors of caching decorator, to pull together most of Week 3's function
+toolkit in one place.
 
-## Required endpoints
+Implement:
 
-| Method & path | Behavior |
-|---|---|
-| `POST /shorten` | Body: `{"url": "https://example.com/very/long/path"}`. Creates a short code for the URL (reusing the existing code if that exact URL was already shortened) and returns `{"code": "...", "short_url": "/abc123"}`. |
-| `GET /{code}` | Redirects (HTTP 307) to the original URL if `code` exists; otherwise returns a 404. Each successful redirect increments that code's click count. |
-| `GET /stats/{code}` | Returns `{"code": "...", "url": "...", "clicks": N}` if `code` exists; otherwise 404. |
+```python
+def make_pipeline():
+    """Return (register, run): register(name) is a decorator that adds the decorated function as the handler for `name`; run(name, *args, **kwargs) calls that handler and returns its result, or raises KeyError if nothing is registered under `name`."""
 
-Storage is **in-memory only** -- a plain Python dict at module scope is
-fine. No database, no file persistence; state resets when the process
-restarts.
+def count_calls(func):
+    """Decorator: wrapper.call_count tracks how many times func has been called."""
+
+def memoize(func):
+    """Decorator: cache func's results by its (args, kwargs), from scratch -- no functools.lru_cache here."""
+
+def cached_expensive(n: int, *, precision: int = 2) -> float:
+    """round(n ** 0.5, precision), decorated with functools.lru_cache(maxsize=None). precision is keyword-only."""
+```
+
+```python
+register, run = make_pipeline()
+
+@register("double")
+def double(x):
+    return x * 2
+
+run("double", 5)     # -> 10
+double.__name__       # -> "double"  (functools.wraps preserved it)
+run("missing")        # -> raises KeyError
+```
+
+Each call to `make_pipeline()` must produce an **independent** registry --
+registering a handler on one pipeline must not affect another.
 
 ## Constraints on HOW you write it
 
-1. **Request and response bodies must be Pydantic `BaseModel` classes**,
-   not raw dicts passed straight through -- define at least a
-   `ShortenRequest` (the incoming `{"url": ...}`) and a `ShortenResponse`
-   (the outgoing `{"code", "short_url"}`) model, matching Week 13's
-   lesson on typed validation instead of untyped dicts.
-2. **Reject invalid URLs with a proper 4xx response**, not a silent
-   failure or a 500. Use Pydantic's URL validation on the request model
-   (or explicit validation in the handler) so `POST /shorten` with
-   `{"url": "not a url"}` returns a 422 with a useful error message.
-3. **Submitting the same URL twice must return the same code** both times
-   -- don't generate a new code (and waste one) for a URL you've already
-   shortened. Document in a docstring how you detect "already shortened."
-4. **A short code, once generated, must never collide with an existing
-   one.** Document your code-generation strategy (length, character set,
-   collision handling) in a docstring on the generation function.
-5. **A docstring (module-level or per-function) with a comprehensive list
-   of the edge cases your implementation handles:** an empty/missing `url`
-   field, a URL submitted a second time, `GET` on a code that was never
-   created, and `GET /stats` on a code that exists but has never been
-   clicked (clicks should read 0, not error).
-
-## Check your work
-
-`python tools/cli.py test challenge05` runs `tests/test_challenge05.py`,
-which uses FastAPI's `TestClient` (Week 13) to walk through exactly this:
-shorten a URL, redirect through it twice, check `/stats` shows 2 clicks,
-submit the same URL again and confirm you get the same code back, and
-confirm an invalid URL, a missing `url` field, and an unknown code all
-come back as proper error responses instead of crashing the server.
+1. **`make_pipeline`'s handler storage must be a closure variable**
+   (a local `dict` inside `make_pipeline`, captured by both `register` and
+   `run`), not a module-level or class-level dict shared across calls to
+   `make_pipeline()`.
+2. **Every decorator here (`register`'s inner decorator, `count_calls`,
+   `memoize`) must use `@functools.wraps(func)`** so the wrapped
+   function's `__name__`/`__doc__` survive.
+3. **`count_calls` must track its count in a closure variable updated with
+   `nonlocal`**, not a mutable default argument or a function attribute
+   incremented without `nonlocal` (that would raise `UnboundLocalError`).
+4. **`memoize` must build the cache key from `(args, tuple(sorted(kwargs
+   .items())))`** so it also works for keyword arguments, and must not use
+   `functools.lru_cache` (that's what `cached_expensive` is for) --
+   `memoize` is the "build it yourself" version.
+5. **`cached_expensive`'s `precision` must be keyword-only** (`*` before
+   it in the signature) and it must be decorated with
+   `functools.lru_cache(maxsize=None)`.
+6. **`run` must accept and forward arbitrary `*args`/`**kwargs`** to
+   whatever handler is registered -- it has no idea what signature a
+   given handler expects.

@@ -1,62 +1,69 @@
-# Challenge 07 — Min Stack
+# Challenge 07 — Anagram Groups with Records
 
-**Do this after:** Week 06 (OOP I)
+**Do this after:** Week 04 (Data Structures)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge07` (or `pytest tests/test_challenge07.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
-Design a stack that supports `push`, `pop`, `top`, and retrieving the
-minimum element, **all in O(1) time**.
+Group Anagrams (LeetCode #49) is a real, frequently-asked interview
+question: group every string in a list with its anagrams. This version
+asks for it the way you'd actually build it in a real codebase -- returning
+proper records instead of bare lists, and built with the container tools
+Week 4 is about, not around them.
+
+Implement:
 
 ```python
-s = MinStack()
-s.push(-2)
-s.push(0)
-s.push(-3)
-s.get_min()   # -> -3
-s.pop()
-s.top()       # -> 0
-s.get_min()   # -> -2
+@dataclasses.dataclass(frozen=True)
+class AnagramGroup:
+    signature: str
+    words: tuple
+
+    def __len__(self) -> int:
+        return len(self.words)
+
+def build_signature(word: str) -> str:
+    """The word's letters sorted and joined -- "".join(sorted(word))."""
+
+def group_anagrams(words: list) -> list:
+    """Group words sharing a signature into AnagramGroup records, sorted by signature."""
+
+def common_words(group_a: AnagramGroup, group_b: AnagramGroup) -> set:
+    """Words appearing in both groups' .words."""
+
+def largest_groups(groups: list, n: int) -> list:
+    """The n largest groups by len(), ties broken by signature, largest first."""
+
+def label_groups(groups: list) -> list:
+    """["0: SIGNATURE (K words)", "1: SIGNATURE (K words)", ...]."""
 ```
 
-This is LeetCode #155, and it's a favorite OOP/data-structure-design
-question because the naive approach (`min(self._items)` every time)
-"works" but is O(n) per call -- the whole challenge is making `get_min()`
-just as fast as `push`/`pop`.
-
-## Required interface
-
 ```python
-class MinStack:
-    def __init__(self) -> None: ...
-    def push(self, val: int) -> None: ...
-    def pop(self) -> None: ...
-    def top(self) -> int: ...
-    def get_min(self) -> int: ...
+groups = group_anagrams(["eat", "tea", "tan", "ate", "nat", "bat"])
+# -> [AnagramGroup(signature="abt", words=("bat",)),
+#     AnagramGroup(signature="aet", words=("eat", "tea", "ate")),
+#     AnagramGroup(signature="ant", words=("tan", "nat"))]
+label_groups(groups)[0]   # -> "0: abt (1 words)"
 ```
 
 ## Constraints on HOW you write it
 
-1. **`get_min()` must be O(1)**, not O(n). That rules out scanning the
-   stack (or calling `min()` on it) inside `get_min()`. Maintain the
-   running minimum incrementally as part of `push`/`pop` instead --
-   write a comment above the class explaining your approach (e.g. a
-   second stack tracking the min-so-far at each level, or storing
-   `(value, min_at_this_point)` pairs).
-2. **Do not use `min()` anywhere in your implementation.** Track the
-   minimum yourself with comparisons -- using the builtin defeats the
-   point of the exercise.
-3. **A docstring with a comprehensive list of the edge cases your
-   implementation handles:** popping down to an empty stack and then
-   pushing again (the min tracking must reset correctly, not get stuck
-   on a stale value), pushing the same minimum value more than once and
-   then popping one of them (the min must still be correct afterward),
-   and a stack containing only one element.
-4. **Full type hints**, matching the interface above exactly.
-
-## Check your work
-
-`python tools/cli.py test challenge07` runs `tests/test_challenge07.py`,
-which walks through the example above plus the documented edge cases
-(including the "push the same min twice, pop once" scenario, which is
-the one naive implementations usually get wrong).
+1. **`build_signature` must be `"".join(sorted(word))`** -- one line, no
+   manual sorting loop.
+2. **`group_anagrams` must use `collections.defaultdict(list)`** to
+   accumulate words per signature (this is exactly the tool Week 4
+   introduces for this), then convert each bucket into a **frozen**
+   `AnagramGroup` (`words` as a `tuple`, not a `list` -- frozen dataclasses
+   need hashable fields to actually be hashable themselves), and return
+   the groups **sorted by `signature`** via `sorted()`.
+3. **`AnagramGroup` must be `@dataclasses.dataclass(frozen=True)`** --
+   this gets you `__eq__` and `__hash__` for free (two groups with the
+   same signature and words compare and hash equal, and are usable in a
+   `set`), which a plain class wouldn't without writing both by hand.
+4. **`common_words` must use the `&` set operator** on `set(group_a.words)
+   & set(group_b.words)` -- not a list comprehension with an `in` check.
+5. **`largest_groups` must use `sorted(..., key=..., reverse=True)`**,
+   slicing the top `n` -- not a manual max-finding loop.
+6. **`label_groups` must use `enumerate()`.**
+7. **A docstring on `group_anagrams`** listing edge cases: an empty input
+   list, a word that's the empty string, and single-character words.

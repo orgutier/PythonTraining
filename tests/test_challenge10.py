@@ -1,48 +1,60 @@
-from fastapi.testclient import TestClient
-
-from challenges.challenge10.solution import app
-
-client = TestClient(app)
-
-
-def test_checkin_checkout_and_average():
-    client.post("/checkin", json={"id": 1, "station_name": "Leyton", "t": 3})
-    client.post("/checkout", json={"id": 1, "station_name": "Paradise", "t": 8})
-
-    response = client.get("/average/Leyton/Paradise")
-    assert response.status_code == 200
-    assert response.json()["average_time"] == 5
+from challenges.challenge10.solution import (
+    SuppressAndCount,
+    suppress_and_count,
+    extract_error_messages,
+    redact_ips,
+    contains_stack_trace,
+)
 
 
-def test_average_across_multiple_trips():
-    client.post("/checkin", json={"id": 10, "station_name": "A", "t": 0})
-    client.post("/checkout", json={"id": 10, "station_name": "B", "t": 10})
-    client.post("/checkin", json={"id": 11, "station_name": "A", "t": 0})
-    client.post("/checkout", json={"id": 11, "station_name": "B", "t": 20})
-
-    response = client.get("/average/A/B")
-    assert response.json()["average_time"] == 15
+def test_suppress_and_count_class_suppresses_matching():
+    with SuppressAndCount(ValueError) as counter:
+        raise ValueError("bad input")
+    assert counter.count == 1
 
 
-def test_checkout_without_checkin_is_rejected():
-    response = client.post("/checkout", json={"id": 999, "station_name": "X", "t": 5})
-    assert 400 <= response.status_code < 500
+def test_suppress_and_count_class_propagates_non_matching():
+    import pytest
+    with pytest.raises(TypeError):
+        with SuppressAndCount(ValueError):
+            raise TypeError("nope")
 
 
-def test_average_for_unknown_route_is_rejected():
-    response = client.get("/average/Nowhere/Nowhere2")
-    assert 400 <= response.status_code < 500
+def test_suppress_and_count_generator_suppresses_matching():
+    with suppress_and_count(ValueError) as state:
+        raise ValueError("bad input")
+    assert state["count"] == 1
 
 
-def test_rider_can_check_in_again_after_checkout():
-    client.post("/checkin", json={"id": 55, "station_name": "P", "t": 0})
-    client.post("/checkout", json={"id": 55, "station_name": "Q", "t": 4})
+def test_suppress_and_count_generator_propagates_non_matching():
+    import pytest
+    with pytest.raises(TypeError):
+        with suppress_and_count(ValueError):
+            raise TypeError("nope")
 
-    # Reusing the same rider id for a brand-new trip must work normally.
-    second = client.post("/checkin", json={"id": 55, "station_name": "R", "t": 10})
-    assert second.status_code == 200
-    third = client.post("/checkout", json={"id": 55, "station_name": "S", "t": 16})
-    assert third.status_code == 200
 
-    response = client.get("/average/R/S")
-    assert response.json()["average_time"] == 6
+def test_extract_error_messages():
+    text = "09:00 INFO ok\n09:05 ERROR disk full\n09:06 ERROR timeout"
+    assert extract_error_messages(text) == ["disk full", "timeout"]
+
+
+def test_extract_error_messages_none_found():
+    assert extract_error_messages("09:00 INFO all good") == []
+
+
+def test_redact_ips():
+    assert redact_ips("connection from 10.0.0.5 refused") == "connection from [REDACTED] refused"
+
+
+def test_redact_ips_multiple():
+    text = "10.0.0.1 talked to 192.168.1.20"
+    assert redact_ips(text) == "[REDACTED] talked to [REDACTED]"
+
+
+def test_contains_stack_trace_true():
+    text = "something broke\nTraceback (most recent call last):\n  File ..."
+    assert contains_stack_trace(text) is True
+
+
+def test_contains_stack_trace_false():
+    assert contains_stack_trace("all good here") is False

@@ -1,10 +1,9 @@
 """
-Challenge 07 - Min Stack
-Interview-style challenge (LeetCode #155). Correctness is pytest-tested
-(see tests/test_challenge07.py / `python tools/cli.py test challenge07`);
-see README.md in this folder for the full problem statement and the
-constraints your solution must follow (O(1) get_min, no using min(), and
-a docstring listing the edge cases handled).
+Challenge 07 - Anagram Groups with Records
+Interview-style challenge. Correctness is pytest-tested (see
+tests/test_challenge07.py / `python tools/cli.py test challenge07`); see
+README.md in this folder for the full problem statement and the constraints
+your solution must follow (collections.defaultdict for grouping, a frozen dataclass for each group (auto __eq__/__hash__), set operations, and enumerate() for labeling).
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module, matching the convention used by
@@ -12,26 +11,38 @@ exercises/weekNN/solution.py.
 """
 
 
-class MinStack:
-    """
-    A stack supporting push/pop/top/get_min all in O(1) time. Fill in
-    this docstring as part of the challenge: explain how you track the
-    running minimum without scanning, and document the edge cases you
-    handle (emptying and refilling the stack, duplicate minimums, a
-    single-element stack).
-    """
+import dataclasses
 
-    def __init__(self) -> None:
-        raise NotImplementedError
 
-    def push(self, val: int) -> None:
-        raise NotImplementedError
+@dataclasses.dataclass(frozen=True)
+class AnagramGroup:
+    signature: str
+    words: tuple
 
-    def pop(self) -> None:
-        raise NotImplementedError
+    def __len__(self) -> int:
+        return len(self.words)
 
-    def top(self) -> int:
-        raise NotImplementedError
 
-    def get_min(self) -> int:
-        raise NotImplementedError
+def build_signature(word: str) -> str:
+    """"".join(sorted(word))."""
+    raise NotImplementedError
+
+
+def group_anagrams(words: list) -> list:
+    """Group words into AnagramGroup records via collections.defaultdict(list), sorted by signature."""
+    raise NotImplementedError
+
+
+def common_words(group_a: AnagramGroup, group_b: AnagramGroup) -> set:
+    """Words in both groups, via the & set operator."""
+    raise NotImplementedError
+
+
+def largest_groups(groups: list, n: int) -> list:
+    """The n largest groups by len(), ties broken by signature, largest first."""
+    raise NotImplementedError
+
+
+def label_groups(groups: list) -> list:
+    """["0: SIGNATURE (K words)", ...] via enumerate()."""
+    raise NotImplementedError

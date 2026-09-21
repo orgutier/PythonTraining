@@ -1,31 +1,31 @@
 """
-Challenge 04 - Rate Limiter (Token Bucket)
+Challenge 04 - Batch Retry Simulator
 Interview-style challenge. Correctness is pytest-tested (see
-tests/test_challenge04.py / `python tools/cli.py test challenge04`); see README.md in this folder
-for the full problem statement and the constraints your solution must follow
-(thread safety with threading.Lock, a from-scratch token bucket driven by
-time.monotonic(), a comprehensive docstring, and a debuggable __repr__).
+tests/test_challenge04.py / `python tools/cli.py test challenge04`); see
+README.md in this folder for the full problem statement and the constraints
+your solution must follow (a while...else retry loop with break/continue, range()-based run detection, chained ternaries, and itertools for flattening batches).
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module, matching the convention used by
 exercises/weekNN/solution.py.
 """
-import threading
 
 
-class RateLimiter:
-    """
-    Thread-safe token-bucket rate limiter. Fill in this docstring as part
-    of the challenge: document capacity, refill_rate, empty-bucket
-    behavior, concurrent-access behavior, and your clock source choice.
-    """
+def retry_until_clean(batches: list, max_retries: int, bad_levels: tuple = ("ERROR", "CRITICAL")) -> int:
+    """Cyclically retry batches up to max_retries times; return the first clean batch's index, or -1. A while...else."""
+    raise NotImplementedError
 
-    def __init__(self, capacity: int, refill_rate: float) -> None:
-        raise NotImplementedError
 
-    def allow_request(self) -> bool:
-        """Consume one token and return True, or return False if none available."""
-        raise NotImplementedError
+def group_consecutive_runs(levels: list) -> list:
+    """Group consecutive equal values into sublists, via range()-based index comparison."""
+    raise NotImplementedError
 
-    def __repr__(self) -> str:
-        raise NotImplementedError
+
+def status_label(count: int) -> str:
+    """"empty"/"ok"/"busy" -- one chained ternary expression."""
+    raise NotImplementedError
+
+
+def interleave_first_n(batches: list, limit: int) -> list:
+    """First `limit` items across all batches, flattened in order -- itertools.chain + islice."""
+    raise NotImplementedError
