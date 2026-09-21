@@ -1,29 +1,57 @@
-from challenges.challenge06.solution import longest_consecutive
+import functools
+import pytest
+from challenges.challenge06.solution import (
+    stream_batches,
+    process_batch,
+    get_total_processed,
+    reset_total_processed,
+    make_scaled_transform,
+)
 
 
-def test_longest_consecutive_basic():
-    assert longest_consecutive([100, 4, 200, 1, 3, 2]) == 4
+def test_stream_batches_chunks_with_short_last_chunk():
+    assert list(stream_batches([1, 2, 3, 4, 5], 2)) == [[1, 2], [3, 4], [5]]
 
 
-def test_longest_consecutive_full_run():
-    assert longest_consecutive([0, 3, 7, 2, 5, 8, 4, 6, 0, 1]) == 9
+def test_stream_batches_is_a_real_generator():
+    gen = stream_batches([1, 2, 3], 1)
+    assert hasattr(gen, "__next__")
+    assert next(gen) == [1]
 
 
-def test_longest_consecutive_empty_list():
-    assert longest_consecutive([]) == 0
+def test_stream_batches_empty_data():
+    assert list(stream_batches([], 3)) == []
 
 
-def test_longest_consecutive_duplicates_do_not_inflate_length():
-    assert longest_consecutive([1, 1, 2]) == 2
+def test_stream_batches_positional_only():
+    with pytest.raises(TypeError):
+        list(stream_batches(data=[1, 2], size=1))
 
 
-def test_longest_consecutive_single_element():
-    assert longest_consecutive([5]) == 1
+def test_process_batch_default_transform_and_global_total():
+    reset_total_processed()
+    assert process_batch([1, 2, 3]) == [1, 2, 3]
+    assert get_total_processed() == 3
 
 
-def test_longest_consecutive_negative_numbers():
-    assert longest_consecutive([-3, -2, -1, 0, 5]) == 4
+def test_process_batch_with_transform_accumulates_total():
+    reset_total_processed()
+    process_batch([1, 2, 3])
+    process_batch([4, 5], transform=make_scaled_transform(10))
+    assert get_total_processed() == 5
 
 
-def test_longest_consecutive_already_contiguous():
-    assert longest_consecutive([5, 4, 3, 2, 1]) == 5
+def test_process_batch_batch_is_positional_only():
+    with pytest.raises(TypeError):
+        process_batch(batch=[1, 2])
+
+
+def test_process_batch_transform_is_keyword_only():
+    with pytest.raises(TypeError):
+        process_batch([1, 2], lambda x: x)
+
+
+def test_make_scaled_transform_uses_functools_partial():
+    triple = make_scaled_transform(3)
+    assert triple(4) == 12
+    assert isinstance(triple, functools.partial)

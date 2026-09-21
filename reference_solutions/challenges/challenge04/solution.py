@@ -1,58 +1,46 @@
-import threading
-import time
+import itertools
 
 
-class RateLimiter:
+def retry_until_clean(batches: list, max_retries: int, bad_levels: tuple = ("ERROR", "CRITICAL")) -> int:
     """
-    Thread-safe token-bucket rate limiter.
+    Cyclically retry batches[0], batches[1], ... up to max_retries attempts.
 
-    - capacity: the maximum number of tokens the bucket can hold, and also
-      the number of tokens it starts full with.
-    - refill_rate: tokens added per second (a float, so fractional rates
-      like 0.5 tokens/sec are allowed). Refill is computed continuously
-      from elapsed wall-clock time, not on a fixed tick.
-    - Empty bucket: allow_request() returns False and consumes nothing;
-      the caller is expected to retry later rather than block.
-    - Concurrent access: a single threading.Lock guards every read and
-      write of the token count and the last-refill timestamp, so two
-      threads can never both be granted the bucket's last token -- each
-      call to allow_request() refills-then-checks-then-consumes as one
-      atomic critical section.
-    - Clock source: time.monotonic(), because it is guaranteed never to go
-      backwards (unlike time.time(), which can jump on a system clock
-      adjustment) -- correctness here depends on elapsed time always being
-      non-negative.
+    Edge cases handled:
+      - Empty batches -> raises ValueError (nothing meaningful to retry).
+      - max_retries == 0 -> no attempt is made, returns -1 immediately.
+      - batches[0] already clean -> returns 0 on the very first attempt.
     """
+    if not batches:
+        raise ValueError("batches must not be empty")
 
-    def __init__(self, capacity: int, refill_rate: float) -> None:
-        self._capacity = capacity
-        self._refill_rate = refill_rate
-        self._tokens = float(capacity)
-        self._last_refill = time.monotonic()
-        self._lock = threading.Lock()
+    attempt = 0
+    while attempt < max_retries:
+        index = attempt % len(batches)
+        batch = batches[index]
+        if any(entry[1] in bad_levels for entry in batch):
+            attempt += 1
+            continue
+        break
+    else:
+        return -1
+    return index
 
-    def allow_request(self) -> bool:
-        """Consume one token and return True, or return False if none available."""
-        with self._lock:
-            self._refill_locked()
-            if self._tokens >= 1.0:
-                self._tokens -= 1.0
-                return True
-            return False
 
-    def _refill_locked(self) -> None:
-        # Caller must already hold self._lock.
-        now = time.monotonic()
-        elapsed = now - self._last_refill
-        if elapsed <= 0:
-            return
-        self._tokens = min(self._capacity, self._tokens + elapsed * self._refill_rate)
-        self._last_refill = now
+def group_consecutive_runs(levels: list) -> list:
+    if not levels:
+        return []
+    runs = [[levels[0]]]
+    for i in range(1, len(levels)):
+        if levels[i] == levels[i - 1]:
+            runs[-1].append(levels[i])
+        else:
+            runs.append([levels[i]])
+    return runs
 
-    def __repr__(self) -> str:
-        with self._lock:
-            self._refill_locked()
-            return (
-                f"RateLimiter(capacity={self._capacity}, "
-                f"refill_rate={self._refill_rate}, tokens={self._tokens:.2f})"
-            )
+
+def status_label(count: int) -> str:
+    return "empty" if count == 0 else "ok" if count < 5 else "busy"
+
+
+def interleave_first_n(batches: list, limit: int) -> list:
+    return list(itertools.islice(itertools.chain.from_iterable(batches), limit))

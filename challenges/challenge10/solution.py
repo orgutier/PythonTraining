@@ -1,41 +1,48 @@
 """
-Challenge 10 - Underground System API
-Interview-style challenge (LeetCode #1396, adapted to FastAPI). Correctness
-is pytest-tested (see tests/test_challenge10.py / `python tools/cli.py
-test challenge10`); see README.md in this folder for the full problem
-statement (POST /checkin, POST /checkout, GET /average/{start}/{end})
-and the constraints your solution must follow (Pydantic request models,
-proper 4xx on invalid checkout/average requests, and a documented list
-of edge cases).
+Challenge 10 - Log Text Utilities with a Custom Context Manager
+Interview-style challenge. Correctness is pytest-tested (see
+tests/test_challenge10.py / `python tools/cli.py test challenge10`); see
+README.md in this folder for the full problem statement and the constraints
+your solution must follow (both forms of a custom context manager (a class and @contextlib.contextmanager), plus re.findall()/re.sub()/re.search()).
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module, matching the convention used by
 exercises/weekNN/solution.py.
 """
-from fastapi import FastAPI
-from pydantic import BaseModel
-
-app = FastAPI()
 
 
-class CheckInRequest(BaseModel):
-    """Fill in: the incoming {"id", "station_name", "t"} check-in body."""
+import re
+import contextlib
 
 
-class CheckOutRequest(BaseModel):
-    """Fill in: the incoming {"id", "station_name", "t"} check-out body."""
+class SuppressAndCount:
+    def __init__(self, *exc_types):
+        self.exc_types = exc_types
+
+    def __enter__(self):
+        raise NotImplementedError
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Suppress + count a matching exception (issubclass check); else return False."""
+        raise NotImplementedError
 
 
-@app.post("/checkin")
-def checkin(request: CheckInRequest) -> dict:
+@contextlib.contextmanager
+def suppress_and_count(*exc_types):
+    """yield a {"count": 0} dict; catch a matching exception around the yield, incrementing it, without re-raising."""
     raise NotImplementedError
 
 
-@app.post("/checkout")
-def checkout(request: CheckOutRequest) -> dict:
+def extract_error_messages(text: str) -> list:
+    """Every message following "ERROR " on its own line, via re.findall()."""
     raise NotImplementedError
 
 
-@app.get("/average/{start_station}/{end_station}")
-def average(start_station: str, end_station: str) -> dict:
+def redact_ips(text: str) -> str:
+    """Every IPv4-shaped address replaced with "[REDACTED]", via re.sub()."""
+    raise NotImplementedError
+
+
+def contains_stack_trace(text: str) -> bool:
+    """True if "Traceback (most recent call last):" appears anywhere, via re.search()."""
     raise NotImplementedError

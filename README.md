@@ -31,10 +31,10 @@ PythonTraining/
 │                          file per challenge). Kept separate from
 │                          exercises/ and challenges/ so trainees can't
 │                          edit the tests themselves.
-├── challenges/            10 interview-style coding challenges (two per
-│   └── challengeNN/        assigned week), separate from the graded
-│       ├── README.md        weekly exercises but tested the same way.
-│       └── solution.py      See challenges/README.md for what these are.
+├── challenges/            26 interview-style coding challenges (two per
+│   └── challengeNN/        week, Weeks 1-13), each an integration problem
+│       ├── README.md        pulling in many of that week's topics at
+│       └── solution.py      once. See challenges/README.md for details.
 ├── tools/                 The test runner (see below).
 │   ├── core.py             Shared logic
 │   ├── cli.py              Command-line interface
@@ -96,7 +96,7 @@ point of the GUI. Both tools call the same underlying test-running code
 
 **CLI** (from the repo root):
 ```bash
-python tools/cli.py list                    # see all 14 weeks, their exercises, + 10 challenges
+python tools/cli.py list                    # see all 14 weeks, their exercises, + 26 challenges
 python tools/cli.py test week01             # run every exercise in one week
 python tools/cli.py test week01_exercise03  # run just that one exercise
 python tools/cli.py test challenge01        # run one interview challenge
@@ -221,9 +221,9 @@ executed output underneath, not a hand-typed guess. This content lives in
 to match each schedule row's `guideKey`. The single-example code blocks in
 the regular glossary drawer are syntax-highlighted the same way.
 
-Five of the topics (Data Structures, OOP I, Pandas, Requests + Threading,
-and FastAPI) also show two **Interview Challenge** callouts each -- pointers
-to the interview-style problems in `challenges/`, described below.
+Every one of the first 13 topics also shows two **Interview Challenge**
+callouts each -- pointers to the interview-style problems in `challenges/`,
+described below.
 
 There's also a 15th topic, "Appendix: The Tooling Itself", covering
 argparse, subprocess, tkinter, ANSI terminal colors, virtual
@@ -236,9 +236,9 @@ Open `presentation/index.html` directly in any browser.
 
 ## Interview Challenges
 
-`challenges/` holds 10 standalone, interview-style coding problems (two
-per assigned week) -- separate from the graded weekly exercises in
-`exercises/`, but tested the same way:
+`challenges/` holds 26 standalone, interview-style coding problems -- two
+for every week that has its own topic list (Weeks 1-13) -- separate from
+the graded weekly exercises in `exercises/`, but tested the same way:
 
 ```bash
 python tools/cli.py test challenge01       # run one challenge's tests
@@ -247,32 +247,102 @@ python tools/cli.py test --all             # runs every week's AND every challen
 
 Each one is the kind of problem an engineer actually gets asked to write
 live in a technical interview: more code than a weekly exercise, and a
-real specification instead of one function signature. Half of them are
-straight from LeetCode (cited by number below); the rest are original,
-realistic tasks in the same spirit. `tests/test_challengeNN.py` grades
-correctness and the documented edge cases automatically, same as a
-week's exercise -- but each challenge's `README.md` also imposes explicit
-constraints on *how* to write the solution (a required technique, a
-forbidden shortcut, or a mandated interface), which pytest can't check.
-Grade those by reading the code.
+real specification instead of one function signature. Unlike the weekly
+exercises -- which each drill one technique in isolation -- every
+challenge is deliberately built to pull in *as many* of its week's
+keywords, dunders, modules, methods, and concepts as it can, so it's an
+integration problem, not a single-topic snippet; expect each one to take
+real, focused time. A handful are straight from LeetCode (cited by number
+below); the rest are original, realistic tasks in the same spirit.
+`tests/test_challengeNN.py` grades correctness and the documented edge
+cases automatically, same as a week's exercise -- but each challenge's
+`README.md` also imposes explicit constraints on *how* to write the
+solution (a required technique, a forbidden shortcut, or a mandated
+interface), which pytest can't check. Grade those by reading the code.
 
 | Challenge | Title | LeetCode | Do it after |
 |---|---|---|---|
-| `challenge01` | Group Anagrams | #49 | Week 04 -- Data Structures |
-| `challenge06` | Longest Consecutive Sequence | #128 | Week 04 -- Data Structures |
-| `challenge02` | LRU Cache | #146 | Week 06 -- OOP I |
-| `challenge07` | Min Stack | #155 | Week 06 -- OOP I |
-| `challenge03` | Sales Data Analyzer | -- | Week 10 -- Pandas |
-| `challenge08` | Two Sum, Pandas-Style | #1 | Week 10 -- Pandas |
-| `challenge04` | Rate Limiter (Token Bucket) | -- | Week 12 -- Requests + Threading |
-| `challenge09` | Bounded Blocking Queue | #1188 | Week 12 -- Requests + Threading |
-| `challenge05` | URL Shortener API | -- | Week 13 -- FastAPI |
-| `challenge10` | Underground System API | #1396 | Week 13 -- FastAPI |
+| `challenge01` | Typed Config Loader | -- | Week 01 -- Python Fundamentals |
+| `challenge02` | Identity, Equality, and a Login Prompt | -- | Week 01 -- Python Fundamentals |
+| `challenge03` | Log Stream Parser and Scanner | -- | Week 02 -- Control Flow |
+| `challenge04` | Batch Retry Simulator | -- | Week 02 -- Control Flow |
+| `challenge05` | Pluggable Event Pipeline | -- | Week 03 -- Functions |
+| `challenge06` | Streaming Metrics Aggregator | -- | Week 03 -- Functions |
+| `challenge07` | Anagram Groups with Records | #49 | Week 04 -- Data Structures |
+| `challenge08` | Longest Consecutive Run of Records | #128 | Week 04 -- Data Structures |
+| `challenge09` | Log File Parser with a Custom Exception Chain | -- | Week 05 -- Files, Exceptions, Regex |
+| `challenge10` | Log Text Utilities with a Custom Context Manager | -- | Week 05 -- Files, Exceptions, Regex |
+| `challenge11` | LRU Cache with a Descriptor and Class-Level Stats | #146 | Week 06 -- OOP I |
+| `challenge12` | Min Stack with Class-Level Push Stats | #155 | Week 06 -- OOP I |
+| `challenge13` | Notification System with Mixins and ABCs | -- | Week 07 -- OOP II |
+| `challenge14` | Shape Library with Protocols and Composition | -- | Week 07 -- OOP II |
+| `challenge15` | Matrix: A Rich Numeric Type | -- | Week 08 -- The Python Data Model |
+| `challenge16` | Transaction Ledger: Callable and Context Manager | -- | Week 08 -- The Python Data Model |
+| `challenge17` | Directory Report Builder | -- | Week 09 -- OS, JSON, Datetime, XML |
+| `challenge18` | XML Feed to Timezone-Aware Digest | -- | Week 09 -- OS, JSON, Datetime, XML |
+| `challenge19` | Sales Data Analyzer | -- | Week 10 -- Pandas |
+| `challenge20` | Two Sum, Pandas-Style, with Joins and Diagnostics | #1 | Week 10 -- Pandas |
+| `challenge21` | Document Scanner Preprocessing Pipeline | -- | Week 11 -- OpenCV |
+| `challenge22` | Face-Region Redactor | -- | Week 11 -- OpenCV |
+| `challenge23` | Rate-Limited HTTP Client | -- | Week 12 -- Requests + Threading |
+| `challenge24` | Bounded Job Queue with Retry and ThreadPoolExecutor | -- | Week 12 -- Requests + Threading |
+| `challenge25` | URL Shortener API with Dependency-Injected Auth | -- | Week 13 -- FastAPI |
+| `challenge26` | Underground System API with Live Diagnostics | #1396 | Week 13 -- FastAPI |
 
 See `challenges/README.md` for the full picture, and each
 `challenges/challengeNN/README.md` for that problem's statement and
 constraints. Worked answers are in `reference_solutions/challenges/`,
 verified against the same tests before being committed.
+
+## Progress Reports
+
+Each student works on their own branch, named `<group>/<user_id>` --
+e.g. `group1/orgutier` (`group1` here is just whatever label you use to
+tell one cohort/section apart from another; `orgutier` is the student's
+own identifier, typically their GitHub username). `tools/report.py`
+fetches every branch matching that shape, grades each one, and writes
+the results into a single `report.xlsx` you can hand to shareholders:
+
+```bash
+python tools/report.py                                        # fetch + grade every group/user_id branch on origin
+python tools/report.py --pattern "cohort2025-*/*"              # only that cohort's branches
+python tools/report.py --output cohort2025.xlsx --workers 8    # faster, custom filename
+python tools/report.py --local                                 # grade branches you already have locally, skip fetching
+```
+
+The output workbook has three sheets:
+
+- **Summary** -- one row per student (Group, User, Branch, exercises
+  solved/total/%, challenges solved/total/%, Status), color-scaled so the
+  weakest and strongest students stand out at a glance.
+- **Exercises** -- one row per student, one column per exercise, grouped
+  under a merged "Week NN" header, with a class-wide "Solved by" count
+  along the bottom of each column.
+- **Challenges** -- the same shape, for the (optional, not-must-do)
+  interview challenges, kept on its own sheet so it never gets averaged
+  into the required exercise total.
+
+For each matching branch, the script checks it out into a throwaway `git
+worktree` (your own working copy is never touched), overlays **this
+checkout's own `tests/` and `conftest.py`** on top of the student's
+`exercises/`/`challenges/` trees, and runs every exercise's and
+challenge's own test file against it -- a student's branch is graded by
+the current, canonical test suite, never by whatever copy of `tests/`
+happens to be sitting in their own branch (they're not supposed to edit
+it, but this makes sure a stale or modified copy can't skew their grade
+either way). A branch that predates some exercise/challenge (e.g. it was
+created before Week 14 existed) simply doesn't have that folder yet, so
+it's counted as not solved -- this reports what currently passes, not
+intent or timing.
+
+By default it excludes `main`, `master`, `HEAD`, and a few common
+non-student prefixes (`claude/*`, `dependabot/*`, `renovate/*`,
+`gh-pages`) so it's safe to run with no arguments even against this
+template repo's own branches; scope `--pattern` to your actual group
+keyword(s) for a large, busy repo. Grading ~100 exercises/challenges
+takes roughly 20-30 seconds per student sequentially -- `--workers` (a
+handful of branches at a time is a reasonable default) parallelizes
+across students, each in its own worktree.
 
 ## On book references
 

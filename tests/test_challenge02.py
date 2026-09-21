@@ -1,53 +1,58 @@
-from challenges.challenge02.solution import LRUCache
+from challenges.challenge02.solution import (
+    classify_pairs,
+    dedupe_by_identity,
+    dedupe_by_equality,
+    prompt_login,
+)
 
 
-def test_basic_get_and_put():
-    cache = LRUCache(2)
-    cache.put("a", 1)
-    cache.put("b", 2)
-    assert cache.get("a") == 1
-    assert cache.get("b") == 2
+def test_classify_pairs_basic():
+    a = [1, 2]
+    b = [1, 2]
+    c = a
+    result = classify_pairs([a, b, c])
+    assert result == {"same_object": 1, "equal_but_different": 2, "different": 0}
 
 
-def test_get_on_missing_key_returns_negative_one():
-    cache = LRUCache(2)
-    assert cache.get("missing") == -1
+def test_classify_pairs_empty_and_single():
+    assert classify_pairs([]) == {"same_object": 0, "equal_but_different": 0, "different": 0}
+    assert classify_pairs([1]) == {"same_object": 0, "equal_but_different": 0, "different": 0}
 
 
-def test_eviction_of_least_recently_used():
-    cache = LRUCache(2)
-    cache.put("a", 1)
-    cache.put("b", 2)
-    cache.get("a")          # "a" is now most-recently-used
-    cache.put("c", 3)       # over capacity -> evicts "b" (least recently used)
-    assert cache.get("b") == -1
-    assert cache.get("a") == 1
-    assert cache.get("c") == 3
+def test_classify_pairs_all_different():
+    result = classify_pairs([1, 2, 3])
+    assert result == {"same_object": 0, "equal_but_different": 0, "different": 3}
 
 
-def test_put_on_existing_key_updates_value_without_extra_eviction():
-    cache = LRUCache(2)
-    cache.put("a", 1)
-    cache.put("b", 2)
-    cache.put("a", 100)     # update, not a new entry
-    assert cache.get("a") == 100
-    assert cache.get("b") == 2  # still present -- capacity wasn't exceeded
+def test_dedupe_by_identity_keeps_equal_but_distinct_objects():
+    a = [1, 2]
+    b = [1, 2]
+    c = a
+    result = dedupe_by_identity([a, b, c])
+    assert len(result) == 2
+    assert result[0] is a
+    assert result[1] is b
 
 
-def test_zero_capacity_stores_nothing():
-    cache = LRUCache(0)
-    cache.put("a", 1)
-    assert cache.get("a") == -1
+def test_dedupe_by_equality_keeps_only_first_equal_value():
+    a = [1, 2]
+    b = [1, 2]
+    c = a
+    result = dedupe_by_equality([a, b, c])
+    assert result == [[1, 2]]
+    assert len(result) == 1
 
 
-def test_eviction_order_with_three_keys():
-    cache = LRUCache(3)
-    cache.put("a", 1)
-    cache.put("b", 2)
-    cache.put("c", 3)
-    cache.get("a")           # order (MRU->LRU): a, c, b
-    cache.put("d", 4)        # evicts "b"
-    assert cache.get("b") == -1
-    assert cache.get("a") == 1
-    assert cache.get("c") == 3
-    assert cache.get("d") == 4
+def test_prompt_login_uses_input_when_username_is_none(monkeypatch, capsys):
+    answers = iter(["ada", "secret"])
+    monkeypatch.setattr("builtins.input", lambda prompt="": next(answers))
+    result = prompt_login()
+    assert result == "ada"
+    assert "Welcome, ada!" in capsys.readouterr().out
+
+
+def test_prompt_login_empty_string_is_not_treated_as_missing(monkeypatch, capsys):
+    monkeypatch.setattr("builtins.input", lambda prompt="": "unused-password")
+    result = prompt_login("")
+    assert result == ""
+    assert "Welcome, !" in capsys.readouterr().out

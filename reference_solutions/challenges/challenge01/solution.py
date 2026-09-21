@@ -1,36 +1,65 @@
-# Time: O(n * k log k), Space: O(n * k)
-# n = number of words, k = length of the longest word.
-# Sorting each word's letters dominates the per-word cost; every word and
-# its signature are stored once, which sets the space bound.
-def group_anagrams(words: list[str]) -> list[list[str]]:
+def _is_int_literal(s: str) -> bool:
+    if s.startswith("-"):
+        s = s[1:]
+    return len(s) > 0 and s.isdigit()
+
+
+def _is_float_literal(s: str) -> bool:
+    if s.startswith("-"):
+        s = s[1:]
+    parts = s.split(".")
+    if len(parts) != 2:
+        return False
+    left, right = parts
+    return left != "" and right != "" and left.isdigit() and right.isdigit()
+
+
+def parse_config_line(line: str) -> tuple[str, object]:
     """
-    Group every string in `words` with the other strings that are anagrams
-    of it. Return the groups as a list of lists; neither the order of the
-    groups nor the order of words within a group is guaranteed.
+    Parse "KEY=value" into (key, typed_value).
 
     Edge cases handled:
-      - Empty input list -> returns [].
-      - Empty string "" -> its signature is "" (sorting an empty string
-        yields an empty string), so every "" in the input lands in its own
-        group together.
-      - Single-character words -> their signature is just that character;
-        grouped correctly with other identical single-character words.
-      - Duplicate words (e.g. ["eat", "eat"]) -> both land in the same
-        group, since they share a signature.
-      - Case sensitivity: comparison is case-SENSITIVE by design ("Eat" and
-        "eat" are treated as different words, matching how the words would
-        actually differ in most real-world text). Callers who want
-        case-insensitive grouping should lowercase their input first.
+      - No "=" at all -> raises ValueError.
+      - Empty value (after stripping) -> None.
+      - "true"/"false" in any letter case -> bool (checked before int/float,
+        since "true" would otherwise fall through to the str case).
+      - A value containing "=" (e.g. a URL with a query string) -> kept
+        intact, since we split on the FIRST "=" only.
+      - Surrounding whitespace on the key and/or value -> stripped from both.
     """
-    if not words:
-        return []
+    if "=" not in line:
+        raise ValueError(f"not a KEY=value line: {line!r}")
 
-    signatures = ["".join(sorted(word)) for word in words]
+    raw_key, raw_value = line.split("=", 1)
+    key = raw_key.strip()
+    value_str = raw_value.strip()
 
-    groups: dict[str, list[str]] = {}
-    for word, signature in zip(words, signatures):
-        if signature not in groups:
-            groups[signature] = []
-        groups[signature].append(word)
+    if value_str == "":
+        return key, None
+    if value_str.lower() in ("true", "false"):
+        return key, value_str.lower() == "true"
+    if _is_int_literal(value_str):
+        return key, int(value_str)
+    if _is_float_literal(value_str):
+        return key, float(value_str)
+    return key, value_str
 
-    return list(groups.values())
+
+def load_config(lines: list[str]) -> dict[str, object]:
+    config: dict[str, object] = {}
+    for line in lines:
+        if line.strip() == "":
+            continue
+        key, value = parse_config_line(line)
+        config[key] = value
+    return config
+
+
+def describe_types(config: dict) -> dict[str, str]:
+    return {key: type(value).__name__ for key, value in config.items()}
+
+
+def merge_configs(base: dict, override: dict) -> dict:
+    merged = dict(base)
+    merged.update(override)
+    return merged

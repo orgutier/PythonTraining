@@ -1,51 +1,69 @@
-# Challenge 10 — Underground System API
+# Challenge 10 — Log Text Utilities with a Custom Context Manager
 
-**Do this after:** Week 13 (FastAPI)
+**Do this after:** Week 05 (Files, Exceptions, Regex)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge10` (or `pytest tests/test_challenge10.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
-LeetCode #1396 ("Design Underground System") asks you to track riders
-checking in and out of a metro system and report average travel times
-between stations. This challenge asks for the same system, but exposed
-as a small FastAPI service instead of a plain class.
+A companion to Challenge 09: text-processing helpers over raw log
+content, plus the same "suppress and count matching exceptions" utility
+built **two different ways** -- as a class (`__enter__`/`__exit__`) and as
+a `@contextlib.contextmanager` generator -- so you see both sides of how a
+context manager actually works.
 
-## Required endpoints
+Implement:
 
-| Method & path | Behavior |
-|---|---|
-| `POST /checkin` | Body: `{"id": 1, "station_name": "Leyton", "t": 3}`. Records that rider `id` checked in at `station_name` at time `t`. |
-| `POST /checkout` | Body: `{"id": 1, "station_name": "Paradise", "t": 8}`. Records that rider `id` (who must have an open check-in) checked out, completing a trip of duration `t - checkin_t` from their check-in station to this one. |
-| `GET /average/{start_station}/{end_station}` | Returns `{"start_station": ..., "end_station": ..., "average_time": ...}` -- the average travel time across every completed trip from `start_station` to `end_station`. |
+```python
+class SuppressAndCount:
+    """A class-based context manager: __init__(self, *exc_types) stores them; __enter__ returns self (self.count = 0); __exit__ suppresses (returns True) and increments self.count for a matching exception, else returns False."""
 
-Storage is **in-memory only** -- plain Python dicts at module scope, same
-as Challenge 05's URL shortener. No database, no file persistence.
+def suppress_and_count(*exc_types):
+    """The @contextlib.contextmanager equivalent: yields a {"count": 0} dict, incrementing it (and suppressing) on a matching exception."""
+
+def extract_error_messages(text: str) -> list:
+    """Every message that follows "ERROR " on its own line, across the whole text."""
+
+def redact_ips(text: str) -> str:
+    """Every IPv4-shaped address in text replaced with "[REDACTED]"."""
+
+def contains_stack_trace(text: str) -> bool:
+    """True if text contains the literal line "Traceback (most recent call last):" anywhere."""
+```
+
+```python
+with SuppressAndCount(ValueError) as counter:
+    raise ValueError("bad input")
+counter.count   # -> 1
+
+with suppress_and_count(ValueError) as state:
+    raise ValueError("bad input")
+state["count"]  # -> 1
+
+extract_error_messages("09:00 INFO ok\n09:05 ERROR disk full\n09:06 ERROR timeout")
+# -> ["disk full", "timeout"]
+redact_ips("connection from 10.0.0.5 refused")
+# -> "connection from [REDACTED] refused"
+```
 
 ## Constraints on HOW you write it
 
-1. **Request and response bodies must be Pydantic `BaseModel` classes**,
-   not raw dicts passed straight through -- define `CheckInRequest` and
-   `CheckOutRequest` models (per Week 13's lesson on typed validation).
-2. **`/checkout` for a rider with no open check-in must return a proper
-   4xx error**, not a 500 or a silently-wrong result -- validate that the
-   rider actually has a pending check-in before completing a trip.
-3. **The same rider ID must be reusable for a new trip after they check
-   out** -- checking in again after a completed checkout should work
-   normally, not be rejected as "already checked in."
-4. **`GET /average/...` for a station pair with zero completed trips
-   must return a proper 4xx error**, not a division-by-zero crash or a
-   fabricated `0`.
-5. **A docstring (module-level or per-function) with a comprehensive
-   list of the edge cases your implementation handles:** checkout
-   without checkin, checkin without a matching checkout yet (no trip
-   recorded until checkout happens), multiple completed trips between
-   the same two stations (correctly averaged), and an average request
-   for a route no one has ever traveled.
-
-## Check your work
-
-`python tools/cli.py test challenge10` runs `tests/test_challenge10.py`,
-which uses FastAPI's `TestClient` (Week 13) to check in and out several
-riders across multiple trips, verifies the averages, and confirms the
-checkout-without-checkin and no-data-for-route cases both come back as
-proper error responses instead of crashing the server.
+1. **`SuppressAndCount.__exit__` must check `issubclass(exc_type,
+   self.exc_types)`** (where `self.exc_types` is the tuple passed to
+   `__init__`) before suppressing -- an exception type that wasn't asked
+   for must propagate normally (`__exit__` returns `False` for it).
+2. **`suppress_and_count` must be a generator** decorated with
+   `@contextlib.contextmanager`, catching a matching exception in a
+   `try`/`except` **around its `yield`** and *not* re-raising it (that's
+   what makes `contextlib.contextmanager` suppress an exception -- catch
+   it and let the generator function return normally instead of letting
+   the exception propagate back out of it).
+3. **`extract_error_messages` must use `re.findall()`** with a capture
+   group for the message, applied across the whole multi-line `text` in
+   one call (pass `re.MULTILINE` if your pattern needs `^`/`$` to work
+   per-line) -- not a manual `for line in text.splitlines()` loop with
+   `re.match` per line.
+4. **`redact_ips` must use `re.sub()`** with a pattern matching four
+   dot-separated groups of 1-3 digits.
+5. **`contains_stack_trace` must use `re.search()`**, not `"..." in
+   text` -- the point here is specifically practicing `re.search` for a
+   fixed substring, even though a plain `in` check would also work.

@@ -1,87 +1,56 @@
-import threading
-import time
-
-from challenges.challenge09.solution import BoundedBlockingQueue
-
-
-def test_enqueue_then_dequeue_basic():
-    q = BoundedBlockingQueue(capacity=2)
-    q.enqueue(1)
-    q.enqueue(2)
-    assert q.size() == 2
-    assert q.dequeue() == 1
-    assert q.dequeue() == 2
-    assert q.size() == 0
+import pytest
+from challenges.challenge09.solution import (
+    LogParseError,
+    MalformedLineError,
+    parse_line,
+    parse_log_file,
+    scan_directory,
+)
 
 
-def test_enqueue_blocks_when_full_then_unblocks():
-    q = BoundedBlockingQueue(capacity=1)
-    q.enqueue("a")
-
-    unblocked = threading.Event()
-
-    def producer():
-        q.enqueue("b")  # should block until "a" is dequeued
-        unblocked.set()
-
-    t = threading.Thread(target=producer, daemon=True)
-    t.start()
-    time.sleep(0.2)
-    assert not unblocked.is_set(), "enqueue() did not block on a full queue"
-
-    assert q.dequeue() == "a"
-    t.join(timeout=2)
-    assert unblocked.is_set(), "enqueue() never unblocked after room freed up"
-    assert q.dequeue() == "b"
+def test_parse_line_basic():
+    result = parse_line("09:05 ERROR disk full", 3)
+    assert result == {"time": "09:05", "level": "ERROR", "message": "disk full", "line_number": 3}
 
 
-def test_dequeue_blocks_when_empty_then_unblocks():
-    q = BoundedBlockingQueue(capacity=1)
-    result = {}
-
-    def consumer():
-        result["value"] = q.dequeue()  # should block until something is enqueued
-
-    t = threading.Thread(target=consumer, daemon=True)
-    t.start()
-    time.sleep(0.2)
-    assert "value" not in result, "dequeue() did not block on an empty queue"
-
-    q.enqueue(42)
-    t.join(timeout=2)
-    assert result.get("value") == 42
+def test_parse_line_malformed_raises():
+    with pytest.raises(MalformedLineError):
+        parse_line("not a log line", 1)
 
 
-def test_multiple_producers_and_consumers_never_lose_or_duplicate_items():
-    q = BoundedBlockingQueue(capacity=3)
-    total_items = 40
-    produced = list(range(total_items))
-    consumed = []
-    consumed_lock = threading.Lock()
+def test_malformed_line_error_is_a_log_parse_error():
+    assert issubclass(MalformedLineError, LogParseError)
 
-    def produce(items):
-        for item in items:
-            q.enqueue(item)
 
-    def consume(count):
-        for _ in range(count):
-            value = q.dequeue()
-            with consumed_lock:
-                consumed.append(value)
+def test_parse_log_file_basic(tmp_path):
+    path = tmp_path / "app.log"
+    path.write_text("09:00 INFO boot\n\n09:05 ERROR disk full\n")
+    entries = parse_log_file(str(path))
+    assert len(entries) == 2
+    assert entries[0]["line_number"] == 1
+    assert entries[1]["level"] == "ERROR"
 
-    chunks = [produced[0:10], produced[10:20], produced[20:30], produced[30:40]]
-    producers = [threading.Thread(target=produce, args=(chunk,)) for chunk in chunks]
-    consumers = [threading.Thread(target=consume, args=(10,)) for _ in range(4)]
 
-    for c in consumers:
-        c.start()
-    for p in producers:
-        p.start()
+def test_parse_log_file_empty(tmp_path):
+    path = tmp_path / "empty.log"
+    path.write_text("")
+    assert parse_log_file(str(path)) == []
 
-    for p in producers:
-        p.join(timeout=5)
-    for c in consumers:
-        c.join(timeout=5)
 
-    assert sorted(consumed) == produced
-    assert q.size() == 0
+def test_parse_log_file_chains_malformed_line_error(tmp_path):
+    path = tmp_path / "bad.log"
+    path.write_text("garbage line\n")
+    with pytest.raises(LogParseError) as exc_info:
+        parse_log_file(str(path))
+    assert isinstance(exc_info.value.__cause__, MalformedLineError)
+
+
+def test_scan_directory_skips_failed_files(tmp_path):
+    good = tmp_path / "good.log"
+    good.write_text("09:00 INFO boot\n")
+    bad = tmp_path / "bad.log"
+    bad.write_text("garbage\n")
+
+    entries, failed = scan_directory([str(good), str(bad)])
+    assert len(entries) == 1
+    assert failed == 1

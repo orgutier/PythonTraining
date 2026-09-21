@@ -9,7 +9,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WEEKS = [f"week{n:02d}" for n in range(1, 15)]
-CHALLENGES = [f"challenge{n:02d}" for n in range(1, 11)]
+CHALLENGES = [f"challenge{n:02d}" for n in range(1, 27)]
 
 
 def _discover_exercises() -> list:

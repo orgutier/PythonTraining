@@ -1,36 +1,41 @@
-# Time: O(n), Space: O(n)
-# Every number is visited a constant number of times: once when added to
-# the set, and once more only if it turns out to be the start of a run
-# (x - 1 not in the set) -- the inner while loop across all outer
-# iterations combined only ever advances through each number once.
-def longest_consecutive(nums: list[int]) -> int:
+import functools
+
+
+def stream_batches(data: list, size: int, /):
     """
-    Return the length of the longest run of consecutive integers present
-    anywhere in nums (order in the list doesn't matter).
+    Yield successive chunks of data, each up to size items long.
 
     Edge cases handled:
-      - Empty list -> returns 0.
-      - Duplicate values (e.g. [1, 1, 2]) -> the set collapses duplicates,
-        so they don't inflate the run length.
-      - Single-element list -> returns 1.
-      - Negative numbers -> work the same as positive ones; consecutive
-        just means each next value is exactly +1.
-      - An already-contiguous list -> still detected correctly since only
-        the true start of the run (no x-1 present) kicks off counting.
+      - len(data) not a multiple of size -> the final chunk is shorter
+        than size (whatever remains).
+      - Empty data -> the generator yields nothing at all.
     """
-    num_set = set(nums)
-    longest = 0
+    for i in range(0, len(data), size):
+        yield data[i:i + size]
 
-    for x in num_set:
-        if x - 1 in num_set:
-            continue  # not the start of a run, skip it
 
-        length = 1
-        current = x
-        while current + 1 in num_set:
-            current += 1
-            length += 1
+_total_processed = 0
 
-        longest = max(longest, length)
 
-    return longest
+def process_batch(batch: list, /, *, transform=lambda x: x) -> list:
+    global _total_processed
+    result = [transform(item) for item in batch]
+    _total_processed += len(batch)
+    return result
+
+
+def get_total_processed() -> int:
+    return _total_processed
+
+
+def reset_total_processed() -> None:
+    global _total_processed
+    _total_processed = 0
+
+
+def _scale(factor, value):
+    return value * factor
+
+
+def make_scaled_transform(factor: int):
+    return functools.partial(_scale, factor)

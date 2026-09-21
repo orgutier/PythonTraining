@@ -1,58 +1,57 @@
-import pandas as pd
-
 from challenges.challenge03.solution import (
-    monthly_revenue,
-    revenue_drop_alerts,
-    top_customers,
+    parse_log_stream,
+    first_critical_index,
+    label_entries,
+    pair_with_severity,
+    is_healthy,
 )
 
 
-def _orders() -> pd.DataFrame:
-    return pd.DataFrame(
-        [
-            {"order_id": "1", "customer": "Alice", "month": "2024-01", "amount": 100.0},
-            {"order_id": "2", "customer": "Bob", "month": "2024-01", "amount": 50.0},
-            {"order_id": "3", "customer": "Alice", "month": "2024-02", "amount": 200.0},
-            {"order_id": "4", "customer": "Carol", "month": "2024-02", "amount": 30.0},
-            {"order_id": "5", "customer": "Alice", "month": "2024-03", "amount": 20.0},
-            {"order_id": "6", "customer": "Bob", "month": "2024-03", "amount": 10.0},
-        ]
-    )
+def _sample_entries():
+    return parse_log_stream([
+        "09:00 INFO boot sequence started",
+        "",
+        "09:05 ERROR disk full",
+        "09:06 INFO retrying",
+    ])
 
 
-def test_monthly_revenue_sums_and_sorts_chronologically():
-    result = monthly_revenue(_orders())
-    assert result.to_dict() == {"2024-01": 150.0, "2024-02": 230.0, "2024-03": 30.0}
+def test_parse_log_stream_skips_blanks_and_keeps_message_spaces():
+    entries = _sample_entries()
+    assert entries == [
+        ("09:00", "INFO", "boot sequence started"),
+        ("09:05", "ERROR", "disk full"),
+        ("09:06", "INFO", "retrying"),
+    ]
 
 
-def test_top_customers_ranks_by_total_revenue():
-    result = top_customers(_orders(), n=2)
-    assert list(result["customer"]) == ["Alice", "Bob"]
-    assert list(result["amount"]) == [320.0, 60.0]
+def test_first_critical_index_found():
+    assert first_critical_index(_sample_entries()) == 1
 
 
-def test_top_customers_respects_n():
-    result = top_customers(_orders(), n=1)
-    assert len(result) == 1
-    assert result.iloc[0]["customer"] == "Alice"
+def test_first_critical_index_not_found():
+    entries = parse_log_stream(["09:00 INFO ok", "09:01 INFO still ok"])
+    assert first_critical_index(entries) == -1
 
 
-def test_revenue_drop_alerts_detects_a_big_drop():
-    assert revenue_drop_alerts(_orders()) == ["2024-03"]
+def test_label_entries():
+    entries = _sample_entries()
+    assert label_entries(entries)[1] == "1: ERROR - disk full"
 
 
-def test_revenue_drop_alerts_ignores_small_drops():
-    orders = pd.DataFrame(
-        [
-            {"order_id": "1", "customer": "Alice", "month": "2024-01", "amount": 100.0},
-            {"order_id": "2", "customer": "Alice", "month": "2024-02", "amount": 90.0},
-        ]
-    )
-    assert revenue_drop_alerts(orders) == []
+def test_pair_with_severity():
+    entries = _sample_entries()
+    result = pair_with_severity(entries, [1, 5, 1])
+    assert result[1] == (("09:05", "ERROR", "disk full"), 5)
 
 
-def test_revenue_drop_alerts_first_month_never_flagged():
-    orders = pd.DataFrame(
-        [{"order_id": "1", "customer": "Alice", "month": "2024-01", "amount": 5.0}]
-    )
-    assert revenue_drop_alerts(orders) == []
+def test_is_healthy_true_without_critical():
+    assert is_healthy(_sample_entries()) is True
+
+
+def test_is_healthy_false_with_matching_level():
+    assert is_healthy(_sample_entries(), levels=("ERROR",)) is False
+
+
+def test_is_healthy_false_when_empty():
+    assert is_healthy([]) is False

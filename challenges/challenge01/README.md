@@ -1,55 +1,80 @@
-# Challenge 01 — Group Anagrams
+# Challenge 01 — Typed Config Loader
 
-**Do this after:** Week 04 (Data Structures)
+**Do this after:** Week 01 (Python Fundamentals)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge01` (or `pytest tests/test_challenge01.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
-Given a list of strings, group every string with any of its anagrams
-(strings made of exactly the same letters, in any order). Return the groups
-as a list of lists; the order of the groups, and the order of words within
-a group, does not matter.
+Config files are almost always just text -- `KEY=value` lines -- but every
+value on the right of the `=` needs to become an actual Python `int`,
+`float`, `bool`, `None`, or `str` before your program can use it. This is
+the "parse untyped input into typed data" problem every backend engineer
+hits in their first week on any real codebase, and it's a natural fit for
+everything Week 1 covers: `int`/`float`/`str`/`bool`/`None`/`True`/`False`,
+`type()`, `isinstance()`, `and`/`or`/`not`/`is`/`in`, and mutability.
+
+Implement four functions:
 
 ```python
-group_anagrams(["eat", "tea", "tan", "ate", "nat", "bat"])
-# ->  [["eat", "tea", "ate"], ["tan", "nat"], ["bat"]]   (any order)
+def parse_config_line(line: str) -> tuple[str, object]:
+    """Parse one "KEY=value" line into (key, typed_value)."""
+
+def load_config(lines: list[str]) -> dict[str, object]:
+    """Parse every non-blank line in lines via parse_config_line into a dict."""
+
+def describe_types(config: dict) -> dict[str, str]:
+    """{key: type(value).__name__ for key, value in config.items()}."""
+
+def merge_configs(base: dict, override: dict) -> dict:
+    """A NEW dict: base's entries, with override's entries taking priority."""
 ```
 
-This is a real, frequently-asked interview question (it's LeetCode #49) --
-interviewers use it to check whether you reach for the right data structure
-(a dict keyed by some canonical signature of each word) instead of an O(n^2)
-compare-every-pair-of-words approach.
+### Type inference rules for `parse_config_line`
 
-## Required signature
+Split the line on the **first** `=` only (a value may itself contain `=`,
+e.g. `URL=http://example.com?x=1`), then strip whitespace from both the key
+and the value, then classify the value **in this order**:
+
+1. Value is `""` (empty after stripping) -> `None`.
+2. Value is `"true"`/`"false"`, any letter case (`"True"`, `"FALSE"`, ...) -> `bool`.
+3. Value is an integer literal (optional leading `-`, otherwise all digits,
+   at least one digit) -> `int`.
+4. Value is a float literal (optional leading `-`, exactly one `.`, digits
+   on both sides, at least one digit on each side) -> `float`.
+5. Otherwise -> `str`, unchanged (already stripped).
 
 ```python
-def group_anagrams(words: list[str]) -> list[list[str]]:
-    ...
+parse_config_line("PORT=8080")        # -> ("PORT", 8080)
+parse_config_line("DEBUG=true")       # -> ("DEBUG", True)
+parse_config_line("RATE = 3.14 ")     # -> ("RATE", 3.14)
+parse_config_line("TIMEOUT=")         # -> ("TIMEOUT", None)
+parse_config_line("NAME=myapp")       # -> ("NAME", "myapp")
+parse_config_line("URL=http://x?y=1") # -> ("URL", "http://x?y=1")
 ```
+
+A line with no `=` at all (e.g. `"# a comment"`) should raise `ValueError`.
 
 ## Constraints on HOW you write it
 
-These are graded by reading the code, not by a test suite:
-
-1. **No `collections.Counter` and no `collections.defaultdict`.** Group the
-   words using a plain `dict` you manage yourself (`dict.setdefault` or an
-   explicit `if key not in groups:` check). The point is to prove you
-   understand dict operations directly, not that you know a shortcut exists.
-2. **The per-word signature (the dict key) must be computed with a
-   comprehension**, not a `for` loop with `.append()`. For example, turning
-   a word into its sorted-letters signature is a one-line comprehension
-   away from `"".join(...)`.
-3. **Full type hints** on the function signature (shown above) -- match it
-   exactly so the function is a drop-in replacement for the stub.
-4. **A docstring with a comprehensive, explicit list of every edge case
-   your implementation handles.** At minimum, address: an empty input list;
-   an empty string in the input; a single-character word; words that are
-   already identical (duplicates); and whether comparison is case-sensitive
-   (state your assumption -- don't leave it silently undefined).
-
-## Complexity target
-
-State the time and space complexity of your solution as a comment directly
-above the function (e.g. `# Time: O(n * k log k), Space: O(n * k)` where n
-is the number of words and k is the max word length) -- and make sure your
-actual implementation matches what you claim.
+1. **No `try`/`except` anywhere in this challenge.** Numeric detection
+   must be done by hand with string methods (`str.isdigit()`, `str.split()`,
+   `str.startswith()`) combined with `and`/`or`/`not`/`in` -- not by
+   attempting `int(value)`/`float(value)` and catching `ValueError`. The
+   point is to practice explicit validation logic, not the EAFP shortcut
+   (which is a fine idiom, just not the one this challenge is about).
+2. **`describe_types` must use `type()`, not `isinstance()`** -- you want
+   the *exact* runtime type name (`"bool"`, not `"int"`, for a boolean
+   value -- remember `bool` is a subclass of `int`, so `isinstance(True,
+   int)` is `True` even though you want `"bool"` reported here).
+3. **`load_config` and `merge_configs` must never mutate their inputs.**
+   `merge_configs(base, override)` returns a *new* dict; the caller's
+   `base` and `override` must be unchanged afterward (a test checks this
+   with `is not`, not just equality). Skip blank (post-`.strip()`-empty)
+   lines entirely in `load_config` -- they produce no entry, not a
+   `("", None)` one.
+4. **Full type hints** on every function signature, matching the ones
+   shown above exactly.
+5. **A docstring on `parse_config_line`** listing every edge case your
+   type-inference logic handles: an empty value, a boolean value in mixed
+   case, a value containing `=`, surrounding whitespace on the key and/or
+   value, and a line with no `=` at all.

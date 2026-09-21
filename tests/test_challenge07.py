@@ -1,52 +1,53 @@
-from challenges.challenge07.solution import MinStack
+from challenges.challenge07.solution import (
+    AnagramGroup,
+    build_signature,
+    group_anagrams,
+    common_words,
+    largest_groups,
+    label_groups,
+)
 
 
-def test_basic_push_pop_top_min():
-    s = MinStack()
-    s.push(-2)
-    s.push(0)
-    s.push(-3)
-    assert s.get_min() == -3
-    s.pop()
-    assert s.top() == 0
-    assert s.get_min() == -2
+def test_build_signature():
+    assert build_signature("eat") == "aet"
 
 
-def test_single_element_stack():
-    s = MinStack()
-    s.push(7)
-    assert s.top() == 7
-    assert s.get_min() == 7
+def test_group_anagrams_basic_and_sorted_by_signature():
+    groups = group_anagrams(["eat", "tea", "tan", "ate", "nat", "bat"])
+    assert [g.signature for g in groups] == sorted(g.signature for g in groups)
+    by_sig = {g.signature: set(g.words) for g in groups}
+    assert by_sig == {
+        "aet": {"eat", "tea", "ate"},
+        "ant": {"tan", "nat"},
+        "abt": {"bat"},
+    }
 
 
-def test_empty_then_refill_resets_minimum():
-    s = MinStack()
-    s.push(5)
-    s.push(1)
-    s.pop()
-    s.pop()
-    s.push(10)
-    assert s.get_min() == 10
-    assert s.top() == 10
+def test_group_anagrams_empty_list():
+    assert group_anagrams([]) == []
 
 
-def test_duplicate_minimum_values():
-    s = MinStack()
-    s.push(2)
-    s.push(-1)
-    s.push(-1)
-    assert s.get_min() == -1
-    s.pop()
-    assert s.get_min() == -1  # the other -1 is still there
-    assert s.top() == -1
+def test_anagram_group_is_hashable_and_eq():
+    a = AnagramGroup(signature="aet", words=("eat", "tea"))
+    b = AnagramGroup(signature="aet", words=("eat", "tea"))
+    assert a == b
+    assert hash(a) == hash(b)
+    assert len({a, b}) == 1
 
 
-def test_min_updates_as_values_are_popped():
-    s = MinStack()
-    for v in [5, 3, 7, 1, 9]:
-        s.push(v)
-    assert s.get_min() == 1
-    s.pop()  # remove 9
-    assert s.get_min() == 1
-    s.pop()  # remove 1
-    assert s.get_min() == 3
+def test_common_words():
+    a = AnagramGroup(signature="aet", words=("eat", "tea", "ate"))
+    b = AnagramGroup(signature="x", words=("tea", "zzz"))
+    assert common_words(a, b) == {"tea"}
+
+
+def test_largest_groups():
+    groups = group_anagrams(["eat", "tea", "tan", "ate", "nat", "bat"])
+    top = largest_groups(groups, 1)
+    assert len(top) == 1
+    assert top[0].signature == "aet"
+
+
+def test_label_groups():
+    groups = [AnagramGroup(signature="abt", words=("bat",))]
+    assert label_groups(groups) == ["0: abt (1 words)"]

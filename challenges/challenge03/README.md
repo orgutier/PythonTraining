@@ -1,62 +1,62 @@
-# Challenge 03 — Sales Data Analyzer
+# Challenge 03 — Log Stream Parser and Scanner
 
-**Do this after:** Week 10 (Pandas)
+**Do this after:** Week 02 (Control Flow)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge03` (or `pytest tests/test_challenge03.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
-A very common data/backend-engineer interview task: "here's a CSV of
-transactions, write code that answers these business questions." You're
-given a DataFrame of orders with columns:
+Parsing and scanning a stream of log lines is the loops-and-conditionals
+problem that shows up in almost every "read this input and tell me
+something about it" interview prompt. This challenge is built to pull in
+most of Week 2's control-flow toolkit at once, not just a `for` loop.
 
-| column | type | meaning |
-|---|---|---|
-| `order_id` | str | unique order identifier |
-| `customer` | str | customer name |
-| `month` | str | `"YYYY-MM"`, e.g. `"2024-03"` |
-| `amount` | float | order revenue in dollars |
-
-Implement three functions that answer three real questions a manager would
-actually ask:
+Implement:
 
 ```python
-def monthly_revenue(orders: pd.DataFrame) -> pd.Series:
-    """Total revenue per month, sorted chronologically."""
+def parse_log_stream(lines: list[str]) -> list[tuple[str, str, str]]:
+    """Parse each "HH:MM LEVEL message" line into (time, level, message)."""
 
-def top_customers(orders: pd.DataFrame, n: int = 5) -> pd.DataFrame:
-    """The n customers with the highest total revenue, highest first."""
+def first_critical_index(entries: list[tuple], levels: tuple = ("ERROR", "CRITICAL")) -> int:
+    """Index of the first entry whose level is in `levels`, or -1 if none is."""
 
-def revenue_drop_alerts(orders: pd.DataFrame, threshold: float = 0.20) -> list[str]:
-    """Months where revenue fell more than `threshold` (20% by default)
-    versus the previous month. Return the list of such months, in order."""
+def label_entries(entries: list[tuple]) -> list[str]:
+    """["0: LEVEL - message", "1: LEVEL - message", ...]."""
+
+def pair_with_severity(entries: list[tuple], severities: list[int]) -> list[tuple]:
+    """[(entry, severity), ...] pairing each entry with its matching severity."""
+
+def is_healthy(entries: list[tuple], levels: tuple = ("CRITICAL",)) -> bool:
+    """True only if entries is non-empty AND none of them has a level in `levels`."""
+```
+
+```python
+lines = ["09:00 INFO boot", "", "09:05 ERROR disk full", "09:06 INFO retrying"]
+entries = parse_log_stream(lines)
+# -> [("09:00", "INFO", "boot"), ("09:05", "ERROR", "disk full"), ("09:06", "INFO", "retrying")]
+first_critical_index(entries)               # -> 1
+label_entries(entries)[1]                   # -> "1: ERROR - disk full"
+is_healthy(entries)                          # -> True  (no CRITICAL entries)
+is_healthy(entries, levels=("ERROR",))      # -> False (there's an ERROR)
 ```
 
 ## Constraints on HOW you write it
 
-1. **No explicit `for` loop over DataFrame rows, anywhere** (no
-   `.iterrows()`, `.itertuples()`, or manual row indexing). Every
-   computation must go through `groupby`, vectorized arithmetic, or
-   `.apply()` on a *Series* (never on the whole DataFrame row-by-row).
-   This is the actual pandas skill being tested: idiomatic, vectorized
-   pandas is what separates a real pandas user from someone looping over
-   `range(len(df))`.
-2. **Each function needs a docstring with a comprehensive list of the
-   assumptions it makes about the input**, and what it does for: a month
-   with no orders at all (should it appear with 0 revenue, or be absent?
-   pick one and document it), a customer with exactly one order, and a
-   tie for the Nth spot in `top_customers` (document your tie-breaking
-   rule).
-3. **`revenue_drop_alerts` must compare each month only to the
-   immediately preceding month** in the sorted monthly series -- state in
-   the docstring what happens for the first month in the data (there is no
-   previous month to compare against).
-4. Return types must match exactly what's declared above (`pd.Series`,
-   `pd.DataFrame`, `list[str]`) so the functions are usable by other code
-   without extra conversion.
-
-## Check your work
-
-`python tools/cli.py test challenge03` runs `tests/test_challenge03.py`,
-which builds small DataFrames covering the cases above (multiple
-customers across multiple months, a >20% revenue drop, an absent month)
-and checks your three functions against them.
+1. **`parse_log_stream` must skip blank lines with `continue`**, not an
+   `if`/`else` that wraps the rest of the loop body -- and must split each
+   line with `line.split(" ", 2)` (`message` can contain spaces; only the
+   first two spaces are structural).
+2. **`first_critical_index` must be a `for...else`**: `break` the instant
+   a matching entry is found (tracking its index via `enumerate`); the
+   loop's `else` clause is where `-1` gets returned, for the "searched
+   everything, found nothing" case -- not a separate `if` after the loop.
+3. **`label_entries` must use `enumerate()`**, and **`pair_with_severity`
+   must use `zip()`** -- not manual index tracking (`i = 0; i += 1`) or
+   `range(len(...))` for either.
+4. **`is_healthy` must be one `and`/`not` expression** (as shown in the
+   docstring shape above), relying on short-circuit evaluation and bare
+   truthiness of `entries` -- not `if entries == []: return False` before
+   a separate check.
+5. **A docstring on `parse_log_stream`** listing edge cases: an all-blank
+   input, a message that itself contains spaces, and a stream with no
+   matching level at all for `first_critical_index`/`is_healthy` to handle
+   correctly.

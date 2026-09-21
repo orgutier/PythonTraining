@@ -1,71 +1,38 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-
-app = FastAPI()
-
-# In-memory storage only, per the challenge's constraints -- state resets
-# when the process restarts.
-# _open_checkins: rider id -> (station_name, t)
-_open_checkins: dict[int, tuple[str, int]] = {}
-# _trips: (start_station, end_station) -> list of completed trip durations
-_trips: dict[tuple[str, str], list[int]] = {}
+import re
+import contextlib
 
 
-class CheckInRequest(BaseModel):
-    id: int
-    station_name: str
-    t: int
+class SuppressAndCount:
+    def __init__(self, *exc_types):
+        self.exc_types = exc_types
+
+    def __enter__(self):
+        self.count = 0
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is not None and issubclass(exc_type, self.exc_types):
+            self.count += 1
+            return True
+        return False
 
 
-class CheckOutRequest(BaseModel):
-    id: int
-    station_name: str
-    t: int
+@contextlib.contextmanager
+def suppress_and_count(*exc_types):
+    state = {"count": 0}
+    try:
+        yield state
+    except exc_types:
+        state["count"] += 1
 
 
-@app.post("/checkin")
-def checkin(request: CheckInRequest) -> dict:
-    """
-    Record a check-in. A rider can check in again immediately after a
-    completed checkout -- _open_checkins only ever holds a rider's
-    CURRENT open trip, if any, so reusing an id across separate trips
-    works normally.
-    """
-    _open_checkins[request.id] = (request.station_name, request.t)
-    return {"status": "checked in"}
+def extract_error_messages(text: str) -> list:
+    return re.findall(r"ERROR (.+)$", text, re.MULTILINE)
 
 
-@app.post("/checkout")
-def checkout(request: CheckOutRequest) -> dict:
-    """
-    Complete a trip. Raises 400 if this rider has no open check-in --
-    checking out without checking in first is invalid, not silently
-    ignored or crashing with a KeyError.
-    """
-    if request.id not in _open_checkins:
-        raise HTTPException(status_code=400, detail="No open check-in for this rider")
-
-    start_station, start_t = _open_checkins.pop(request.id)
-    duration = request.t - start_t
-    route = (start_station, request.station_name)
-    _trips.setdefault(route, []).append(duration)
-    return {"status": "checked out", "duration": duration}
+def redact_ips(text: str) -> str:
+    return re.sub(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", "[REDACTED]", text)
 
 
-@app.get("/average/{start_station}/{end_station}")
-def average(start_station: str, end_station: str) -> dict:
-    """
-    Average travel time across every completed trip between two
-    stations. Raises 404 if no trips have been completed for that exact
-    route -- never returns a fabricated 0 for a route with no data.
-    """
-    route = (start_station, end_station)
-    durations = _trips.get(route)
-    if not durations:
-        raise HTTPException(status_code=404, detail="No completed trips for this route")
-
-    return {
-        "start_station": start_station,
-        "end_station": end_station,
-        "average_time": sum(durations) / len(durations),
-    }
+def contains_stack_trace(text: str) -> bool:
+    return re.search(r"Traceback \(most recent call last\):", text) is not None

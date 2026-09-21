@@ -1,58 +1,63 @@
-# Challenge 09 — Bounded Blocking Queue
+# Challenge 09 — Log File Parser with a Custom Exception Chain
 
-**Do this after:** Week 12 (Requests + Threading)
+**Do this after:** Week 05 (Files, Exceptions, Regex)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge09` (or `pytest tests/test_challenge09.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
-Implement a thread-safe, fixed-capacity queue: `enqueue(element)` blocks
-(waits) if the queue is already full instead of raising or dropping the
-element, and `dequeue()` blocks if the queue is empty instead of
-returning a sentinel. Once space/an element becomes available, a
-blocked caller wakes up and completes.
+Reading a real log file means three things happening together: file I/O,
+a regex pulling structured fields out of free text, and deciding what to
+do when a line doesn't match -- raise, skip, or something in between. This
+challenge asks for all three, wired together with a proper custom
+exception hierarchy instead of bare `Exception`/`ValueError`.
 
-This is LeetCode #1188 ("Design Bounded Blocking Queue"), a real
-producer/consumer concurrency problem -- the kind of thing that comes up
-whenever a system needs backpressure between a fast producer and a
-slower consumer (or vice versa).
-
-## Required interface
+Implement:
 
 ```python
-class BoundedBlockingQueue:
-    def __init__(self, capacity: int) -> None: ...
-    def enqueue(self, element: int) -> None:
-        """Block until there's room, then add element."""
-    def dequeue(self) -> int:
-        """Block until an element is available, then remove and return it."""
-    def size(self) -> int:
-        """Current number of elements (never blocks)."""
+class LogParseError(Exception):
+    pass
+
+class MalformedLineError(LogParseError):
+    pass
+
+LOG_PATTERN = re.compile(r"(?P<time>\d{2}:\d{2}) (?P<level>\w+) (?P<message>.+)")
+
+def parse_line(line: str, line_number: int) -> dict:
+    """Match LOG_PATTERN against line; on no match, raise MalformedLineError. On a match, return match.groupdict() plus "line_number"."""
+
+def parse_log_file(path: str) -> list:
+    """Read path, parse every non-blank line via parse_line. If any line raises MalformedLineError, catch it and raise LogParseError(...) from that error instead."""
+
+def scan_directory(paths: list) -> tuple:
+    """Parse every path via parse_log_file, skipping (not raising for) any whose LogParseError propagates. Return (all_parsed_entries, how_many_files_failed)."""
+```
+
+```python
+parse_line("09:05 ERROR disk full", 3)
+# -> {"time": "09:05", "level": "ERROR", "message": "disk full", "line_number": 3}
+parse_line("not a log line", 1)   # -> raises MalformedLineError
 ```
 
 ## Constraints on HOW you write it
 
-1. **Use `threading.Condition` to block, not a sleep-and-poll loop.**
-   A `while queue_is_full: time.sleep(0.01)` "works" but wastes CPU and
-   adds latency; a proper solution calls `condition.wait()` and lets
-   another thread's `enqueue`/`dequeue` call `condition.notify()` (or
-   `notify_all()`) to wake it. Write a comment explaining which
-   condition(s) you used and why.
-2. **Must be correct with multiple producer and multiple consumer
-   threads running at once** -- not just one producer and one consumer.
-   That means every check-then-act sequence (checking if there's room,
-   then adding) has to happen while holding the lock, and has to
-   re-check its condition in a `while` loop (not `if`) after waking up,
-   since another thread might have grabbed the last slot first.
-3. **A docstring with a comprehensive list of the edge cases your
-   implementation handles:** `capacity=1` (only one element in flight at
-   a time), a `dequeue()` call that arrives before any `enqueue()` (it
-   must block, not error), and what happens when multiple threads are
-   all blocked waiting at once (all of them must eventually be woken,
-   not just one, as capacity/elements keep freeing up).
-
-## Check your work
-
-`python tools/cli.py test challenge09` runs `tests/test_challenge09.py`,
-which includes a real multi-producer/multi-consumer test with a small
-capacity and a timeout, so a solution that deadlocks or loses a wakeup
-will actually fail instead of just running slow.
+1. **`MalformedLineError` must subclass `LogParseError`**, not `Exception`
+   directly -- a two-level hierarchy, so catching `LogParseError` also
+   catches `MalformedLineError`.
+2. **`LOG_PATTERN` must be a module-level `re.compile(...)`**, reused by
+   `parse_line` via `LOG_PATTERN.match(line)` -- not a fresh `re.match(...,
+   line)` call with the raw pattern string every time.
+3. **`parse_log_file` must open the file with `with open(path) as f:`**
+   and iterate it with `for i, line in enumerate(f, start=1)`, skipping
+   blank lines (after `.strip()`) with `continue`.
+4. **`parse_log_file` must catch `MalformedLineError` and re-raise
+   `LogParseError(f"failed to parse {path!r}") from e`** -- chaining, so
+   the original `MalformedLineError` is still available as `.__cause__`
+   on the new exception, not swallowed.
+5. **`scan_directory` must catch `LogParseError` per-file** (`try` inside
+   the `for` loop, not one `try` wrapping the whole loop, which would stop
+   at the first bad file instead of skipping it and continuing).
+6. **A docstring on `parse_log_file`** listing edge cases: a completely
+   empty file (returns `[]`), a file where every line is malformed (the
+   `LogParseError` is raised on the *first* bad line, not after scanning
+   the rest), and blank lines mixed in with good ones (skipped, not
+   counted as entries or errors).

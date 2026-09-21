@@ -1,39 +1,40 @@
 """
-Challenge 09 - Bounded Blocking Queue
-Interview-style challenge (LeetCode #1188). Correctness is pytest-tested
-(see tests/test_challenge09.py / `python tools/cli.py test challenge09`);
-see README.md in this folder for the full problem statement and the
-constraints your solution must follow (threading.Condition, not
-sleep-and-poll; correct under multiple producers/consumers; a docstring
-listing the edge cases handled).
+Challenge 09 - Log File Parser with a Custom Exception Chain
+Interview-style challenge. Correctness is pytest-tested (see
+tests/test_challenge09.py / `python tools/cli.py test challenge09`); see
+README.md in this folder for the full problem statement and the constraints
+your solution must follow (a two-level custom exception hierarchy, re.compile()/named groups, with/open/as, and raise ... from ... chaining).
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module, matching the convention used by
 exercises/weekNN/solution.py.
 """
-import threading
 
 
-class BoundedBlockingQueue:
-    """
-    A thread-safe, fixed-capacity queue whose enqueue/dequeue block
-    instead of failing. Fill in this docstring as part of the challenge:
-    explain your condition-variable design and document the edge cases
-    you handle (capacity=1, dequeue-before-any-enqueue, multiple blocked
-    threads waking correctly).
-    """
+import re
 
-    def __init__(self, capacity: int) -> None:
-        raise NotImplementedError
 
-    def enqueue(self, element: int) -> None:
-        """Block until there's room, then add element."""
-        raise NotImplementedError
+class LogParseError(Exception):
+    pass
 
-    def dequeue(self) -> int:
-        """Block until an element is available, then remove and return it."""
-        raise NotImplementedError
 
-    def size(self) -> int:
-        """Current number of elements (never blocks)."""
-        raise NotImplementedError
+class MalformedLineError(LogParseError):
+    pass
+
+
+LOG_PATTERN = re.compile(r"(?P<time>\d{2}:\d{2}) (?P<level>\w+) (?P<message>.+)")
+
+
+def parse_line(line: str, line_number: int) -> dict:
+    """LOG_PATTERN.match(line); on no match, raise MalformedLineError. Else match.groupdict() + line_number."""
+    raise NotImplementedError
+
+
+def parse_log_file(path: str) -> list:
+    """with open(path) as f: parse every non-blank line; chain MalformedLineError into LogParseError."""
+    raise NotImplementedError
+
+
+def scan_directory(paths: list) -> tuple:
+    """Parse every path; skip (don't raise for) any that fail. Return (entries, failed_file_count)."""
+    raise NotImplementedError

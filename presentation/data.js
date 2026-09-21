@@ -4,6 +4,20 @@
 const TOPICS = [
 {
   n: 1, title: "Python Fundamentals", sub: "variables, types, operators",
+  challenges: [
+    {
+      id: "challenge01",
+      title: "Typed Config Loader",
+      blurb: "Parse KEY=value config lines into properly typed int/float/bool/None/str values by hand -- no try/except numeric-detection shortcuts, isinstance()/type() used explicitly, and the result is always a brand-new dict.",
+      path: "challenges/challenge01/"
+    },
+    {
+      id: "challenge02",
+      title: "Identity, Equality, and a Login Prompt",
+      blurb: "A pairwise identity-vs-equality auditor plus a None-safe login prompt -- is/is not used explicitly throughout, and a bare is-None check instead of truthiness so an empty string is never mistaken for a missing one.",
+      path: "challenges/challenge02/"
+    }
+  ],
   schedule: [
     { day: "Day 1", title: "Environment & tooling setup", details: "Install Python 3.11+, create and activate a virtual environment (python -m venv .venv), pip install -r requirements.txt, and open the repo in VS Code. Run python tools/cli.py list and python tools/cli.py test week01 to see the starter tests fail, try tools/gui.py, and do a git basics pass (status/add/commit). Tour exercises/, reference_solutions/, tests/, and open presentation/index.html to keep alongside the editor all course long." },
     { day: "Day 2", title: "Basic tier", guideKey: "week01-basic", details: "Variables & assignment; int/float/str/bool/None; arithmetic & comparison operators; print()/input(); basic type casting; type hints for variables." },
@@ -33,6 +47,20 @@ const TOPICS = [
 },
 {
   n: 2, title: "Control Flow", sub: "conditionals, loops",
+  challenges: [
+    {
+      id: "challenge03",
+      title: "Log Stream Parser and Scanner",
+      blurb: "Parse and scan a stream of log lines using a for...else search, enumerate()/zip() for labeling and pairing, and one and/not expression for a health check -- most of Week 2's control-flow toolkit in one pipeline.",
+      path: "challenges/challenge03/"
+    },
+    {
+      id: "challenge04",
+      title: "Batch Retry Simulator",
+      blurb: "A batch-retry simulator built around a while...else loop, itertools.chain + islice for flattening batches, and a chained ternary for status labels.",
+      path: "challenges/challenge04/"
+    }
+  ],
   schedule: [
     { day: "Day 1", title: "Basic tier", guideKey: "week02-basic", details: "if/elif/else; while; for + range(); break/continue/pass; nested loops." },
     { day: "Day 2", title: "Mid tier", guideKey: "week02-mid", details: "for...else / while...else; short-circuit and/or; ternary expressions; zip() for parallel iteration." },
@@ -62,6 +90,20 @@ const TOPICS = [
 },
 {
   n: 3, title: "Functions", sub: "parameters, scope, recursion",
+  challenges: [
+    {
+      id: "challenge05",
+      title: "Pluggable Event Pipeline",
+      blurb: "A closure-based plugin registry, plus two flavors of caching decorator -- a hand-rolled memoize() and functools.lru_cache with a keyword-only parameter -- every decorator preserving metadata via functools.wraps.",
+      path: "challenges/challenge05/"
+    },
+    {
+      id: "challenge06",
+      title: "Streaming Metrics Aggregator",
+      blurb: "A streaming batch processor combining a real generator (yield), positional-only AND keyword-only parameters in the same signature, module state via global, and functools.partial for a reusable transform.",
+      path: "challenges/challenge06/"
+    }
+  ],
   schedule: [
     { day: "Day 1", title: "Basic tier", guideKey: "week03-basic", details: "def, parameters, return, default args, *args/**kwargs, return type hints, basic recursion, lambda." },
     { day: "Day 2", title: "Mid tier", guideKey: "week03-mid", details: "Keyword-only and positional-only arguments; docstrings & introspection; closures; writing a simple decorator." },
@@ -93,16 +135,16 @@ const TOPICS = [
   n: 4, title: "Data Structures", sub: "lists, tuples, dicts, sets",
   challenges: [
     {
-      id: "challenge01",
-      title: "Group Anagrams",
-      blurb: "A real, frequently-asked interview question (LeetCode #49): group every string in a list with its anagrams, using a dict you manage yourself -- no collections.Counter or defaultdict allowed, and the per-word signature must be built with a comprehension.",
-      path: "challenges/challenge01/"
+      id: "challenge07",
+      title: "Anagram Groups with Records",
+      blurb: "Group Anagrams (LeetCode #49), rebuilt around collections.defaultdict and a frozen, hashable dataclass record for each group -- plus set operations and enumerate() for the derived reports.",
+      path: "challenges/challenge07/"
     },
     {
-      id: "challenge06",
-      title: "Longest Consecutive Sequence",
-      blurb: "LeetCode #128: find the length of the longest run of consecutive integers in an unsorted list -- in O(n) using a set, with sorting explicitly banned so the set-based technique is the only way through.",
-      path: "challenges/challenge06/"
+      id: "challenge08",
+      title: "Longest Consecutive Run of Records",
+      blurb: "Longest Consecutive Sequence (LeetCode #128), returning every run (not just the longest) as collections.namedtuple records, found in O(n) via a set -- no sorting the raw input.",
+      path: "challenges/challenge08/"
     }
   ],
   schedule: [
@@ -134,6 +176,20 @@ const TOPICS = [
 },
 {
   n: 5, title: "Files, Exceptions, Regex", sub: "I/O, error handling, pattern matching",
+  challenges: [
+    {
+      id: "challenge09",
+      title: "Log File Parser with a Custom Exception Chain",
+      blurb: "Parse a real log file with a two-level custom exception hierarchy, a compiled regex with named groups, and raise ... from ... chaining when a bad line is found.",
+      path: "challenges/challenge09/"
+    },
+    {
+      id: "challenge10",
+      title: "Log Text Utilities with a Custom Context Manager",
+      blurb: "Text-processing utilities plus the same \"suppress and count\" context manager built two ways -- a class with __enter__/__exit__, and the @contextlib.contextmanager generator equivalent -- alongside re.findall()/re.sub()/re.search().",
+      path: "challenges/challenge10/"
+    }
+  ],
   schedule: [
     { day: "Day 1", title: "Basic tier", guideKey: "week05-basic", details: "open/with/read/write; try/except/finally/raise; custom exception classes; re.search/match/findall/sub." },
     { day: "Day 2", title: "Mid tier", guideKey: "week05-mid", details: "Exception chaining (raise ... from ...); exception hierarchies; contextlib beyond files; regex groups, named groups, re.compile." },
@@ -165,16 +221,16 @@ const TOPICS = [
   n: 6, title: "OOP I", sub: "classes, encapsulation, properties",
   challenges: [
     {
-      id: "challenge02",
-      title: "LRU Cache",
-      blurb: "One of the most common interview problems at every level (LeetCode #146): build a fixed-capacity least-recently-used cache with O(1) get/put, using a hand-built doubly linked list -- collections.OrderedDict is off-limits, since building the list yourself is the actual point.",
-      path: "challenges/challenge02/"
+      id: "challenge11",
+      title: "LRU Cache with a Descriptor and Class-Level Stats",
+      blurb: "LRU Cache (LeetCode #146) with O(1) get/put via a hand-built doubly linked list, __slots__, a validating descriptor for capacity, a computed @property, and a @classmethod alternate constructor.",
+      path: "challenges/challenge11/"
     },
     {
-      id: "challenge07",
-      title: "Min Stack",
-      blurb: "LeetCode #155: a stack that also tracks its minimum in O(1) -- the naive min(stack) approach is O(n), so the challenge is maintaining a running minimum incrementally without ever calling the min() builtin.",
-      path: "challenges/challenge07/"
+      id: "challenge12",
+      title: "Min Stack with Class-Level Push Stats",
+      blurb: "Min Stack (LeetCode #155) with O(1) minimum() and no min() call, wrapped in a __slots__ class that tracks total pushes across every instance via a class attribute.",
+      path: "challenges/challenge12/"
     }
   ],
   schedule: [
@@ -206,6 +262,20 @@ const TOPICS = [
 },
 {
   n: 7, title: "OOP II", sub: "inheritance, polymorphism, abstraction",
+  challenges: [
+    {
+      id: "challenge13",
+      title: "Notification System with Mixins and ABCs",
+      blurb: "A notification dispatcher built from an abc.ABC base, mixins combined via multiple inheritance, super() cooperating through the chain, and isinstance()/duck typing in the broadcaster.",
+      path: "challenges/challenge13/"
+    },
+    {
+      id: "challenge14",
+      title: "Shape Library with Protocols and Composition",
+      blurb: "A shape library where Circle and Rectangle share no base class at all -- only a runtime_checkable typing.Protocol -- plus a CompositeShape built by composition, not inheritance.",
+      path: "challenges/challenge14/"
+    }
+  ],
   schedule: [
     { day: "Day 1", title: "Basic tier", guideKey: "week07-basic", details: "class Child(Parent), super(), method overriding, duck typing." },
     { day: "Day 2", title: "Mid tier", guideKey: "week07-mid", details: "Multiple inheritance basics; composition-vs-inheritance judgment; the abc module, @abstractmethod." },
@@ -235,6 +305,20 @@ const TOPICS = [
 },
 {
   n: 8, title: "The Python Data Model", sub: "special methods, protocols",
+  challenges: [
+    {
+      id: "challenge15",
+      title: "Matrix: A Rich Numeric Type",
+      blurb: "A Matrix class implementing ten dunders at once -- __repr__/__str__/__eq__/__hash__/__add__/__radd__/__len__/__getitem__/__iter__/__contains__/__bool__ -- with NotImplemented used correctly so + fails cleanly on a shape mismatch.",
+      path: "challenges/challenge15/"
+    },
+    {
+      id: "challenge16",
+      title: "Transaction Ledger: Callable and Context Manager",
+      blurb: "A transaction ledger that's directly callable (__call__) and a context manager (__enter__/__exit__) with commit-or-rollback batching -- no inheritance from any special base required for either to work.",
+      path: "challenges/challenge16/"
+    }
+  ],
   schedule: [
     { day: "Day 1", title: "Basic tier", guideKey: "week08-basic", details: "__init__, __repr__, __str__, __eq__." },
     { day: "Day 2", title: "Mid tier", guideKey: "week08-mid", details: "__add__ and other operator dunders; __len__/__getitem__/__iter__/__contains__; __call__; __bool__." },
@@ -264,6 +348,20 @@ const TOPICS = [
 },
 {
   n: 9, title: "OS, JSON, Datetime, XML", sub: "everyday stdlib modules",
+  challenges: [
+    {
+      id: "challenge17",
+      title: "Directory Report Builder",
+      blurb: "A directory report builder combining os.walk(), pathlib's rglob() as the modern alternative, and json.dumps(default=...) to serialize the real datetime objects it collects.",
+      path: "challenges/challenge17/"
+    },
+    {
+      id: "challenge18",
+      title: "XML Feed to Timezone-Aware Digest",
+      blurb: "Parse an XML event feed (ElementTree, findall()), explicitly attach UTC to its naive timestamps, and rebuild a fresh XML document from the result.",
+      path: "challenges/challenge18/"
+    }
+  ],
   schedule: [
     { day: "Day 1", title: "Basic tier", guideKey: "week09-basic", details: "os.listdir/os.path; json.load/dump; datetime.now(); basic XML parsing with ElementTree." },
     { day: "Day 2", title: "Mid tier", guideKey: "week09-mid", details: "pathlib as the modern os.path alternative; json custom encoders (default=); timezone-aware vs naive datetimes; ElementTree.findall()." },
@@ -295,16 +393,16 @@ const TOPICS = [
   n: 10, title: "Pandas", sub: "data analysis",
   challenges: [
     {
-      id: "challenge03",
+      id: "challenge19",
       title: "Sales Data Analyzer",
-      blurb: "A realistic data-engineer interview task: given a DataFrame of orders, report monthly revenue, the top N customers, and month-over-month revenue drops -- with zero explicit row-by-row loops allowed, only groupby and vectorized pandas.",
-      path: "challenges/challenge03/"
+      blurb: "A sales data analyzer using nothing but groupby()/sort_values()/boolean indexing/pivot_table() -- zero explicit row loops -- plus category-dtype memory optimization.",
+      path: "challenges/challenge19/"
     },
     {
-      id: "challenge08",
-      title: "Two Sum, Pandas-Style",
-      blurb: "LeetCode #1, the most famous interview question there is -- but solved as a pandas.Series operation returning index labels, with no nested comparison loop allowed.",
-      path: "challenges/challenge08/"
+      id: "challenge20",
+      title: "Two Sum, Pandas-Style, with Joins and Diagnostics",
+      blurb: "Two Sum (LeetCode #1) solved as a vectorized pandas.Series operation, alongside df.merge(), df.apply(), a two-key groupby (MultiIndex), and a df.head()/info()/describe() diagnostics bundle.",
+      path: "challenges/challenge20/"
     }
   ],
   schedule: [
@@ -337,6 +435,20 @@ const TOPICS = [
 },
 {
   n: 11, title: "OpenCV", sub: "images as arrays",
+  challenges: [
+    {
+      id: "challenge21",
+      title: "Document Scanner Preprocessing Pipeline",
+      blurb: "A document-scanner preprocessing pipeline: grayscale -> Gaussian blur -> Canny edges -> the largest-contour trick -> an aspect-ratio-preserving resize.",
+      path: "challenges/challenge21/"
+    },
+    {
+      id: "challenge22",
+      title: "Face-Region Redactor",
+      blurb: "A face-region redactor built on cv2.CascadeClassifier, with box-clipping via image.shape, adaptive thresholding, and cv2.imread()/imwrite() file I/O.",
+      path: "challenges/challenge22/"
+    }
+  ],
   schedule: [
     { day: "Day 1", title: "Basic tier", guideKey: "week11-basic", details: "cv2.imread/imwrite; cv2.cvtColor (color conversion); cv2.resize; basic drawing (rectangle/circle/line)." },
     { day: "Day 2", title: "Mid tier", guideKey: "week11-mid", details: "Thresholding; simple edge detection (Canny); cropping via array slicing; video capture from a file/webcam." },
@@ -369,16 +481,16 @@ const TOPICS = [
   n: 12, title: "Requests + Threading", sub: "HTTP clients, concurrency",
   challenges: [
     {
-      id: "challenge04",
-      title: "Rate Limiter (Token Bucket)",
-      blurb: "A staple of backend/systems interviews: build a thread-safe token-bucket rate limiter from scratch, protected by threading.Lock and driven by time.monotonic() -- then prove it's actually thread-safe by hammering it from several threads at once.",
-      path: "challenges/challenge04/"
+      id: "challenge23",
+      title: "Rate-Limited HTTP Client",
+      blurb: "A thread-safe token-bucket rate limiter wired into an actual requests.Session-based HTTP client -- fetched concurrently from raw threading.Thread workers, results returned in the original order.",
+      path: "challenges/challenge23/"
     },
     {
-      id: "challenge09",
-      title: "Bounded Blocking Queue",
-      blurb: "LeetCode #1188: a fixed-capacity queue whose enqueue/dequeue block instead of failing -- built with threading.Condition (not a sleep-and-poll loop), correct under multiple producers and consumers at once.",
-      path: "challenges/challenge09/"
+      id: "challenge24",
+      title: "Bounded Job Queue with Retry and ThreadPoolExecutor",
+      blurb: "A retrying job submitter (requests.post + exponential backoff) driven by concurrent.futures.ThreadPoolExecutor, with a threading.Lock-protected counter proving exact correctness under real concurrency.",
+      path: "challenges/challenge24/"
     }
   ],
   schedule: [
@@ -412,16 +524,16 @@ const TOPICS = [
   n: 13, title: "Local API Endpoints", sub: "FastAPI",
   challenges: [
     {
-      id: "challenge05",
-      title: "URL Shortener API",
-      blurb: "A classic \"design + code it live\" exercise: build POST /shorten, GET /{code}, and GET /stats/{code} with in-memory storage, Pydantic request/response models, idempotent shortening, and proper 4xx responses for invalid input.",
-      path: "challenges/challenge05/"
+      id: "challenge25",
+      title: "URL Shortener API with Dependency-Injected Auth",
+      blurb: "A URL shortener API with an API-key check injected via Depends(), Pydantic request/response models, an async def route, and Query() validation on a search endpoint.",
+      path: "challenges/challenge25/"
     },
     {
-      id: "challenge10",
-      title: "Underground System API",
-      blurb: "LeetCode #1396, adapted to FastAPI: track rider check-ins/check-outs and report average travel time between stations, with Pydantic models and proper 4xx errors for a checkout with no check-in or a route with no data.",
-      path: "challenges/challenge10/"
+      id: "challenge26",
+      title: "Underground System API with Live Diagnostics",
+      blurb: "Design Underground System (LeetCode #1396), with its storage injected via Depends() instead of touched directly in the routes, plus a TestClient()-based diagnostics utility and a mocked uvicorn.run().",
+      path: "challenges/challenge26/"
     }
   ],
   schedule: [
