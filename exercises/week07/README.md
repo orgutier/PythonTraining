@@ -4,7 +4,7 @@ Five exercises covering inheritance, composition, duck typing, abstract base cla
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement). Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test week07_exerciseXX`. Work through them in order.
 
 - **`exercise01/`** -- class Child(Parent), a first super(), polymorphism
 - **`exercise02/`** -- super() x3 (three-level chain), isinstance(), polymorphism again

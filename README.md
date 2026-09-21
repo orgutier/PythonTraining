@@ -25,11 +25,12 @@ PythonTraining/
 │           └── solution.py
 │   └── challenges/        Worked answers for challenges/, same idea.
 │       └── challengeNN/solution.py
-├── tests/                 Staff-authored pytest files, one per week -- each
-│   ├── test_weekNN.py      aggregates ALL of that week's exercises' tests
-│   └── test_challengeNN.py into a single file (plus one per challenge).
-│                          Kept separate from exercises/ and challenges/ so
-│                          trainees can't edit the tests themselves.
+├── tests/                 Staff-authored pytest files, one per EXERCISE --
+│   ├── test_weekNN_exerciseXX.py  each exercise is independently testable
+│   └── test_challengeNN.py         and its own git-hook target (plus one
+│                          file per challenge). Kept separate from
+│                          exercises/ and challenges/ so trainees can't
+│                          edit the tests themselves.
 ├── challenges/            10 interview-style coding challenges (two per
 │   └── challengeNN/        assigned week), separate from the graded
 │       ├── README.md        weekly exercises but tested the same way.
@@ -41,10 +42,10 @@ PythonTraining/
 │   ├── install-git-hooks.bat  Installs the pre-commit/pre-push hooks (Windows)
 │   └── install-git-hooks.sh    same, for macOS/Linux
 ├── .githooks/             Tracked hook scripts the installers point git at
-│   ├── pre-commit           (git config core.hooksPath .githooks). Only
-│   ├── pre-push              test the weeks/challenges whose solution.py
-│   └── run-tests-for-changed-files.sh  (or a helper submodule next to one)
-│                          actually changed -- see "Git hook integration".
+│   ├── pre-commit           (git config core.hooksPath .githooks).
+│   ├── pre-push              pre-commit tests just the exercise(s) staged;
+│   └── run-tests-for-changed-files.sh  pre-push tests the whole week for
+│                          any exercise touched -- see "Git hook integration".
 ├── presentation/          Open presentation/index.html in a browser.
 │                          Topic reference (documentation-grade prose,
 │                          keywords, dunders, modules, a clickable "day
@@ -95,10 +96,11 @@ point of the GUI. Both tools call the same underlying test-running code
 
 **CLI** (from the repo root):
 ```bash
-python tools/cli.py list              # see all 14 weeks + 10 challenges
-python tools/cli.py test week01       # run one week
-python tools/cli.py test challenge01  # run one interview challenge
-python tools/cli.py test --all        # run everything (weeks + challenges)
+python tools/cli.py list                    # see all 14 weeks, their exercises, + 10 challenges
+python tools/cli.py test week01             # run every exercise in one week
+python tools/cli.py test week01_exercise03  # run just that one exercise
+python tools/cli.py test challenge01        # run one interview challenge
+python tools/cli.py test --all              # run everything (weeks + challenges)
 ```
 
 **GUI** (from the repo root):
@@ -112,19 +114,31 @@ let a `test --all` pick them up.
 
 ## Git hook integration
 
-A ready-to-run pre-commit + pre-push hook is included. Both are
-**targeted, not blanket**: they look at which
-`exercises/weekNN/exerciseXX/*.py` files (`solution.py` itself, or a helper
-submodule you added next to it) or `challenges/challengeNN/solution.py`
-files are staged (pre-commit) or differ from the remote (pre-push), map
-each one back to its week/challenge id, and run `python tools/cli.py test
-<id>` once per affected week/challenge -- not the full suite, and not
-`test --all`. Touching any exercise within a week runs that **whole**
-week's aggregated test file (`tests/test_weekNN.py` covers every exercise
-in that week), since that's the granularity the test runner operates at.
-A commit or push that doesn't touch any exercise/challenge file (docs,
-tests, the presentation, anything else) passes straight through untested,
-since there's nothing new to check. Install it once per local clone:
+A ready-to-run pre-commit + pre-push hook is included, and the two are
+**deliberately different granularities**, not the same check run twice:
+
+- **pre-commit is atomic, per exercise.** It looks at which
+  `exercises/weekNN/exerciseXX/*.py` files (`solution.py` itself, or a
+  helper submodule you added next to it) or `challenges/challengeNN/solution.py`
+  files are staged, maps each one to its own exercise/challenge id, and
+  runs `python tools/cli.py test <id>` for **only** that exercise --
+  `week01_exercise03`, not all of `week01`. Fast, focused feedback on
+  exactly what you just changed.
+- **pre-push tests the whole week.** For the same kind of changed files
+  (this time, differing from the remote), it maps each one back to its
+  **week** id and runs every exercise in that week -- `week01`, covering
+  `week01_exercise01` through however many exercises that week has. This
+  is deliberately broader than pre-commit: it catches a week left
+  inconsistent by commits made with `--no-verify`, or an earlier exercise
+  a later change in the same week accidentally broke, before any of it
+  leaves your machine.
+
+Neither runs the full suite or `test --all`, and a challenge always tests
+as just itself at both stages (challenges aren't split into exercises,
+so there's no larger unit to widen to). A commit or push that doesn't
+touch any exercise/challenge file (docs, tests, the presentation,
+anything else) passes straight through untested at either stage, since
+there's nothing new to check. Install it once per local clone:
 
 ```bash
 tools\install-git-hooks.bat     # Windows
@@ -135,23 +149,26 @@ This points git at the tracked `.githooks/` folder (`git config
 core.hooksPath .githooks`) instead of copying files into the untracked
 `.git/hooks/`, so the hooks stay in sync with the repo automatically.
 The matching logic lives in `.githooks/run-tests-for-changed-files.sh`,
-shared by both hooks. Skip a single check when you need to with
-`git commit --no-verify` / `git push --no-verify`.
+shared by both hooks -- it takes `exercise` or `week` as an argument to
+pick which granularity to map changed files to; `pre-commit` passes
+`exercise`, `pre-push` passes `week`. Skip a single check when you need
+to with `git commit --no-verify` / `git push --no-verify`.
 
-Because only *staged*/*pushed* solutions get tested, this is safe to
+Because only *staged*/*pushed* exercises get tested, this is safe to
 install both in a trainee's own working copy as they fill in
 `exercises/` week by week, and on this template repo itself: editing an
 unrelated file (like this README) is never blocked by some other
-week's stub still raising `NotImplementedError`. It only blocks a
-commit/push when the specific week (or challenge) whose exercise files
-you just changed doesn't pass its own tests yet.
+exercise's stub still raising `NotImplementedError`. It only blocks a
+commit when the specific exercise you just changed doesn't pass its own
+tests yet, or a push when any exercise in a week you touched doesn't.
 
-See `tests/test_week12.py` and `tests/test_week13.py` for the two
-exceptions that need special handling if you extend this further:
+See `tests/test_week12_exercise*.py` and `tests/test_week13_exercise*.py`
+for the two exceptions that need special handling if you extend this
+further:
 
-- **Week 12 (requests + threading):** the test mocks `requests.get` --
-  never point a hook at the live `jsonplaceholder.typicode.com` endpoint.
-- **Week 13 (FastAPI):** the test uses `fastapi.testclient.TestClient`,
+- **Week 12 (requests + threading):** every test mocks `requests.get`/
+  `requests.post` -- never point a hook at a live endpoint.
+- **Week 13 (FastAPI):** every test uses `fastapi.testclient.TestClient`,
   which calls the app in-process. No real server or port needed.
 
 ## Presentation

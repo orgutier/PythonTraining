@@ -11,6 +11,21 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 WEEKS = [f"week{n:02d}" for n in range(1, 15)]
 CHALLENGES = [f"challenge{n:02d}" for n in range(1, 11)]
 
+
+def _discover_exercises() -> list:
+    """Every "weekNN_exerciseXX" id with a tests/test_weekNN_exerciseXX.py
+    file on disk, sorted. Computed from the filesystem (not hardcoded) so
+    it can't drift out of sync with what generate.py actually produced."""
+    tests_dir = REPO_ROOT / "tests"
+    ids = [
+        path.stem.removeprefix("test_")
+        for path in tests_dir.glob("test_week[0-9][0-9]_exercise[0-9][0-9].py")
+    ]
+    return sorted(ids)
+
+
+EXERCISES = _discover_exercises()
+
 WEEK_TOPICS = {
     "week01": "Python Fundamentals",
     "week02": "Control Flow",
@@ -29,13 +44,30 @@ WEEK_TOPICS = {
 }
 
 
-def run_week_tests(week: str) -> subprocess.CompletedProcess:
-    """Run pytest for a single week's exercise. Returns the completed process."""
-    test_file = REPO_ROOT / "tests" / f"test_{week}.py"
-    if not test_file.exists():
-        raise FileNotFoundError(f"No test file found for {week}: {test_file}")
+def _test_targets(id: str) -> list:
+    """Resolve a test id to the test file(s) that cover it.
+
+    "week01_exercise03" (or "challenge01") maps to its own single test
+    file. A plain week id like "week01" has no test file of its own --
+    it maps to every exercise test file for that week
+    (test_week01_exercise*.py), so testing "week01" always covers
+    everything currently in it, however many exercises that turns out to
+    be.
+    """
+    exact = REPO_ROOT / "tests" / f"test_{id}.py"
+    if exact.exists():
+        return [exact]
+    return sorted((REPO_ROOT / "tests").glob(f"test_{id}_exercise*.py"))
+
+
+def run_week_tests(id: str) -> subprocess.CompletedProcess:
+    """Run pytest for one week, one exercise, or one challenge (by id).
+    Returns the completed process."""
+    targets = _test_targets(id)
+    if not targets:
+        raise FileNotFoundError(f"No test file(s) found for {id}")
     return subprocess.run(
-        [sys.executable, "-m", "pytest", str(test_file), "-v"],
+        [sys.executable, "-m", "pytest", *(str(t) for t in targets), "-v"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,

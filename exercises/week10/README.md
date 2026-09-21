@@ -4,7 +4,7 @@ Five exercises built around a small sales dataset, covering every core DataFrame
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement). Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test week10_exerciseXX`. Work through them in order.
 
 - **`exercise01/`** -- pd.read_csv, df.head(), df.describe(), df.info()
 - **`exercise02/`** -- boolean indexing x3

@@ -3,9 +3,9 @@ OS, JSON, Datetime, XML -- os.path and pathlib Basics
 Implement the function(s)/class(es) below.
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
-It must stay a plain importable module -- the aggregated test suite in
-tests/test_week09.py imports directly from here. Need a helper function or
-class of your own? Add another .py file next to this one inside
+It must stay a plain importable module -- the test suite in
+tests/test_week09_exercise01.py imports directly from here. Need a helper
+function or class of your own? Add another .py file next to this one inside
 exercises/week09/exercise01/ and import it as a submodule (e.g.
 `from exercises.week09.exercise01 import helpers`) -- solution.py just has to
 stay the entry point these tests import from.

@@ -4,7 +4,7 @@ Six exercises covering every OpenCV function and image-array concept from Topic 
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement). Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test week11_exerciseXX`. Work through them in order.
 
 - **`exercise01/`** -- cv2.imread, cv2.imwrite, image.shape x2
 - **`exercise02/`** -- cv2.cvtColor x2, cv2.resize x2, image.shape
