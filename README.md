@@ -30,7 +30,12 @@ PythonTraining/
 ├── tools/                 The test runner (see below).
 │   ├── core.py             Shared logic
 │   ├── cli.py              Command-line interface
-│   └── gui.py               Tkinter GUI
+│   ├── gui.py               Tkinter GUI
+│   ├── install-git-hooks.bat  Installs the pre-commit/pre-push hooks (Windows)
+│   └── install-git-hooks.sh    same, for macOS/Linux
+├── .githooks/             Tracked hook scripts the installers point git at
+│   ├── pre-commit           (git config core.hooksPath .githooks)
+│   └── pre-push              -- see "Git hook integration" below.
 ├── presentation/          Open presentation/index.html in a browser.
 │                          Topic reference (documentation-grade prose,
 │                          keywords, dunders, modules, a clickable "day
@@ -85,11 +90,36 @@ let a `test --all` pick them up.
 
 ## Git hook integration
 
-If you're wiring this into a git hook that auto-tests on commit: detect
-which `exercises/weekNN/` changed in the commit, then run
-`python tools/cli.py test weekNN` (or import `tools/core.py` directly) and
-gate the commit on the exit code. See `tests/test_week12.py` and
-`tests/test_week13.py` for the two exceptions that need special handling:
+A ready-to-run pre-commit + pre-push hook is included: both run the full
+test suite (every week's exercise tests **and** every interview
+challenge's tests) via `python tools/cli.py test --all`, and block the
+commit/push if anything fails. Install it once per local clone:
+
+```bash
+tools\install-git-hooks.bat     # Windows
+sh tools/install-git-hooks.sh   # macOS/Linux
+```
+
+This points git at the tracked `.githooks/` folder (`git config
+core.hooksPath .githooks`) instead of copying files into the untracked
+`.git/hooks/`, so the hooks stay in sync with the repo automatically.
+Skip a single check when you need to with `git commit --no-verify` /
+`git push --no-verify`.
+
+**This is meant for a trainee's own working copy**, installed once
+they've started filling in `exercises/`, not for this template repo as
+shipped -- every exercise stub still raises `NotImplementedError` by
+design, so the hooks will (correctly) block every commit until there's
+real code to test. Staff maintaining this template repo itself should
+leave the hooks uninstalled (or use `--no-verify`) rather than fighting
+that by design failure.
+
+If you'd rather wire something narrower yourself -- e.g. only testing
+whichever `exercises/weekNN/` changed in the commit -- call
+`python tools/cli.py test weekNN` (or import `tools/core.py` directly)
+per changed week instead of `test --all`. See `tests/test_week12.py` and
+`tests/test_week13.py` for the two exceptions that need special handling
+either way:
 
 - **Week 12 (requests + threading):** the test mocks `requests.get` --
   never point a hook at the live `jsonplaceholder.typicode.com` endpoint.
