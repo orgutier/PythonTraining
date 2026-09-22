@@ -49,10 +49,10 @@ PythonTraining/
 │   ├── install-git-hooks.bat  Installs the pre-commit/pre-push hooks (Windows)
 │   └── install-git-hooks.sh    same, for macOS/Linux
 ├── .githooks/             Tracked hook scripts the installers point git at
-│   ├── pre-commit           (git config core.hooksPath .githooks). Both
-│   ├── pre-push               hooks test at the same per-exercise
-│   └── run-tests-for-changed-files.sh  granularity -- see "Git hook
-│                          integration".
+│   ├── pre-commit           (git config core.hooksPath .githooks).
+│   ├── pre-push               pre-commit is always per-exercise; pre-push
+│   └── run-tests-for-changed-files.sh  defaults to per-exercise too but is
+│                          configurable -- see "Git hook integration".
 ├── presentation/          Open presentation/index.html in a browser.
 │                          Topic reference (documentation-grade prose,
 │                          keywords, dunders, modules, a clickable "day
@@ -122,10 +122,7 @@ let a `test --all` pick them up.
 
 ## Git hook integration
 
-A ready-to-run pre-commit + pre-push hook is included, both testing at
-the **same atomic, per-exercise granularity** -- pre-push isn't a wider
-check, it's the same check run again on whatever actually made it into
-the commits being pushed:
+A ready-to-run pre-commit + pre-push hook is included:
 
 - **pre-commit** looks at which `exercises/stageNN/exerciseXX/*.py` files
   (`solution.py` itself, or a helper submodule you added next to it),
@@ -133,14 +130,31 @@ the commits being pushed:
   files are staged, maps each one to its own exercise/exam/challenge id,
   and runs `python tools/cli.py test <id>` for **only** that one --
   `stage01_exercise03`, not all of `stage01`. Fast, focused feedback on
-  exactly what you just changed.
-- **pre-push** does the exact same mapping, but over whatever changed
-  between the remote ref and what's being pushed. This re-checks
-  pre-commit's job on what's actually about to leave your machine, so a
-  commit made with `--no-verify` (or anything else that slipped past
-  pre-commit) still gets caught before it ships.
+  exactly what you just changed. Always this granularity, not
+  configurable.
+- **pre-push** does the same mapping over whatever changed between the
+  remote ref and what's being pushed, re-checking pre-commit's job on
+  what's actually about to leave your machine (so a commit made with
+  `--no-verify`, or anything else that slipped past pre-commit, still
+  gets caught before it ships) -- but **its granularity is configurable**,
+  since pushing per exercise is the common case:
 
-Neither runs the full suite or `test --all`. A commit or push that
+  ```bash
+  git config hooks.pushGranularity exercise   # default -- just the exercise(s)/exam(s)/challenge(s) that changed
+  git config hooks.pushGranularity stage      # every exercise in any stage touched, not just the one(s) that changed
+  git config --unset hooks.pushGranularity    # back to the default (exercise)
+  ```
+
+  `stage` is deliberately broader: it catches a stage left inconsistent
+  by commits made with `--no-verify`, or an earlier exercise a later
+  change in the same stage accidentally broke -- useful if you're about
+  to push a whole stage's worth of commits at once instead of one
+  exercise at a time. An exam or challenge always tests as just itself
+  either way (neither is split into smaller units, so there's no wider
+  target to expand `stage` to). An unset or unrecognized value falls
+  back to `exercise` with a warning, never a hard failure.
+
+Neither hook runs the full suite or `test --all`. A commit or push that
 doesn't touch any exercise/exam/challenge file (docs, tests, the
 presentation, anything else) passes straight through untested, since
 there's nothing new to check. Install it once per local clone:
@@ -154,18 +168,21 @@ This points git at the tracked `.githooks/` folder (`git config
 core.hooksPath .githooks`) instead of copying files into the untracked
 `.git/hooks/`, so the hooks stay in sync with the repo automatically.
 The matching logic lives in `.githooks/run-tests-for-changed-files.sh`,
-shared by both hooks -- it reads changed file paths from stdin and maps
-each one to its exercise/exam/challenge id, at the one granularity both
-hooks use. Skip a single check when you need to with
-`git commit --no-verify` / `git push --no-verify`.
+shared by both hooks -- it reads changed file paths from stdin and an
+optional `exercise`/`stage` argument (defaulting to `exercise`), and maps
+each changed file to its test id at that granularity. Skip a single
+check when you need to with `git commit --no-verify` /
+`git push --no-verify`.
 
-Because only *staged*/*pushed* exercises get tested, this is safe to
-install both in a trainee's own working copy as they fill in
-`exercises/` stage by stage, and on this template repo itself: editing an
-unrelated file (like this README) is never blocked by some other
-exercise's stub still raising `NotImplementedError`. It only blocks a
-commit or push when the specific exercise/exam/challenge you just
-changed doesn't pass its own tests yet.
+Because only *staged*/*pushed* exercises get tested (plus, at `stage`
+granularity, only stages you actually touched), this is safe to install
+both in a trainee's own working copy as they fill in `exercises/` stage
+by stage, and on this template repo itself: editing an unrelated file
+(like this README) is never blocked by some other exercise's stub still
+raising `NotImplementedError`. It only blocks a commit or push when the
+specific exercise/exam/challenge you just changed (or, at `stage`
+granularity on push, any exercise in a stage you touched) doesn't pass
+its own tests yet.
 
 See `tests/test_stage12_exercise*.py` and `tests/test_stage13_exercise*.py`
 for the two exceptions that need special handling if you extend this

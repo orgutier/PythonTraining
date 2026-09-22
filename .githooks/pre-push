@@ -3,16 +3,24 @@
 # tools/install-git-hooks.sh (macOS/Linux). See README.md, section
 # "Git hook integration".
 #
-# Per exercise, same granularity as pre-commit: for each
+# Configurable granularity, per-exercise by default: for each
 # exercises/stageNN/exerciseXX/*.py (or exams/examNN/solution.py, or
 # challenges/challengeNN/solution.py) that differs between the remote ref
-# and what's being pushed, runs "python tools/cli.py test <id>" for that
-# ONE exercise/exam/challenge -- not its whole stage, and not the whole
-# suite. This re-checks pre-commit's job on whatever is actually about to
-# leave your machine, so a commit made with --no-verify (or any other way
-# a broken solution slipped past pre-commit) still gets caught before it
-# ships. A push that doesn't touch any exercise/exam/challenge file passes
-# through untested (nothing to check).
+# and what's being pushed, runs "python tools/cli.py test <id>" at
+# whichever granularity `git config hooks.pushGranularity` says --
+# "exercise" (the default, same as pre-commit: just the ONE
+# exercise/exam/challenge that changed) or "stage" (every exercise in any
+# stage touched, not just the one(s) that changed). Set it once per clone
+# with, e.g.:
+#     git config hooks.pushGranularity stage       # whole stage on push
+#     git config hooks.pushGranularity exercise     # back to the default
+#     git config --unset hooks.pushGranularity      # same as "exercise"
+#
+# Either way this re-checks pre-commit's job on whatever is actually
+# about to leave your machine, so a commit made with --no-verify (or any
+# other way a broken solution slipped past pre-commit) still gets caught
+# before it ships. A push that doesn't touch any exercise/exam/challenge
+# file passes through untested (nothing to check).
 #
 # Git feeds this hook one line per ref being pushed on stdin:
 #   <local ref> <local sha1> <remote ref> <remote sha1>
@@ -20,6 +28,19 @@
 HOOK_DIR=$(dirname "$0")
 ZERO="0000000000000000000000000000000000000000"
 overall_status=0
+
+granularity=$(git config --get hooks.pushGranularity)
+case "$granularity" in
+    exercise|stage)
+        ;;
+    "")
+        granularity="exercise"
+        ;;
+    *)
+        echo "pre-push: hooks.pushGranularity is '$granularity', expected 'exercise' or 'stage' -- using 'exercise'." >&2
+        granularity="exercise"
+        ;;
+esac
 
 while read -r local_ref local_sha remote_ref remote_sha; do
     if [ "$local_sha" = "$ZERO" ]; then
@@ -34,8 +55,8 @@ while read -r local_ref local_sha remote_ref remote_sha; do
         changed=$(git diff --name-only --diff-filter=ACM "$remote_sha" "$local_sha")
     fi
 
-    echo "pre-push: checking exercise/exam/challenge files changing on $remote_ref (per-exercise)..."
-    echo "$changed" | sh "$HOOK_DIR/run-tests-for-changed-files.sh"
+    echo "pre-push: checking exercise/exam/challenge files changing on $remote_ref (granularity: $granularity)..."
+    echo "$changed" | sh "$HOOK_DIR/run-tests-for-changed-files.sh" "$granularity"
     status=$?
     if [ $status -ne 0 ]; then
         overall_status=1
