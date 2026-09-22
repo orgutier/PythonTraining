@@ -1,6 +1,6 @@
 # Challenge 10 — Log Text Utilities with a Custom Context Manager
 
-**Do this after:** Week 05 (Files, Exceptions, Regex)
+**Do this after:** Stage 05 (Files, Exceptions, Regex)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge10` (or `pytest tests/test_challenge10.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem

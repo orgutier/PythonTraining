@@ -3,8 +3,8 @@ Command-line interface for the Python Training test suite.
 
 Usage (run from the repo root):
     python tools/cli.py list
-    python tools/cli.py test week01
-    python tools/cli.py test week01_exercise03
+    python tools/cli.py test stage01
+    python tools/cli.py test stage01_exercise03
     python tools/cli.py test challenge01
     python tools/cli.py test --all
 """
@@ -13,16 +13,17 @@ import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from core import run_week_tests, run_all_tests, WEEKS, WEEK_TOPICS, CHALLENGES, EXERCISES
+from core import run_stage_tests, run_all_tests, STAGES, STAGE_TOPICS, CHALLENGES, EXERCISES, EXAMS
 
 
 EXAMPLES = """\
 examples:
-  python tools/cli.py list                    list all 14 weeks, their exercises, and the challenges
-  python tools/cli.py test week01              run every exercise in week01
-  python tools/cli.py test week01_exercise03   run just that one exercise
+  python tools/cli.py list                    list all 14 stages, their exercises, the challenges, and the exams
+  python tools/cli.py test stage01              run every exercise in stage01
+  python tools/cli.py test stage01_exercise03   run just that one exercise
   python tools/cli.py test challenge01         run one interview challenge's tests
-  python tools/cli.py test --all               run the full test suite (weeks + challenges)
+  python tools/cli.py test exam01              run one evaluation exam's tests
+  python tools/cli.py test --all               run the full test suite (stages + challenges + exams)
 """
 
 # Same PASSED/FAILED-ERROR/separator color scheme as the "pass"/"fail"/"dim"
@@ -57,70 +58,77 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    subparsers.add_parser("list", help="List all available weeks, their exercises, and the interview challenges")
+    subparsers.add_parser("list", help="List all available stages, their exercises, the interview challenges, and the evaluation exams")
 
     test_parser = subparsers.add_parser(
         "test",
-        help="Run tests for one week, one exercise, one challenge, or everything",
-        description="Run tests for one week, one exercise within a week, one interview challenge, or everything.",
+        help="Run tests for one stage, one exercise, one challenge, one exam, or everything",
+        description="Run tests for one stage, one exercise within a stage, one interview challenge, one evaluation exam, or everything.",
         epilog=(
             "examples:\n"
-            "  python tools/cli.py test week01               run every exercise in week01\n"
-            "  python tools/cli.py test week01_exercise03    run just that one exercise\n"
+            "  python tools/cli.py test stage01               run every exercise in stage01\n"
+            "  python tools/cli.py test stage01_exercise03    run just that one exercise\n"
             "  python tools/cli.py test challenge01           run only challenge01's tests\n"
-            "  python tools/cli.py test --all                 run every week's + challenge's tests\n"
+            "  python tools/cli.py test exam01                run only exam01's tests\n"
+            "  python tools/cli.py test --all                 run every stage's + challenge's + exam's tests\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     test_parser.add_argument(
-        "week",
+        "stage",
         nargs="?",
-        help="e.g. week01, week01_exercise03, or challenge01 (see 'python tools/cli.py list')",
+        help="e.g. stage01, stage01_exercise03, challenge01, or exam01 (see 'python tools/cli.py list')",
     )
-    test_parser.add_argument("--all", action="store_true", help="Run every week's and challenge's tests")
+    test_parser.add_argument("--all", action="store_true", help="Run every stage's, challenge's, and exam's tests")
 
     args = parser.parse_args()
 
     if args.command == "list":
-        exercises_by_week = {}
+        exercises_by_stage = {}
         for ex_id in EXERCISES:
-            week = ex_id.split("_exercise")[0]
-            exercises_by_week.setdefault(week, []).append(ex_id)
-        for w in WEEKS:
-            week_exercises = exercises_by_week.get(w, [])
-            print(f"{w}  -  {WEEK_TOPICS[w]}  ({len(week_exercises)} exercise{'s' if len(week_exercises) != 1 else ''})")
-            for ex_id in week_exercises:
+            stage = ex_id.split("_exercise")[0]
+            exercises_by_stage.setdefault(stage, []).append(ex_id)
+        for w in STAGES:
+            stage_exercises = exercises_by_stage.get(w, [])
+            print(f"{w}  -  {STAGE_TOPICS[w]}  ({len(stage_exercises)} exercise{'s' if len(stage_exercises) != 1 else ''})")
+            for ex_id in stage_exercises:
                 print(f"    {ex_id}")
         print()
-        print("Run a single exercise with, e.g., python tools/cli.py test week01_exercise03")
-        print("Run a whole week (every exercise above) with, e.g., python tools/cli.py test week01")
+        print("Run a single exercise with, e.g., python tools/cli.py test stage01_exercise03")
+        print("Run a whole stage (every exercise above) with, e.g., python tools/cli.py test stage01")
         print()
         print("Interview challenges (see challenges/README.md):")
         for c in CHALLENGES:
             print(f"{c}")
+        print()
+        print("Evaluation exams (see exams/README.md):")
+        for e in EXAMS:
+            print(f"{e}")
         return
 
     if args.command == "test":
-        valid_targets = WEEKS + EXERCISES + CHALLENGES
+        valid_targets = STAGES + EXERCISES + CHALLENGES + EXAMS
         if args.all:
             result = run_all_tests()
-        elif args.week:
-            if args.week not in valid_targets:
+        elif args.stage:
+            if args.stage not in valid_targets:
                 print(
-                    f"Unknown target: {args.week!r}. Expected one of week01-week14, "
-                    f"a specific exercise like week01_exercise03, or "
-                    f"challenge01-challenge10 (run 'python tools/cli.py list' to see them all).\n"
-                    f"Example: python tools/cli.py test week01"
+                    f"Unknown target: {args.stage!r}. Expected one of stage01-stage14, "
+                    f"a specific exercise like stage01_exercise03, "
+                    f"challenge01-challenge26, or exam01-exam03 "
+                    f"(run 'python tools/cli.py list' to see them all).\n"
+                    f"Example: python tools/cli.py test stage01"
                 )
                 sys.exit(1)
-            result = run_week_tests(args.week)
+            result = run_stage_tests(args.stage)
         else:
             print(
-                "Specify a week/exercise/challenge or pass --all.\n"
+                "Specify a stage/exercise/challenge/exam or pass --all.\n"
                 "Examples:\n"
-                "  python tools/cli.py test week01\n"
-                "  python tools/cli.py test week01_exercise03\n"
+                "  python tools/cli.py test stage01\n"
+                "  python tools/cli.py test stage01_exercise03\n"
                 "  python tools/cli.py test challenge01\n"
+                "  python tools/cli.py test exam01\n"
                 "  python tools/cli.py test --all"
             )
             sys.exit(1)

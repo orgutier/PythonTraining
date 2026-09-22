@@ -1,6 +1,6 @@
 # Challenge 19 — Sales Data Analyzer
 
-**Do this after:** Week 10 (Pandas)
+**Do this after:** Stage 10 (Pandas)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge19` (or `pytest tests/test_challenge19.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem

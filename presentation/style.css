@@ -217,7 +217,7 @@ html, body{
 }
 
 /* ============================================================
-   Week schedule — day-by-day rows for delivering this topic.
+   Stage schedule — day-by-day rows for delivering this topic.
    ============================================================ */
 .schedule{
   margin-bottom: 32px;
@@ -295,7 +295,7 @@ html, body{
 
 /* ============================================================
    Interview challenge callout — an optional, ungraded,
-   interview-style problem assigned to this week.
+   interview-style problem assigned to this stage.
    ============================================================ */
 .challenge{
   max-width: var(--max-line);

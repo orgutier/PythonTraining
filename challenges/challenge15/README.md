@@ -1,6 +1,6 @@
 # Challenge 15 — Matrix: A Rich Numeric Type
 
-**Do this after:** Week 08 (The Python Data Model)
+**Do this after:** Stage 08 (The Python Data Model)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge15` (or `pytest tests/test_challenge15.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -8,8 +8,8 @@
 "Implement a Matrix class" is a real interview staple precisely because it
 forces you to decide what `+`, `==`, `len()`, indexing, iteration, and
 `bool()` should each mean for a type that isn't a builtin -- exactly what
-Week 8's dunder methods are *for*. This challenge asks for essentially
-every dunder from this week on one cohesive class.
+Stage 8's dunder methods are *for*. This challenge asks for essentially
+every dunder from this stage on one cohesive class.
 
 Implement:
 

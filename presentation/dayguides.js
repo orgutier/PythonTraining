@@ -1,13 +1,13 @@
 // Day-by-day deep-dive documentation, opened by clicking a Basic/Mid/Advanced
-// row in a topic's Week schedule table. Every example below was executed for
+// row in a topic's Stage schedule table. Every example below was executed for
 // real (see scripts used to generate this file) -- the shown output is not
 // hand-typed.
 
 const DAY_GUIDES = {
-  "week01-basic": {
-    week: 1,
+  "stage01-basic": {
+    stage: 1,
     tierLabel: "Basic tier",
-    title: "Week 1 \u2014 Basic tier: variables, types, casting",
+    title: "Stage 1 \u2014 Basic tier: variables, types, casting",
     summary: "Get comfortable naming values, telling the five core types apart, and converting between them explicitly.",
     examples: [
       {
@@ -22,10 +22,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week01-mid": {
-    week: 1,
+  "stage01-mid": {
+    stage: 1,
     tierLabel: "Mid tier",
-    title: "Week 1 \u2014 Mid tier: f-strings, walrus, float caveats",
+    title: "Stage 1 \u2014 Mid tier: f-strings, walrus, float caveats",
     summary: "Write more compact, idiomatic expressions -- and see the float-imprecision trap firsthand.",
     examples: [
       {
@@ -40,10 +40,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week01-advanced": {
-    week: 1,
+  "stage01-advanced": {
+    stage: 1,
     tierLabel: "Advanced tier & internals",
-    title: "Week 1 \u2014 Advanced tier: big ints, safe float comparison",
+    title: "Stage 1 \u2014 Advanced tier: big ints, safe float comparison",
     summary: "See arbitrary-precision integers in action, and the correct way to compare floats.",
     examples: [
       {
@@ -58,10 +58,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week02-basic": {
-    week: 2,
+  "stage02-basic": {
+    stage: 2,
     tierLabel: "Basic tier",
-    title: "Week 2 \u2014 Basic tier: loops, break/continue",
+    title: "Stage 2 \u2014 Basic tier: loops, break/continue",
     summary: "Practice the core loop constructs and controlling their flow with break/continue.",
     examples: [
       {
@@ -76,10 +76,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week02-mid": {
-    week: 2,
+  "stage02-mid": {
+    stage: 2,
     tierLabel: "Mid tier",
-    title: "Week 2 \u2014 Mid tier: for...else, zip()",
+    title: "Stage 2 \u2014 Mid tier: for...else, zip()",
     summary: "Two idioms that come up constantly: the loop else clause, and iterating several sequences in lockstep.",
     examples: [
       {
@@ -94,10 +94,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week02-advanced": {
-    week: 2,
+  "stage02-advanced": {
+    stage: 2,
     tierLabel: "Advanced tier & internals",
-    title: "Week 2 \u2014 Advanced tier: custom iterators, itertools",
+    title: "Stage 2 \u2014 Advanced tier: custom iterators, itertools",
     summary: "See the exact iterator protocol that every for loop relies on, plus a itertools building block.",
     examples: [
       {
@@ -112,10 +112,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week03-basic": {
-    week: 3,
+  "stage03-basic": {
+    stage: 3,
     tierLabel: "Basic tier",
-    title: "Week 3 \u2014 Basic tier: args, kwargs, recursion",
+    title: "Stage 3 \u2014 Basic tier: args, kwargs, recursion",
     summary: "Write functions that accept a flexible number of arguments, and your first recursive function.",
     examples: [
       {
@@ -130,10 +130,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week03-mid": {
-    week: 3,
+  "stage03-mid": {
+    stage: 3,
     tierLabel: "Mid tier",
-    title: "Week 3 \u2014 Mid tier: keyword-only params, closures",
+    title: "Stage 3 \u2014 Mid tier: keyword-only params, closures",
     summary: "Lock down a function's call signature, and see a closure remember state between calls.",
     examples: [
       {
@@ -148,10 +148,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week03-advanced": {
-    week: 3,
+  "stage03-advanced": {
+    stage: 3,
     tierLabel: "Advanced tier & internals",
-    title: "Week 3 \u2014 Advanced tier: lru_cache, generators",
+    title: "Stage 3 \u2014 Advanced tier: lru_cache, generators",
     summary: "Memoize a recursive function in one line, and write a lazy generator instead of building a whole list.",
     examples: [
       {
@@ -166,10 +166,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week04-basic": {
-    week: 4,
+  "stage04-basic": {
+    stage: 4,
     tierLabel: "Basic tier",
-    title: "Week 4 \u2014 Basic tier: comprehensions, core methods",
+    title: "Stage 4 \u2014 Basic tier: comprehensions, core methods",
     summary: "Build collections with comprehensions instead of append-loops, and use the everyday list/set methods.",
     examples: [
       {
@@ -184,10 +184,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week04-mid": {
-    week: 4,
+  "stage04-mid": {
+    stage: 4,
     tierLabel: "Mid tier",
-    title: "Week 4 \u2014 Mid tier: sorting with key=, set algebra",
+    title: "Stage 4 \u2014 Mid tier: sorting with key=, set algebra",
     summary: "Sort structured data by a specific field, and compare two collections with set operators.",
     examples: [
       {
@@ -202,10 +202,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week04-advanced": {
-    week: 4,
+  "stage04-advanced": {
+    stage: 4,
     tierLabel: "Advanced tier & internals",
-    title: "Week 4 \u2014 Advanced tier: defaultdict, Counter",
+    title: "Stage 4 \u2014 Advanced tier: defaultdict, Counter",
     summary: "Two collections-module tools that replace a lot of manual dict bookkeeping.",
     examples: [
       {
@@ -220,10 +220,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week05-basic": {
-    week: 5,
+  "stage05-basic": {
+    stage: 5,
     tierLabel: "Basic tier",
-    title: "Week 5 \u2014 Basic tier: try/except, basic regex",
+    title: "Stage 5 \u2014 Basic tier: try/except, basic regex",
     summary: "Handle a failure without crashing, and pull data out of text with a regex.",
     examples: [
       {
@@ -238,10 +238,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week05-mid": {
-    week: 5,
+  "stage05-mid": {
+    stage: 5,
     tierLabel: "Mid tier",
-    title: "Week 5 \u2014 Mid tier: exception chaining, named groups",
+    title: "Stage 5 \u2014 Mid tier: exception chaining, named groups",
     summary: "Preserve the original cause when translating an exception, and name your regex captures.",
     examples: [
       {
@@ -256,10 +256,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week05-advanced": {
-    week: 5,
+  "stage05-advanced": {
+    stage: 5,
     tierLabel: "Advanced tier & internals",
-    title: "Week 5 \u2014 Advanced tier: custom context managers",
+    title: "Stage 5 \u2014 Advanced tier: custom context managers",
     summary: "Build a context manager without a class, and a small exception hierarchy of your own.",
     examples: [
       {
@@ -274,10 +274,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week06-basic": {
-    week: 6,
+  "stage06-basic": {
+    stage: 6,
     tierLabel: "Basic tier",
-    title: "Week 6 \u2014 Basic tier: classes, @property",
+    title: "Stage 6 \u2014 Basic tier: classes, @property",
     summary: "Write your first class, then expose a computed value with @property instead of a plain method call.",
     examples: [
       {
@@ -292,10 +292,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week06-mid": {
-    week: 6,
+  "stage06-mid": {
+    stage: 6,
     tierLabel: "Mid tier",
-    title: "Week 6 \u2014 Mid tier: __slots__, @classmethod",
+    title: "Stage 6 \u2014 Mid tier: __slots__, @classmethod",
     summary: "Lock a class down to fixed attributes, and build an alternative constructor.",
     examples: [
       {
@@ -310,10 +310,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week06-advanced": {
-    week: 6,
+  "stage06-advanced": {
+    stage: 6,
     tierLabel: "Advanced tier & internals",
-    title: "Week 6 \u2014 Advanced tier: descriptors, __init_subclass__",
+    title: "Stage 6 \u2014 Advanced tier: descriptors, __init_subclass__",
     summary: "Build the same mechanism @property is made of, and a hook that fires on every subclass.",
     examples: [
       {
@@ -328,10 +328,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week07-basic": {
-    week: 7,
+  "stage07-basic": {
+    stage: 7,
     tierLabel: "Basic tier",
-    title: "Week 7 \u2014 Basic tier: inheritance, duck typing",
+    title: "Stage 7 \u2014 Basic tier: inheritance, duck typing",
     summary: "Override a parent method, and see Python check behavior instead of type.",
     examples: [
       {
@@ -346,10 +346,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week07-mid": {
-    week: 7,
+  "stage07-mid": {
+    stage: 7,
     tierLabel: "Mid tier",
-    title: "Week 7 \u2014 Mid tier: ABCs, composition",
+    title: "Stage 7 \u2014 Mid tier: ABCs, composition",
     summary: "Force subclasses to implement a method, and prefer composition over inheritance.",
     examples: [
       {
@@ -364,10 +364,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week07-advanced": {
-    week: 7,
+  "stage07-advanced": {
+    stage: 7,
     tierLabel: "Advanced tier & internals",
-    title: "Week 7 \u2014 Advanced tier: MRO, Protocol",
+    title: "Stage 7 \u2014 Advanced tier: MRO, Protocol",
     summary: "See the actual method resolution order for diamond inheritance, and structural typing with Protocol.",
     examples: [
       {
@@ -382,10 +382,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week08-basic": {
-    week: 8,
+  "stage08-basic": {
+    stage: 8,
     tierLabel: "Basic tier",
-    title: "Week 8 \u2014 Basic tier: __repr__, __str__, __eq__",
+    title: "Stage 8 \u2014 Basic tier: __repr__, __str__, __eq__",
     summary: "Give your objects a real debug representation and value-based equality.",
     examples: [
       {
@@ -400,10 +400,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week08-mid": {
-    week: 8,
+  "stage08-mid": {
+    stage: 8,
     tierLabel: "Mid tier",
-    title: "Week 8 \u2014 Mid tier: __len__/__getitem__, __call__",
+    title: "Stage 8 \u2014 Mid tier: __len__/__getitem__, __call__",
     summary: "Make an object work with len()/indexing/for loops, and make an instance callable like a function.",
     examples: [
       {
@@ -418,10 +418,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week08-advanced": {
-    week: 8,
+  "stage08-advanced": {
+    stage: 8,
     tierLabel: "Advanced tier & internals",
-    title: "Week 8 \u2014 Advanced tier: operator overloading, context managers",
+    title: "Stage 8 \u2014 Advanced tier: operator overloading, context managers",
     summary: "Implement + correctly with NotImplemented, and a class-based context manager.",
     examples: [
       {
@@ -436,10 +436,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week09-basic": {
-    week: 9,
+  "stage09-basic": {
+    stage: 9,
     tierLabel: "Basic tier",
-    title: "Week 9 \u2014 Basic tier: json round-trip, datetime basics",
+    title: "Stage 9 \u2014 Basic tier: json round-trip, datetime basics",
     summary: "Serialize and reload Python data as JSON, and format a datetime for display.",
     examples: [
       {
@@ -454,10 +454,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week09-mid": {
-    week: 9,
+  "stage09-mid": {
+    stage: 9,
     tierLabel: "Mid tier",
-    title: "Week 9 \u2014 Mid tier: pathlib, ElementTree",
+    title: "Stage 9 \u2014 Mid tier: pathlib, ElementTree",
     summary: "Build paths the modern way, and parse a small XML document.",
     examples: [
       {
@@ -472,10 +472,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week09-advanced": {
-    week: 9,
+  "stage09-advanced": {
+    stage: 9,
     tierLabel: "Advanced tier & internals",
-    title: "Week 9 \u2014 Advanced tier: JSON default=, timedelta math",
+    title: "Stage 9 \u2014 Advanced tier: JSON default=, timedelta math",
     summary: "Serialize a non-JSON-native type, and do real calendar arithmetic.",
     examples: [
       {
@@ -490,10 +490,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week10-basic": {
-    week: 10,
+  "stage10-basic": {
+    stage: 10,
     tierLabel: "Basic tier",
-    title: "Week 10 \u2014 Basic tier: DataFrame basics, read_csv",
+    title: "Stage 10 \u2014 Basic tier: DataFrame basics, read_csv",
     summary: "Build a DataFrame directly and from CSV text, then take the standard first look at it.",
     examples: [
       {
@@ -508,10 +508,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week10-mid": {
-    week: 10,
+  "stage10-mid": {
+    stage: 10,
     tierLabel: "Mid tier",
-    title: "Week 10 \u2014 Mid tier: boolean indexing, groupby",
+    title: "Stage 10 \u2014 Mid tier: boolean indexing, groupby",
     summary: "Filter rows with a boolean mask, and aggregate by group.",
     examples: [
       {
@@ -526,10 +526,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week10-advanced": {
-    week: 10,
+  "stage10-advanced": {
+    stage: 10,
     tierLabel: "Advanced tier & internals",
-    title: "Week 10 \u2014 Advanced tier: vectorization, pivot_table",
+    title: "Stage 10 \u2014 Advanced tier: vectorization, pivot_table",
     summary: "Compare a vectorized column operation to .apply(), and build a two-dimensional summary.",
     examples: [
       {
@@ -544,10 +544,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week11-basic": {
-    week: 11,
+  "stage11-basic": {
+    stage: 11,
     tierLabel: "Basic tier",
-    title: "Week 11 \u2014 Basic tier: images as arrays, drawing",
+    title: "Stage 11 \u2014 Basic tier: images as arrays, drawing",
     summary: "See that an image is just a NumPy array, and draw directly onto one.",
     examples: [
       {
@@ -562,10 +562,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week11-mid": {
-    week: 11,
+  "stage11-mid": {
+    stage: 11,
     tierLabel: "Mid tier",
-    title: "Week 11 \u2014 Mid tier: color conversion, cropping",
+    title: "Stage 11 \u2014 Mid tier: color conversion, cropping",
     summary: "Convert BGR to grayscale, and crop an image with plain array slicing.",
     examples: [
       {
@@ -580,10 +580,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week11-advanced": {
-    week: 11,
+  "stage11-advanced": {
+    stage: 11,
     tierLabel: "Advanced tier & internals",
-    title: "Week 11 \u2014 Advanced tier: thresholding, blurring",
+    title: "Stage 11 \u2014 Advanced tier: thresholding, blurring",
     summary: "Convert an image to pure black/white, and smooth it with a convolution.",
     examples: [
       {
@@ -598,10 +598,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week12-basic": {
-    week: 12,
+  "stage12-basic": {
+    stage: 12,
     tierLabel: "Basic tier",
-    title: "Week 12 \u2014 Basic tier: threads, mocked requests",
+    title: "Stage 12 \u2014 Basic tier: threads, mocked requests",
     summary: "Start and join several threads, and mock requests.get the same way the graded tests do.",
     examples: [
       {
@@ -616,10 +616,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week12-mid": {
-    week: 12,
+  "stage12-mid": {
+    stage: 12,
     tierLabel: "Mid tier",
-    title: "Week 12 \u2014 Mid tier: Lock, raise_for_status",
+    title: "Stage 12 \u2014 Mid tier: Lock, raise_for_status",
     summary: "Protect shared state from a race, and handle a failing HTTP response properly.",
     examples: [
       {
@@ -634,10 +634,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week12-advanced": {
-    week: 12,
+  "stage12-advanced": {
+    stage: 12,
     tierLabel: "Advanced tier & internals",
-    title: "Week 12 \u2014 Advanced tier: ThreadPoolExecutor, session reuse",
+    title: "Stage 12 \u2014 Advanced tier: ThreadPoolExecutor, session reuse",
     summary: "Run tasks through a thread pool instead of raw Threads, and reuse one session across calls.",
     examples: [
       {
@@ -652,10 +652,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week13-basic": {
-    week: 13,
+  "stage13-basic": {
+    stage: 13,
     tierLabel: "Basic tier",
-    title: "Week 13 \u2014 Basic tier: a route, query parameters",
+    title: "Stage 13 \u2014 Basic tier: a route, query parameters",
     summary: "Stand up a minimal FastAPI route and call it in-process with TestClient.",
     examples: [
       {
@@ -670,10 +670,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week13-mid": {
-    week: 13,
+  "stage13-mid": {
+    stage: 13,
     tierLabel: "Mid tier",
-    title: "Week 13 \u2014 Mid tier: Pydantic validation, Depends()",
+    title: "Stage 13 \u2014 Mid tier: Pydantic validation, Depends()",
     summary: "Validate a request body with a Pydantic model, and share logic across routes with Depends.",
     examples: [
       {
@@ -688,10 +688,10 @@ const DAY_GUIDES = {
       },
     ]
   },
-  "week13-advanced": {
-    week: 13,
+  "stage13-advanced": {
+    stage: 13,
     tierLabel: "Advanced tier & internals",
-    title: "Week 13 \u2014 Advanced tier: async routes, 404 handling",
+    title: "Stage 13 \u2014 Advanced tier: async routes, 404 handling",
     summary: "Write an async def endpoint, and confirm an unknown route returns a real 404.",
     examples: [
       {

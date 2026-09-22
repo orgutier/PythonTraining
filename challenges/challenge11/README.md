@@ -1,6 +1,6 @@
 # Challenge 11 — LRU Cache with a Descriptor and Class-Level Stats
 
-**Do this after:** Week 06 (OOP I)
+**Do this after:** Stage 06 (OOP I)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge11` (or `pytest tests/test_challenge11.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem

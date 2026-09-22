@@ -1,6 +1,6 @@
 # Challenge 03 — Log Stream Parser and Scanner
 
-**Do this after:** Week 02 (Control Flow)
+**Do this after:** Stage 02 (Control Flow)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge03` (or `pytest tests/test_challenge03.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -8,7 +8,7 @@
 Parsing and scanning a stream of log lines is the loops-and-conditionals
 problem that shows up in almost every "read this input and tell me
 something about it" interview prompt. This challenge is built to pull in
-most of Week 2's control-flow toolkit at once, not just a `for` loop.
+most of Stage 2's control-flow toolkit at once, not just a `for` loop.
 
 Implement:
 

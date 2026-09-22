@@ -1,6 +1,6 @@
 # Challenge 26 — Underground System API with Live Diagnostics
 
-**Do this after:** Week 13 (FastAPI)
+**Do this after:** Stage 13 (FastAPI)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge26` (or `pytest tests/test_challenge26.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -10,7 +10,7 @@ out of a transit system, and reports the average travel time between any
 two stations. This version injects its storage via `Depends()` instead of
 touching module globals directly inside the routes, and adds a small
 diagnostics utility built from `TestClient`/`uvicorn.run` -- the parts of
-Week 13 the URL shortener challenge didn't need.
+Stage 13 the URL shortener challenge didn't need.
 
 Implement:
 

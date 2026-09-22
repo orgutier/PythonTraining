@@ -7,7 +7,7 @@ your solution must follow (Depends() for a header-based auth check, Pydantic req
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module, matching the convention used by
-exercises/weekNN/solution.py.
+exercises/stageNN/solution.py.
 """
 
 

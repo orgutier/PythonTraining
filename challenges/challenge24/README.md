@@ -1,6 +1,6 @@
 # Challenge 24 — Bounded Job Queue with Retry and ThreadPoolExecutor
 
-**Do this after:** Week 12 (Requests + Threading)
+**Do this after:** Stage 12 (Requests + Threading)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge24` (or `pytest tests/test_challenge24.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem

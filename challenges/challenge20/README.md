@@ -1,6 +1,6 @@
 # Challenge 20 — Two Sum, Pandas-Style, with Joins and Diagnostics
 
-**Do this after:** Week 10 (Pandas)
+**Do this after:** Stage 10 (Pandas)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge20` (or `pytest tests/test_challenge20.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -9,7 +9,7 @@ A companion to Challenge 19: LeetCode #1 ("Two Sum") solved the way a data
 engineer would -- as a vectorized `pandas.Series` operation, not a Python
 loop -- plus a small set of everyday pandas utilities (joining two tables,
 a derived column, a multi-indexed summary, and a combined diagnostics
-report) that round out the rest of this week's toolkit.
+report) that round out the rest of this stage's toolkit.
 
 Implement:
 

@@ -1,6 +1,6 @@
 # Challenge 02 — Identity, Equality, and a Login Prompt
 
-**Do this after:** Week 01 (Python Fundamentals)
+**Do this after:** Stage 01 (Python Fundamentals)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge02` (or `pytest tests/test_challenge02.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -9,7 +9,7 @@
 real debugging (duplicate detection, cache invalidation, `None` vs a
 falsy-but-present default). This challenge builds a small identity/equality
 auditor, plus a tiny login prompt that gets the `None`-vs-falsy distinction
-right -- both squarely Week 1 material.
+right -- both squarely Stage 1 material.
 
 Implement four functions:
 

@@ -7,7 +7,7 @@ your solution must follow (ten dunders on one class -- __repr__/__str__/__eq__/_
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module, matching the convention used by
-exercises/weekNN/solution.py.
+exercises/stageNN/solution.py.
 """
 
 

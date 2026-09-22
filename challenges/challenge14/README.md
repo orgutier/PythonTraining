@@ -1,12 +1,12 @@
 # Challenge 14 — Shape Library with Protocols and Composition
 
-**Do this after:** Week 07 (OOP II)
+**Do this after:** Stage 07 (OOP II)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge14` (or `pytest tests/test_challenge14.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
 A companion to Challenge 13: this one deliberately avoids a base-class
-inheritance chain, to give the *other* half of Week 7's ideas -- structural
+inheritance chain, to give the *other* half of Stage 7's ideas -- structural
 typing (`typing.Protocol`) and composition -- somewhere concrete to live.
 `Circle` and `Rectangle` share **no** common base class at all; they're
 related only by having matching methods.

@@ -3,16 +3,16 @@
 # tools/install-git-hooks.sh (macOS/Linux). See README.md, section
 # "Git hook integration".
 #
-# Whole week, not just what changed: for each exercises/weekNN/exerciseXX/*.py
-# (or challenges/challengeNN/solution.py) that differs between the remote
-# ref and what's being pushed, runs "python tools/cli.py test <id>" for
-# that entire week/challenge -- every exercise in a week you touched, not
-# just the one(s) that changed, and not the whole suite. This is
-# deliberately broader than pre-commit's per-exercise check: it catches a
-# week left inconsistent by commits made with --no-verify, or an earlier
-# exercise a later change in the same week accidentally broke. A push
-# that doesn't touch any exercise/challenge file passes through untested
-# (nothing to check).
+# Per exercise, same granularity as pre-commit: for each
+# exercises/stageNN/exerciseXX/*.py (or exams/examNN/solution.py, or
+# challenges/challengeNN/solution.py) that differs between the remote ref
+# and what's being pushed, runs "python tools/cli.py test <id>" for that
+# ONE exercise/exam/challenge -- not its whole stage, and not the whole
+# suite. This re-checks pre-commit's job on whatever is actually about to
+# leave your machine, so a commit made with --no-verify (or any other way
+# a broken solution slipped past pre-commit) still gets caught before it
+# ships. A push that doesn't touch any exercise/exam/challenge file passes
+# through untested (nothing to check).
 #
 # Git feeds this hook one line per ref being pushed on stdin:
 #   <local ref> <local sha1> <remote ref> <remote sha1>
@@ -34,8 +34,8 @@ while read -r local_ref local_sha remote_ref remote_sha; do
         changed=$(git diff --name-only --diff-filter=ACM "$remote_sha" "$local_sha")
     fi
 
-    echo "pre-push: checking exercise/challenge files changing on $remote_ref (whole week per exercise touched)..."
-    echo "$changed" | sh "$HOOK_DIR/run-tests-for-changed-files.sh" week
+    echo "pre-push: checking exercise/exam/challenge files changing on $remote_ref (per-exercise)..."
+    echo "$changed" | sh "$HOOK_DIR/run-tests-for-changed-files.sh"
     status=$?
     if [ $status -ne 0 ]; then
         overall_status=1

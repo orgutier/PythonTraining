@@ -1,6 +1,6 @@
 # Challenge 04 — Batch Retry Simulator
 
-**Do this after:** Week 02 (Control Flow)
+**Do this after:** Stage 02 (Control Flow)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge04` (or `pytest tests/test_challenge04.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -8,7 +8,7 @@
 A companion to Challenge 03: given the log entries it parses, batched into
 groups, simulate retrying batches until a "clean" one is found -- the same
 retry-with-a-give-up-point shape behind real job queues and API retry
-logic, and a good excuse to use `while`, `itertools`, and both of Week 2's
+logic, and a good excuse to use `while`, `itertools`, and both of Stage 2's
 `else`-on-a-loop forms.
 
 Implement:

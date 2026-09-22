@@ -7,7 +7,7 @@ your solution must follow (cv2.CascadeClassifier for detection, cv2.imread()/imw
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module, matching the convention used by
-exercises/weekNN/solution.py.
+exercises/stageNN/solution.py.
 """
 
 

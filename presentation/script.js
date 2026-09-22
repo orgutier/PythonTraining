@@ -98,7 +98,7 @@
     wrap.className = "schedule";
 
     const h2 = document.createElement("h2");
-    h2.textContent = "Week schedule";
+    h2.textContent = "Stage schedule";
     wrap.appendChild(h2);
 
     const table = document.createElement("table");
@@ -311,7 +311,7 @@
     let html = "<p class='drawer-summary'>" + escapeHtml(guide.summary) + "</p>";
     guide.examples.forEach((ex, i) => {
       html += "<div class='example-caption'>Example " + (i + 1) + ": " + escapeHtml(ex.caption) + "</div>";
-      html += codeBlockHtml(ex.code, guide.week ? ("week" + String(guide.week).padStart(2, "0") + "_example" + (i + 1) + ".py") : undefined);
+      html += codeBlockHtml(ex.code, guide.stage ? ("stage" + String(guide.stage).padStart(2, "0") + "_example" + (i + 1) + ".py") : undefined);
       html += outputBlockHtml(ex.output);
     });
     drawerBodyEl.innerHTML = html;

@@ -6,10 +6,11 @@ Each student works on their own branch named "<group>/<user_id>" (e.g.
 fetches every branch matching that shape, checks each one out into a
 throwaway git worktree, runs THIS checkout's own test suite (never the
 student's copy of it -- see "Why the canonical test suite" below) against
-their exercises/ and challenges/ trees, and writes the pass/fail results
-into report.xlsx: one row per student, one column per exercise (grouped
-by week) on one sheet, one column per challenge (grouped by week) on
-another, and a Summary sheet with solved/total counts for both.
+their exercises/, challenges/, and exams/ trees, and writes the pass/fail
+results into report.xlsx: one row per student, one column per exercise
+(grouped by stage) on one sheet, one column per challenge (grouped by
+stage) on another, one column per exam on a third, and a Summary sheet
+with solved/total counts for all three.
 
 Usage (from the repo root):
     python tools/report.py
@@ -32,8 +33,8 @@ same, current test suite, regardless of what's sitting in their branch's
 tests/ directory.
 
 A student branch that predates a given exercise/challenge (e.g. it
-branched off before Week 14 existed) simply doesn't have that
-exercises/weekNN/exerciseXX/ folder -- the corresponding test file fails
+branched off before Stage 14 existed) simply doesn't have that
+exercises/stageNN/exerciseXX/ folder -- the corresponding test file fails
 to import and is recorded as not solved. That's a known, accepted
 limitation: this reports what currently passes, not intent or timing.
 """
@@ -49,7 +50,7 @@ import threading
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from core import REPO_ROOT, EXERCISES, CHALLENGES  # noqa: E402
+from core import REPO_ROOT, EXERCISES, CHALLENGES, EXAMS  # noqa: E402
 
 try:
     import openpyxl
@@ -108,13 +109,13 @@ def fetch_remote(remote: str) -> None:
 
 # --------------------------------------------------------------------------- per-student test run
 
-def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list) -> dict:
+def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list) -> dict:
     """Check out `ref` into a throwaway worktree, overlay this checkout's
-    tests/ + conftest.py, run every exercise's and challenge's own test
-    file, and return {"exercises": {id: bool}, "challenges": {id: bool},
-    "error": str | None}."""
+    tests/ + conftest.py, run every exercise's, challenge's, and exam's own
+    test file, and return {"exercises": {id: bool}, "challenges": {id: bool},
+    "exams": {id: bool}, "error": str | None}."""
     worktree_dir = Path(tempfile.mkdtemp(prefix="pt-report-"))
-    outcome = {"exercises": {}, "challenges": {}, "error": None}
+    outcome = {"exercises": {}, "challenges": {}, "exams": {}, "error": None}
     added = False
     try:
         with _WORKTREE_LOCK:
@@ -135,6 +136,8 @@ def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list) -> dict
             outcome["exercises"][ex_id] = _run_one_test_file(worktree_dir, f"tests/test_{ex_id}.py")
         for ch_id in challenge_ids:
             outcome["challenges"][ch_id] = _run_one_test_file(worktree_dir, f"tests/test_{ch_id}.py")
+        for exam_id in exam_ids:
+            outcome["exams"][exam_id] = _run_one_test_file(worktree_dir, f"tests/test_{exam_id}.py")
     except Exception as e:  # noqa: BLE001 -- one bad branch must not kill the whole report run
         outcome["error"] = f"{type(e).__name__}: {e}"
     finally:
@@ -158,28 +161,40 @@ def _run_one_test_file(worktree_dir: Path, relative_path: str) -> bool:
     return result.returncode == 0
 
 
-# --------------------------------------------------------------------------- week grouping
+# --------------------------------------------------------------------------- stage grouping
 
-def exercise_week(exercise_id: str) -> str:
+def exercise_stage(exercise_id: str) -> str:
     return exercise_id.split("_exercise")[0]
 
 
-def challenge_week(challenge_id: str) -> str:
-    """The week a challenge belongs to, read from its own README.md's
-    "Do this after: Week NN" line -- not hardcoded, so this stays correct
-    even if the challenges-per-week convention ever changes."""
+def challenge_stage(challenge_id: str) -> str:
+    """The stage a challenge belongs to, read from its own README.md's
+    "Do this after: Stage NN" line -- not hardcoded, so this stays correct
+    even if the challenges-per-stage convention ever changes."""
     readme = REPO_ROOT / "challenges" / challenge_id / "README.md"
     if readme.exists():
-        m = re.search(r"Week (\d+)", readme.read_text())
+        m = re.search(r"Stage (\d+)", readme.read_text())
         if m:
-            return f"week{int(m.group(1)):02d}"
+            return f"stage{int(m.group(1)):02d}"
     return "unknown"
+
+
+def exam_label(exam_id: str) -> str:
+    """A short column header for an exam, e.g. "Exam 1 (Stages 1-4)", read
+    from its own README.md's "Covers: Stages NN-NN" line when present."""
+    readme = REPO_ROOT / "exams" / exam_id / "README.md"
+    n = int(exam_id.replace("exam", ""))
+    if readme.exists():
+        m = re.search(r"Covers: Stages (\d+-\d+)", readme.read_text())
+        if m:
+            return f"Exam {n} (Stages {m.group(1)})"
+    return f"Exam {n}"
 
 
 # --------------------------------------------------------------------------- report building
 
 HEADER_FILL = PatternFill("solid", fgColor="1F2933")
-WEEK_FILL = PatternFill("solid", fgColor="334155")
+STAGE_FILL = PatternFill("solid", fgColor="334155")
 PASS_FILL = PatternFill("solid", fgColor="C6EFCE")
 FAIL_FILL = PatternFill("solid", fgColor="FFC7CE")
 ERROR_FILL = PatternFill("solid", fgColor="FFEB9C")
@@ -199,7 +214,7 @@ def _autosize(ws, min_width=4, max_width=28):
         ws.column_dimensions[col].width = width
 
 
-def _write_grid_sheet(wb, title: str, rows: list, ids: list, week_of, results_key: str):
+def _write_grid_sheet(wb, title: str, rows: list, ids: list, stage_of, results_key: str):
     ws = wb.create_sheet(title)
     id_cols = {id_: 3 + i for i, id_ in enumerate(ids)}
 
@@ -211,33 +226,33 @@ def _write_grid_sheet(wb, title: str, rows: list, ids: list, week_of, results_ke
         ws.cell(row=1, column=col).fill = HEADER_FILL
         ws.merge_cells(start_row=1, start_column=col, end_row=2, end_column=col)
 
-    # Week-grouped merged header row, then one sub-header per id.
-    weeks_in_order = []
+    # Stage-grouped merged header row, then one sub-header per id.
+    stages_in_order = []
     for id_ in ids:
-        w = week_of(id_)
-        if not weeks_in_order or weeks_in_order[-1] != w:
-            weeks_in_order.append(w)
-    week_start_col = {}
+        w = stage_of(id_)
+        if not stages_in_order or stages_in_order[-1] != w:
+            stages_in_order.append(w)
+    stage_start_col = {}
     col = 3
     for id_ in ids:
-        w = week_of(id_)
-        week_start_col.setdefault(w, col)
+        w = stage_of(id_)
+        stage_start_col.setdefault(w, col)
         col += 1
     col = 3
-    prev_week = None
+    prev_stage = None
     for id_ in ids:
-        w = week_of(id_)
-        if w != prev_week:
-            span_ids = [i for i in ids if week_of(i) == w]
-            start = week_start_col[w]
+        w = stage_of(id_)
+        if w != prev_stage:
+            span_ids = [i for i in ids if stage_of(i) == w]
+            start = stage_start_col[w]
             end = start + len(span_ids) - 1
-            cell = ws.cell(row=1, column=start, value=w.replace("week", "Week "))
+            cell = ws.cell(row=1, column=start, value=w.replace("stage", "Stage "))
             cell.font = HEADER_FONT
-            cell.fill = WEEK_FILL
+            cell.fill = STAGE_FILL
             cell.alignment = Alignment(horizontal="center")
             if end > start:
                 ws.merge_cells(start_row=1, start_column=start, end_row=1, end_column=end)
-            prev_week = w
+            prev_stage = w
         short_label = id_.split("_exercise")[-1] if "_exercise" in id_ else id_.replace("challenge", "")
         label = ("Ex " + short_label) if "_exercise" in id_ else ("Ch " + short_label)
         c = ws.cell(row=2, column=col, value=label)
@@ -280,10 +295,62 @@ def _write_grid_sheet(wb, title: str, rows: list, ids: list, week_of, results_ke
     return ws
 
 
-def _write_summary_sheet(wb, rows: list, n_exercises: int, n_challenges: int):
+def _write_flat_grid_sheet(wb, title: str, rows: list, ids: list, label_of, results_key: str):
+    """Same PASS/FAIL grid as _write_grid_sheet, but a single header row
+    with no stage-grouping -- for exams, which each span several stages
+    rather than belonging to just one."""
+    ws = wb.create_sheet(title)
+    id_cols = {id_: 3 + i for i, id_ in enumerate(ids)}
+
+    ws.cell(row=1, column=1, value="Group").font = HEADER_FONT
+    ws.cell(row=1, column=2, value="User").font = HEADER_FONT
+    for col in (1, 2):
+        ws.cell(row=1, column=col).fill = HEADER_FILL
+
+    for id_, cc in id_cols.items():
+        c = ws.cell(row=1, column=cc, value=label_of(id_))
+        c.font = HEADER_FONT
+        c.fill = HEADER_FILL
+        c.alignment = Alignment(horizontal="center")
+
+    r = 2
+    for row_data in rows:
+        ws.cell(row=r, column=1, value=row_data["group"])
+        ws.cell(row=r, column=2, value=row_data["user"])
+        if row_data["error"]:
+            for id_, cc in id_cols.items():
+                cell = ws.cell(row=r, column=cc, value="ERROR")
+                cell.fill = ERROR_FILL
+                cell.alignment = Alignment(horizontal="center")
+                cell.border = THIN_BORDER
+        else:
+            for id_, cc in id_cols.items():
+                passed = row_data[results_key].get(id_, False)
+                cell = ws.cell(row=r, column=cc, value="PASS" if passed else "")
+                cell.fill = PASS_FILL if passed else FAIL_FILL
+                cell.alignment = Alignment(horizontal="center")
+                cell.border = THIN_BORDER
+        r += 1
+
+    footer_row = r
+    ws.cell(row=footer_row, column=2, value="Solved by").font = Font(italic=True)
+    for id_, cc in id_cols.items():
+        n_solved = sum(
+            1 for row_data in rows
+            if not row_data["error"] and row_data[results_key].get(id_, False)
+        )
+        ws.cell(row=footer_row, column=cc, value=n_solved).alignment = Alignment(horizontal="center")
+
+    ws.freeze_panes = "C2"
+    _autosize(ws)
+    return ws
+
+
+def _write_summary_sheet(wb, rows: list, n_exercises: int, n_challenges: int, n_exams: int):
     ws = wb.create_sheet("Summary", 0)
     headers = ["Group", "User", "Branch", "Exercises Solved", "Exercises Total", "Exercises %",
-               "Challenges Solved", "Challenges Total", "Challenges %", "Status"]
+               "Challenges Solved", "Challenges Total", "Challenges %",
+               "Exams Solved", "Exams Total", "Exams %", "Status"]
     for c, h in enumerate(headers, start=1):
         cell = ws.cell(row=1, column=c, value=h)
         cell.font = HEADER_FONT
@@ -294,6 +361,7 @@ def _write_summary_sheet(wb, rows: list, n_exercises: int, n_challenges: int):
     for row_data in rows:
         ex_solved = sum(1 for v in row_data["exercises"].values() if v)
         ch_solved = sum(1 for v in row_data["challenges"].values() if v)
+        exam_solved = sum(1 for v in row_data["exams"].values() if v)
         status = row_data["error"] or "ok"
         values = [
             row_data["group"], row_data["user"], row_data["branch"],
@@ -301,17 +369,19 @@ def _write_summary_sheet(wb, rows: list, n_exercises: int, n_challenges: int):
             (ex_solved / n_exercises) if n_exercises else 0,
             ch_solved, n_challenges,
             (ch_solved / n_challenges) if n_challenges else 0,
+            exam_solved, n_exams,
+            (exam_solved / n_exams) if n_exams else 0,
             status,
         ]
         for c, v in enumerate(values, start=1):
             cell = ws.cell(row=r, column=c, value=v)
-            if c in (6, 9):
+            if c in (6, 9, 12):
                 cell.number_format = "0%"
         r += 1
 
     last_row = r - 1
     if last_row >= 2:
-        for col_letter in ("F", "I"):
+        for col_letter in ("F", "I", "L"):
             rule = ColorScaleRule(
                 start_type="min", start_color="FFC7CE",
                 mid_type="percentile", mid_value=50, mid_color="FFEB9C",
@@ -324,12 +394,13 @@ def _write_summary_sheet(wb, rows: list, n_exercises: int, n_challenges: int):
     return ws
 
 
-def build_workbook(rows: list, exercise_ids: list, challenge_ids: list):
+def build_workbook(rows: list, exercise_ids: list, challenge_ids: list, exam_ids: list):
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
-    _write_summary_sheet(wb, rows, len(exercise_ids), len(challenge_ids))
-    _write_grid_sheet(wb, "Exercises", rows, exercise_ids, exercise_week, "exercises")
-    _write_grid_sheet(wb, "Challenges", rows, challenge_ids, challenge_week, "challenges")
+    _write_summary_sheet(wb, rows, len(exercise_ids), len(challenge_ids), len(exam_ids))
+    _write_grid_sheet(wb, "Exercises", rows, exercise_ids, exercise_stage, "exercises")
+    _write_grid_sheet(wb, "Challenges", rows, challenge_ids, challenge_stage, "challenges")
+    _write_flat_grid_sheet(wb, "Exams", rows, exam_ids, exam_label, "exams")
     return wb
 
 
@@ -375,14 +446,15 @@ def main():
 
     exercise_ids = list(EXERCISES)
     challenge_ids = list(CHALLENGES)
-    total = len(exercise_ids) + len(challenge_ids)
+    exam_ids = list(EXAMS)
+    total = len(exercise_ids) + len(challenge_ids) + len(exam_ids)
 
     rows = []
     done = 0
 
     def _work(item):
         group, user, ref = item
-        outcome = run_student_tests(ref, exercise_ids, challenge_ids)
+        outcome = run_student_tests(ref, exercise_ids, challenge_ids, exam_ids)
         return group, user, ref, outcome
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
@@ -396,23 +468,24 @@ def main():
                 else:
                     ex_solved = sum(1 for v in outcome["exercises"].values() if v)
                     ch_solved = sum(1 for v in outcome["challenges"].values() if v)
+                    exam_solved = sum(1 for v in outcome["exams"].values() if v)
                     print(
                         f"[{done}/{len(branches)}] {group}/{user}: "
                         f"{ex_solved}/{len(exercise_ids)} exercises, "
-                        f"{ch_solved}/{len(challenge_ids)} challenges"
+                        f"{ch_solved}/{len(challenge_ids)} challenges, "
+                        f"{exam_solved}/{len(exam_ids)} exams"
                     )
             rows.append({
                 "group": group, "user": user, "branch": ref,
                 "exercises": outcome["exercises"], "challenges": outcome["challenges"],
-                "error": outcome["error"],
+                "exams": outcome["exams"], "error": outcome["error"],
             })
 
     rows.sort(key=lambda r: (r["group"], r["user"]))
 
-    wb = build_workbook(rows, exercise_ids, challenge_ids)
+    wb = build_workbook(rows, exercise_ids, challenge_ids, exam_ids)
     wb.save(args.output)
-    print(f"\nWrote {args.output} ({total} tracked exercises/challenges, {len(rows)} students).")
-    _ = total  # avoid unused warnings if trimmed later
+    print(f"\nWrote {args.output} ({total} tracked exercises/challenges/exams, {len(rows)} students).")
 
 
 if __name__ == "__main__":

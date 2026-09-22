@@ -1,6 +1,6 @@
 # Challenge 21 — Document Scanner Preprocessing Pipeline
 
-**Do this after:** Week 11 (OpenCV)
+**Do this after:** Stage 11 (OpenCV)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge21` (or `pytest tests/test_challenge21.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -9,7 +9,7 @@
 worthy OpenCV exercise: grayscale -> blur -> edge-detect -> find the
 biggest contour (the document itself, assuming it's the largest shape in
 frame) -> draw its outline. This challenge builds that whole pipeline,
-touching most of Week 11's toolkit along the way.
+touching most of Stage 11's toolkit along the way.
 
 Implement:
 

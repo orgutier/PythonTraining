@@ -3,17 +3,19 @@
 # tools/install-git-hooks.sh (macOS/Linux). See README.md, section
 # "Git hook integration".
 #
-# Atomic, per exercise: for each staged exercises/weekNN/exerciseXX/*.py
-# (or challenges/challengeNN/solution.py), runs "python tools/cli.py test
-# <id>" for that ONE exercise/challenge -- not its whole week, and not the
-# whole suite. A commit that doesn't touch any exercise/challenge file
-# passes through untested (nothing to check). See pre-push for the
-# whole-week check that runs before code actually leaves your machine.
+# Atomic, per exercise: for each staged exercises/stageNN/exerciseXX/*.py
+# (or exams/examNN/solution.py, or challenges/challengeNN/solution.py),
+# runs "python tools/cli.py test <id>" for that ONE exercise/exam/challenge
+# -- not its whole stage, and not the whole suite. A commit that doesn't
+# touch any exercise/exam/challenge file passes through untested (nothing
+# to check). pre-push runs the exact same per-exercise check again on
+# whatever actually changes on the remote, so nothing that skipped this
+# hook (e.g. a commit made with --no-verify) ships broken.
 
 HOOK_DIR=$(dirname "$0")
 
-echo "pre-commit: checking staged exercise/challenge files (per-exercise)..."
-git diff --cached --name-only --diff-filter=ACM | sh "$HOOK_DIR/run-tests-for-changed-files.sh" exercise
+echo "pre-commit: checking staged exercise/exam/challenge files (per-exercise)..."
+git diff --cached --name-only --diff-filter=ACM | sh "$HOOK_DIR/run-tests-for-changed-files.sh"
 status=$?
 
 if [ $status -ne 0 ]; then

@@ -9,7 +9,7 @@ openpyxl>=3.1  # tools/report.py -- writes the .xlsx progress report
 
 # opencv-python-headless is used here because it's what test/CI environments
 # need (no GUI/display libraries required). If you want to also use
-# cv2.imshow() interactively while working through Week 11 on your own
+# cv2.imshow() interactively while working through Stage 11 on your own
 # machine, install the regular GUI-enabled package instead:
 #     pip uninstall opencv-python-headless
 #     pip install opencv-python
