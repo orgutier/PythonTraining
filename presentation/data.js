@@ -20,10 +20,10 @@ const TOPICS = [
   ],
   schedule: [
     { step: "1", title: "Setup", details: "Install Python 3.11+, create and activate a virtual environment (python -m venv .venv), pip install -r requirements.txt, and open the repo in VS Code. Run python tools/cli.py list and python tools/cli.py test stage01 to see the starter tests fail, try tools/gui.py, and do a git basics pass (status/add/commit). Tour exercises/, reference_solutions/, tests/, and open presentation/index.html to keep alongside the editor all course long." },
-    { step: "2", title: "Learn", details: "Variables, Python's five foundational types, and operators, building up through precedence, f-strings, and the walrus operator to arbitrary-precision integers and IEEE-754 float internals.", links: [
-      { label: "Basic tier", guideKey: "stage01-basic" },
+    { step: "2", title: "Learn", details: "Variables, Python's five foundational types, and operators, building up through precedence, f-strings, and the walrus operator to arbitrary-precision integers and IEEE-754 float internals.", tiers: [
+      { label: "Basic tier", guideKey: "stage01-basic", keywords: ["int", "float", "str", "bool", "None", "True", "False", "print()", "input()", "type()", "isinstance()", "and", "or", "not", "is", "in", "x: int = 5"], concepts: ["type hints"] },
       { label: "Mid tier", guideKey: "stage01-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage01-advanced" }
+      { label: "Advanced tier & internals", guideKey: "stage01-advanced", concepts: ["mutability vs immutability", "identity vs equality"], theory: ["small-integer caching", "string interning", "IEEE-754 floating point"] }
     ] },
     { step: "3", title: "Practice", details: "Work through the exercises in exercises/stage01/ (see its README for the full list), running \`python tools/cli.py test stage01\` as you go." },
     { step: "4", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage01\` fully green, and review anything the group is still shaky on before moving on." }
@@ -65,10 +65,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "Conditionals and loops, building up through for...else, ternaries, and zip() to writing a custom iterator and the iterator protocol.", links: [
-      { label: "Basic tier", guideKey: "stage02-basic" },
-      { label: "Mid tier", guideKey: "stage02-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage02-advanced" }
+    { step: "1", title: "Learn", details: "Conditionals and loops, building up through for...else, ternaries, and zip() to writing a custom iterator and the iterator protocol.", tiers: [
+      { label: "Basic tier", guideKey: "stage02-basic", keywords: ["if", "elif", "else", "while", "for", "in", "range()", "break", "continue", "pass"], methods: ["enumerate()"] },
+      { label: "Mid tier", guideKey: "stage02-mid", methods: ["zip()"], concepts: ["short-circuit evaluation", "ternary expression", "for...else / while...else"] },
+      { label: "Advanced tier & internals", guideKey: "stage02-advanced", modules: ["itertools"], concepts: ["truthiness"], theory: ["iterator protocol (iter/next)", "StopIteration"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage02/ (see its README for the full list), running \`python tools/cli.py test stage02\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage02\` fully green, and review anything the group is still shaky on before moving on." }
@@ -110,10 +110,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "Defining and calling functions, building up through closures and decorators to generator functions and Python's LEGB scoping rules.", links: [
-      { label: "Basic tier", guideKey: "stage03-basic" },
-      { label: "Mid tier", guideKey: "stage03-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage03-advanced" }
+    { step: "1", title: "Learn", details: "Defining and calling functions, building up through closures and decorators to generator functions and Python's LEGB scoping rules.", tiers: [
+      { label: "Basic tier", guideKey: "stage03-basic", keywords: ["def", "return", "->", "*args", "**kwargs", "lambda"] },
+      { label: "Mid tier", guideKey: "stage03-mid", keywords: ["nonlocal"], concepts: ["decorators", "keyword-only arguments", "positional-only parameters"] },
+      { label: "Advanced tier & internals", guideKey: "stage03-advanced", keywords: ["global", "yield"], methods: ["functools.wraps()", "functools.lru_cache()", "functools.partial()"], modules: ["functools"], concepts: ["closures"], theory: ["LEGB scope resolution", "mutable default argument bug", "no tail-call optimization"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage03/ (see its README for the full list), running \`python tools/cli.py test stage03\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage03\` fully green, and review anything the group is still shaky on before moving on." }
@@ -155,10 +155,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "The four built-in collections and comprehensions, building up through sorting and set operations to collections' specialized containers and the hash-table/dynamic-array internals behind them.", links: [
-      { label: "Basic tier", guideKey: "stage04-basic" },
-      { label: "Mid tier", guideKey: "stage04-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage04-advanced" }
+    { step: "1", title: "Learn", details: "The four built-in collections and comprehensions, building up through sorting and set operations to collections' specialized containers and the hash-table/dynamic-array internals behind them.", tiers: [
+      { label: "Basic tier", guideKey: "stage04-basic", keywords: ["list", "tuple", "dict", "set", "append()", "sort()/sorted()", "len()", "zip()", "enumerate()", "[x for x in ...]", "{k:v for ...}"] },
+      { label: "Mid tier", guideKey: "stage04-mid", methods: ["dataclasses.dataclass"], dunders: ["__eq__"], modules: ["collections", "dataclasses"], concepts: ["namedtuple / dataclass records", "set operations (union/intersection/difference)"] },
+      { label: "Advanced tier & internals", guideKey: "stage04-advanced", methods: ["collections.defaultdict()", "collections.Counter()", "collections.deque()"], dunders: ["__hash__"], concepts: ["hashability"], theory: ["dynamic array amortized growth", "hash table internals", "insertion-ordered dicts (3.7+)"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage04/ (see its README for the full list), running \`python tools/cli.py test stage04\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage04\` fully green, and review anything the group is still shaky on before moving on." }
@@ -200,10 +200,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "Reading/writing files, exceptions, and regex basics, building up through exception chaining and named groups to custom context managers and the regex engine's backtracking behavior.", links: [
-      { label: "Basic tier", guideKey: "stage05-basic" },
-      { label: "Mid tier", guideKey: "stage05-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage05-advanced" }
+    { step: "1", title: "Learn", details: "Reading/writing files, exceptions, and regex basics, building up through exception chaining and named groups to custom context managers and the regex engine's backtracking behavior.", tiers: [
+      { label: "Basic tier", guideKey: "stage05-basic", keywords: ["open()", "with", "as", "try", "except", "finally", "raise", "Exception", "re.search()", "re.findall()"], methods: ["re.match()", "re.sub()"], modules: ["re"] },
+      { label: "Mid tier", guideKey: "stage05-mid", keywords: ["re.compile()"], modules: ["contextlib"], concepts: ["exception chaining (raise ... from ...)", "exception hierarchies", "regex named groups"] },
+      { label: "Advanced tier & internals", guideKey: "stage05-advanced", methods: ["contextlib.contextmanager"], dunders: ["__enter__", "__exit__"], concepts: ["custom context managers"], theory: ["traceback propagation up the call stack", "backtracking regex engine", "catastrophic backtracking"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage05/ (see its README for the full list), running \`python tools/cli.py test stage05\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage05\` fully green, and review anything the group is still shaky on before moving on." }
@@ -245,10 +245,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "Classes, __init__, and encapsulation conventions, building up through __slots__ and computed properties to writing a custom descriptor and Python's attribute lookup order.", links: [
-      { label: "Basic tier", guideKey: "stage06-basic" },
-      { label: "Mid tier", guideKey: "stage06-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage06-advanced" }
+    { step: "1", title: "Learn", details: "Classes, __init__, and encapsulation conventions, building up through __slots__ and computed properties to writing a custom descriptor and Python's attribute lookup order.", tiers: [
+      { label: "Basic tier", guideKey: "stage06-basic", keywords: ["class", "self", "__init__", "@property", "@x.setter", "@staticmethod", "@classmethod", "cls"], dunders: ["__init__"], concepts: ["encapsulation", "instance vs class attributes"] },
+      { label: "Mid tier", guideKey: "stage06-mid", concepts: ["__slots__ memory savings"] },
+      { label: "Advanced tier & internals", guideKey: "stage06-advanced", dunders: ["__get__/__set__ (preview)"], concepts: ["descriptors"], theory: ["attribute lookup order (instance \u2192 class \u2192 MRO)", "descriptor protocol (__get__/__set__)"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage06/ (see its README for the full list), running \`python tools/cli.py test stage06\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage06\` fully green, and review anything the group is still shaky on before moving on." }
@@ -290,10 +290,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "Inheritance, super(), and duck typing, building up through multiple inheritance and the abc module to Method Resolution Order, mixins, and structural typing with Protocol.", links: [
-      { label: "Basic tier", guideKey: "stage07-basic" },
-      { label: "Mid tier", guideKey: "stage07-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage07-advanced" }
+    { step: "1", title: "Learn", details: "Inheritance, super(), and duck typing, building up through multiple inheritance and the abc module to Method Resolution Order, mixins, and structural typing with Protocol.", tiers: [
+      { label: "Basic tier", guideKey: "stage07-basic", keywords: ["class Child(Parent)", "super()", "isinstance()"], modules: ["typing"], concepts: ["polymorphism", "duck typing"] },
+      { label: "Mid tier", guideKey: "stage07-mid", keywords: ["abc", "ABC", "@abstractmethod"], modules: ["abc"], concepts: ["composition vs inheritance"] },
+      { label: "Advanced tier & internals", guideKey: "stage07-advanced", concepts: ["mixins", "Protocol structural typing"], theory: ["Method Resolution Order (C3 linearization)", "diamond inheritance"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage07/ (see its README for the full list), running \`python tools/cli.py test stage07\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage07\` fully green, and review anything the group is still shaky on before moving on." }
@@ -335,10 +335,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "The core object dunders (__init__/__repr__/__eq__), building up through operator overloading and container/callable protocols to context managers and how dunder lookup actually happens on the type.", links: [
-      { label: "Basic tier", guideKey: "stage08-basic" },
-      { label: "Mid tier", guideKey: "stage08-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage08-advanced" }
+    { step: "1", title: "Learn", details: "The core object dunders (__init__/__repr__/__eq__), building up through operator overloading and container/callable protocols to context managers and how dunder lookup actually happens on the type.", tiers: [
+      { label: "Basic tier", guideKey: "stage08-basic", dunders: ["__repr__", "__str__", "__eq__"] },
+      { label: "Mid tier", guideKey: "stage08-mid", dunders: ["__add__", "__len__", "__getitem__", "__iter__", "__contains__", "__call__", "__bool__"], concepts: ["operator overloading", "protocols vs explicit inheritance"] },
+      { label: "Advanced tier & internals", guideKey: "stage08-advanced", dunders: ["__enter__", "__exit__", "__hash__", "__radd__"], theory: ["dunder lookup happens on the type, not the instance", "reflected operators & NotImplemented", "iterator protocol requires StopIteration"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage08/ (see its README for the full list), running \`python tools/cli.py test stage08\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage08\` fully green, and review anything the group is still shaky on before moving on." }
@@ -380,10 +380,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "Everyday stdlib modules for files, JSON, dates, and XML, building up through pathlib and timezone-aware datetimes to recursive directory walks and building XML trees from scratch.", links: [
-      { label: "Basic tier", guideKey: "stage09-basic" },
-      { label: "Mid tier", guideKey: "stage09-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage09-advanced" }
+    { step: "1", title: "Learn", details: "Everyday stdlib modules for files, JSON, dates, and XML, building up through pathlib and timezone-aware datetimes to recursive directory walks and building XML trees from scratch.", tiers: [
+      { label: "Basic tier", guideKey: "stage09-basic", keywords: ["os.listdir", "os.path", "json.load/dump", "datetime.now/isoformat", "ElementTree.parse/findall"], modules: ["os", "json", "datetime", "xml.etree.ElementTree"] },
+      { label: "Mid tier", guideKey: "stage09-mid", methods: ["pathlib.Path", "json.dumps(default=...)"], modules: ["pathlib"], concepts: ["pathlib as the modern os.path alternative", "timezone-aware vs naive datetimes"] },
+      { label: "Advanced tier & internals", guideKey: "stage09-advanced", methods: ["os.walk()"], theory: ["JSON recursive-descent parsing", "DOM-style (ElementTree) vs streaming (SAX) XML parsing"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage09/ (see its README for the full list), running \`python tools/cli.py test stage09\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage09\` fully green, and review anything the group is still shaky on before moving on." }
@@ -425,10 +425,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "DataFrame/Series basics and reading data, building up through filtering, grouping, and merging to vectorized operations, multi-indexing, and pandas' columnar NumPy-backed storage.", links: [
-      { label: "Basic tier", guideKey: "stage10-basic" },
-      { label: "Mid tier", guideKey: "stage10-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage10-advanced" }
+    { step: "1", title: "Learn", details: "DataFrame/Series basics and reading data, building up through filtering, grouping, and merging to vectorized operations, multi-indexing, and pandas' columnar NumPy-backed storage.", tiers: [
+      { label: "Basic tier", guideKey: "stage10-basic", keywords: ["pd.read_csv", "df.head()"], methods: ["df.describe()"], modules: ["pandas"] },
+      { label: "Mid tier", guideKey: "stage10-mid", keywords: ["df.groupby()", "df.sort_values()", "df.merge()"], concepts: ["boolean indexing"] },
+      { label: "Advanced tier & internals", guideKey: "stage10-advanced", methods: ["df.info()", "df.apply()", "df.pivot_table()"], concepts: ["multi-indexing", "dtype-based memory optimization"], theory: ["columnar storage backed by NumPy arrays", "vectorization vs per-row Python loops"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage10/ (see its README for the full list), running \`python tools/cli.py test stage10\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage10\` fully green, and review anything the group is still shaky on before moving on." }
@@ -471,10 +471,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "Reading, writing, and transforming images, building up through thresholding and edge detection to contour detection and how images are represented as NumPy arrays.", links: [
-      { label: "Basic tier", guideKey: "stage11-basic" },
-      { label: "Mid tier", guideKey: "stage11-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage11-advanced" }
+    { step: "1", title: "Learn", details: "Reading, writing, and transforming images, building up through thresholding and edge detection to contour detection and how images are represented as NumPy arrays.", tiers: [
+      { label: "Basic tier", guideKey: "stage11-basic", keywords: ["cv2.imread", "cv2.imwrite", "cv2.cvtColor", "cv2.resize", "cv2.rectangle", "image.shape"], modules: ["opencv-python (cv2)", "numpy"] },
+      { label: "Mid tier", guideKey: "stage11-mid", methods: ["cv2.Canny()"], concepts: ["thresholding"] },
+      { label: "Advanced tier & internals", guideKey: "stage11-advanced", methods: ["cv2.findContours()", "cv2.GaussianBlur()", "cv2.CascadeClassifier"], concepts: ["convolution filtering"], theory: ["images as NumPy arrays (height \u00d7 width \u00d7 channels)", "BGR vs RGB channel order"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage11/ (see its README for the full list), running \`python tools/cli.py test stage11\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage11\` fully green, and review anything the group is still shaky on before moving on." }
@@ -517,10 +517,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "Making HTTP requests and basic threading, building up through auth/timeouts and locking shared state to connection pooling, ThreadPoolExecutor, and the GIL.", links: [
-      { label: "Basic tier", guideKey: "stage12-basic" },
-      { label: "Mid tier", guideKey: "stage12-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage12-advanced" }
+    { step: "1", title: "Learn", details: "Making HTTP requests and basic threading, building up through auth/timeouts and locking shared state to connection pooling, ThreadPoolExecutor, and the GIL.", tiers: [
+      { label: "Basic tier", guideKey: "stage12-basic", keywords: ["requests.get()", "response.json()", "threading.Thread", ".start()", ".join()"], methods: ["requests.post()"], modules: ["requests", "threading"] },
+      { label: "Mid tier", guideKey: "stage12-mid", keywords: ["threading.Lock"], methods: ["response.raise_for_status()"] },
+      { label: "Advanced tier & internals", guideKey: "stage12-advanced", methods: ["requests.Session()", "concurrent.futures.ThreadPoolExecutor"], concepts: ["sessions & connection reuse", "retry/backoff strategies", "race conditions & deadlocks"], theory: ["Global Interpreter Lock (GIL)", "I/O-bound vs CPU-bound concurrency"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage12/ (see its README for the full list), running \`python tools/cli.py test stage12\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage12\` fully green, and review anything the group is still shaky on before moving on." }
@@ -562,10 +562,10 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "Building routes that return JSON, building up through Pydantic validation and dependency injection to async endpoints, middleware, and ASGI.", links: [
-      { label: "Basic tier", guideKey: "stage13-basic" },
-      { label: "Mid tier", guideKey: "stage13-mid" },
-      { label: "Advanced tier & internals", guideKey: "stage13-advanced" }
+    { step: "1", title: "Learn", details: "Building routes that return JSON, building up through Pydantic validation and dependency injection to async endpoints, middleware, and ASGI.", tiers: [
+      { label: "Basic tier", guideKey: "stage13-basic", keywords: ["FastAPI()", "@app.get", "@app.post", "uvicorn.run"], modules: ["fastapi", "uvicorn"], concepts: ["path & query parameters"] },
+      { label: "Mid tier", guideKey: "stage13-mid", keywords: ["Depends"], methods: ["BaseModel (pydantic)"], modules: ["pydantic"], concepts: ["dependency injection", "automatic interactive docs (/docs)"] },
+      { label: "Advanced tier & internals", guideKey: "stage13-advanced", methods: ["TestClient()"], concepts: ["async def endpoints"], theory: ["ASGI vs WSGI", "type-hint-driven runtime validation"] }
     ] },
     { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage13/ (see its README for the full list), running \`python tools/cli.py test stage13\` as you go." },
     { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage13\` fully green, and review anything the group is still shaky on before moving on." }

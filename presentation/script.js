@@ -92,6 +92,34 @@
     return row;
   }
 
+  function scheduleTierBlock(tier) {
+    const wrap = document.createElement("div");
+    wrap.className = "schedule-tier";
+
+    const link = document.createElement("button");
+    link.type = "button";
+    link.className = "badge schedule-tier-link";
+    link.textContent = tier.label;
+    link.title = "Open a deep-dive with runnable examples";
+    link.addEventListener("click", () => openDayGuide(tier.guideKey, link));
+    wrap.appendChild(link);
+
+    const groupsWithContent = META_GROUPS.filter((g) => tier[g.key] && tier[g.key].length);
+    if (groupsWithContent.length === 0) {
+      wrap.insertAdjacentHTML("beforeend", '<p class="schedule-tier-empty">No tagged keywords/dunders/modules/concepts for this tier yet.</p>');
+      return wrap;
+    }
+
+    const badges = document.createElement("div");
+    badges.className = "badges schedule-tier-badges";
+    groupsWithContent.forEach((g) => {
+      tier[g.key].forEach((term) => badges.appendChild(makeBadge(term, g.badgeClass)));
+    });
+    wrap.appendChild(badges);
+
+    return wrap;
+  }
+
   function scheduleBlock(schedule) {
     if (!schedule || !schedule.length) return null;
     const wrap = document.createElement("div");
@@ -122,19 +150,8 @@
 
       const tdDetails = document.createElement("td");
       tdDetails.appendChild(document.createTextNode(row.details));
-      if (row.links && row.links.length) {
-        const linksWrap = document.createElement("div");
-        linksWrap.className = "schedule-links";
-        row.links.forEach((link) => {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "badge schedule-link";
-          btn.textContent = link.label;
-          btn.title = "Open a deep-dive with runnable examples";
-          btn.addEventListener("click", () => openDayGuide(link.guideKey, btn));
-          linksWrap.appendChild(btn);
-        });
-        tdDetails.appendChild(linksWrap);
+      if (row.tiers && row.tiers.length) {
+        row.tiers.forEach((tier) => tdDetails.appendChild(scheduleTierBlock(tier)));
       }
       tr.appendChild(tdDetails);
 

@@ -220,32 +220,47 @@ trainer/trainee, not fixed to a training-stage's number of days. Stage 1
 installing Python, creating the virtual environment, running
 `tools/cli.py` for the first time, and touring the repo -- since it's
 the only point in the course where none of that exists yet. Every
-stage then goes **Learn** (a short summary plus one clickable link per
-tier -- Basic/Mid/Advanced -- styled and behaving exactly like the
-badges described below), **Practice** (work the stage's exercises), and
-**Review** (finish up, get the stage's tests green, review as a group).
-Stage 14 (Capstone) swaps that shape for its own 4-sub-stage project
-process (Kickoff, Build, Polish, Demo & Review) instead of tiers, since
-it has no new content of its own.
+stage then goes **Learn**, **Practice** (work the stage's exercises),
+and **Review** (finish up, get the stage's tests green, review as a
+group). Stage 14 (Capstone) swaps that shape for its own 4-sub-stage
+project process (Kickoff, Build, Polish, Demo & Review) instead of
+tiers, since it has no new content of its own.
 
-Click any badge to open a glossary drawer (docked to the right, non-modal --
-the sidebar and content stay fully usable while it's open) with a full
+**Learn** is deliberately explicit, not just a link -- this is a
+trainer's reference, so it spells out every keyword/method/dunder/
+module/concept/theory term tagged to each tier (Basic/Mid/Advanced),
+even though every one of those same terms also appears in the meta-row
+at the bottom of the page. That duplication is intentional: a trainer
+mid-stage shouldn't have to scroll to the bottom and mentally re-sort
+the full term list by tier just to know what "Basic tier" is actually
+supposed to cover. Each tier under **Learn** is its own clickable
+heading (opens that tier's day guide -- see below) followed by its
+color-coded badges (`presentation/data.js`'s `tiers` field on each
+schedule's Learn row, filtered from the same `keywords`/`methods`/
+`dunders`/`modules`/`concepts`/`theory` arrays the bottom meta-row
+reads from, so a term always says the exact same thing in both places).
+A tier with nothing tagged yet says so plainly rather than rendering
+empty.
+
+Click any badge -- in **Learn**, or in the meta-row at the bottom of the
+page -- to open a glossary drawer (docked to the right, non-modal -- the
+sidebar and content stay fully usable while it's open) with a full
 explanation, when/how to use it, and a runnable example -- entries are
 defined in `presentation/glossary.js`, keyed by the exact badge text used
 in `presentation/data.js`. Adding a new badge to a topic means adding a
-matching entry there too.
+matching entry there too (and tagging it to a tier under `tiers` if it
+belongs in the **Learn** breakdown).
 
-The **Stage schedule** table's tier links use that exact same drawer
-mechanism, just pointed at a different data source: clicking "Basic
-tier"/"Mid tier"/"Advanced tier & internals" under a stage's **Learn**
-row opens a "day guide" -- a deeper dive than the tier prose below it,
-built around runnable examples rather than more explanation. Each one
-has at least two examples, every example shown with real VS Code
-Dark+-style syntax highlighting (a small dependency-free tokenizer in
+Each tier's own heading uses a different drawer: clicking "Basic
+tier"/"Mid tier"/"Advanced tier & internals" opens a "day guide" -- a
+deeper dive than the tier prose below it, built around runnable
+examples rather than more explanation. Each one has at least two
+examples, every example shown with real VS Code Dark+-style syntax
+highlighting (a small dependency-free tokenizer in
 `presentation/highlight.js` -- still no CDN) and its actual, executed
 output underneath, not a hand-typed guess. This content lives in
 `presentation/dayguides.js`, keyed by `stageNN-basic` / `-mid` /
-`-advanced` to match each schedule link's `guideKey`. The single-example
+`-advanced` to match each tier's `guideKey`. The single-example
 code blocks in the regular glossary drawer are syntax-highlighted the
 same way.
 
