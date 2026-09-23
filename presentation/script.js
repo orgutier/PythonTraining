@@ -104,34 +104,38 @@
     const table = document.createElement("table");
     table.className = "schedule-table";
     table.insertAdjacentHTML("beforeend",
-      '<thead><tr><th scope="col">Day</th><th scope="col">Focus</th><th scope="col">What to cover</th></tr></thead>');
+      '<thead><tr><th scope="col">Step</th><th scope="col">Sub-stage</th><th scope="col">What to cover</th></tr></thead>');
     const tbody = document.createElement("tbody");
 
     schedule.forEach((row) => {
       const tr = document.createElement("tr");
 
-      const tdDay = document.createElement("td");
-      tdDay.className = "schedule-day";
-      tdDay.textContent = row.day;
-      tr.appendChild(tdDay);
+      const tdStep = document.createElement("td");
+      tdStep.className = "schedule-day";
+      tdStep.textContent = row.step;
+      tr.appendChild(tdStep);
 
       const tdTitle = document.createElement("td");
       tdTitle.className = "schedule-title";
-      if (row.guideKey) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "schedule-title-btn";
-        btn.textContent = row.title;
-        btn.title = "Click for a deep-dive with runnable examples";
-        btn.addEventListener("click", () => openDayGuide(row.guideKey, btn));
-        tdTitle.appendChild(btn);
-      } else {
-        tdTitle.textContent = row.title;
-      }
+      tdTitle.textContent = row.title;
       tr.appendChild(tdTitle);
 
       const tdDetails = document.createElement("td");
-      tdDetails.textContent = row.details;
+      tdDetails.appendChild(document.createTextNode(row.details));
+      if (row.links && row.links.length) {
+        const linksWrap = document.createElement("div");
+        linksWrap.className = "schedule-links";
+        row.links.forEach((link) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "badge schedule-link";
+          btn.textContent = link.label;
+          btn.title = "Open a deep-dive with runnable examples";
+          btn.addEventListener("click", () => openDayGuide(link.guideKey, btn));
+          linksWrap.appendChild(btn);
+        });
+        tdDetails.appendChild(linksWrap);
+      }
       tr.appendChild(tdDetails);
 
       tbody.appendChild(tr);

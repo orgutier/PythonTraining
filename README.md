@@ -212,16 +212,20 @@ so the reference doubles as documentation a trainer can teach straight
 from and a student can self-study from without anyone standing over their
 shoulder to fill in the gaps.
 
-Each of the 14 topics also opens with a **stage schedule**: five
-day-by-day rows (`schedule` in `presentation/data.js`) naming what to
-cover each day so a stage maps onto a standard 5-day training stage. Day
-1 of Stage 1 (Python Fundamentals) is reserved entirely for environment
-setup -- installing Python, creating the virtual environment, running
-`tools/cli.py` for the first time, and touring the repo -- so no actual
-topic content is taught that day; every other stage's five days split
-across basic tier, mid tier, advanced tier + internals, exercises, and
-a practice/review day. Stage 14 (Capstone) uses a project-shaped
-schedule (kickoff, build, build, polish, demo) instead of tiers, since
+Each of the 14 topics also opens with a **stage schedule**: a 3-4
+sub-stage process (`schedule` in `presentation/data.js`), not a
+day-by-day calendar -- how long each sub-stage takes is up to the
+trainer/trainee, not fixed to a training-stage's number of days. Stage 1
+(Python Fundamentals) is the only one with a **Setup** sub-stage --
+installing Python, creating the virtual environment, running
+`tools/cli.py` for the first time, and touring the repo -- since it's
+the only point in the course where none of that exists yet. Every
+stage then goes **Learn** (a short summary plus one clickable link per
+tier -- Basic/Mid/Advanced -- styled and behaving exactly like the
+badges described below), **Practice** (work the stage's exercises), and
+**Review** (finish up, get the stage's tests green, review as a group).
+Stage 14 (Capstone) swaps that shape for its own 4-sub-stage project
+process (Kickoff, Build, Polish, Demo & Review) instead of tiers, since
 it has no new content of its own.
 
 Click any badge to open a glossary drawer (docked to the right, non-modal --
@@ -231,17 +235,19 @@ defined in `presentation/glossary.js`, keyed by the exact badge text used
 in `presentation/data.js`. Adding a new badge to a topic means adding a
 matching entry there too.
 
-The **Stage schedule** table itself is also clickable: every Basic/Mid/
-Advanced-tier day (not the setup/exercises/review days, which have no new
-topic content) opens the same drawer with a "day guide" -- a deeper dive
-than the tier prose above it, built around runnable examples rather than
-more explanation. Each one has at least two examples, every example shown
-with real VS Code Dark+-style syntax highlighting (a small dependency-free
-tokenizer in `presentation/highlight.js` -- still no CDN) and its actual,
-executed output underneath, not a hand-typed guess. This content lives in
-`presentation/dayguides.js`, keyed by `stageNN-basic` / `-mid` / `-advanced`
-to match each schedule row's `guideKey`. The single-example code blocks in
-the regular glossary drawer are syntax-highlighted the same way.
+The **Stage schedule** table's tier links use that exact same drawer
+mechanism, just pointed at a different data source: clicking "Basic
+tier"/"Mid tier"/"Advanced tier & internals" under a stage's **Learn**
+row opens a "day guide" -- a deeper dive than the tier prose below it,
+built around runnable examples rather than more explanation. Each one
+has at least two examples, every example shown with real VS Code
+Dark+-style syntax highlighting (a small dependency-free tokenizer in
+`presentation/highlight.js` -- still no CDN) and its actual, executed
+output underneath, not a hand-typed guess. This content lives in
+`presentation/dayguides.js`, keyed by `stageNN-basic` / `-mid` /
+`-advanced` to match each schedule link's `guideKey`. The single-example
+code blocks in the regular glossary drawer are syntax-highlighted the
+same way.
 
 Every one of the first 13 topics also shows two **Interview Challenge**
 callouts each -- pointers to the interview-style problems in `challenges/`,
