@@ -1,15 +1,14 @@
 # Control Flow
 
-Seven exercises covering every conditional and loop construct from Topic 2 at least three times each, including the two idioms trainees usually only see once: for...else/while...else, and the and/or short-circuit guard pattern.
+Six exercises, two per tier, plus no separate setup exercise (Stage 1 already covered that). Every one is a small scenario -- a grid scan, a bus manifest, a restock check, a round-robin scheduler -- that forces combining several of that tier's control-flow tools at once, not a single isolated demo.
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage02_<name>` (e.g. `python tools/cli.py test stage02_exercise01`). Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage02_<name>` (e.g. `python tools/cli.py test stage02_basic01`). Work through them in order.
 
-- **`exercise01/`** -- if/elif/else, for, range(), a first for...else
-- **`exercise02/`** -- break, continue, while, pass
-- **`exercise03/`** -- zip() x3, enumerate() x2
-- **`exercise04/`** -- range() with step, itertools.cycle/islice/chain/product
-- **`exercise05/`** -- and-short-circuit x3, truthiness x3
-- **`exercise06/`** -- conditional expressions x3
-- **`exercise07/`** -- for...else x2 more, while...else x3
+- **`basic01/`** -- nested for + range(), if/elif/else, continue, pass, while + break
+- **`basic02/`** -- while as the main loop, if/elif/else, break, continue, pass, nested for
+- **`mid01/`** -- for...else, a short-circuit guard, a ternary, zip()
+- **`mid02/`** -- while...else, a short-circuit guard, a ternary, zip() -- a different combination
+- **`advanced01/`** -- a class implementing the iterator protocol (__iter__/__next__/StopIteration) by hand
+- **`advanced02/`** -- itertools.chain + itertools.cycle + itertools.islice, combined

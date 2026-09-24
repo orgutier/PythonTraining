@@ -1,741 +1,663 @@
 """
 Stage 2 -- Control Flow.
 
-Coverage plan (each item exercised by the trainee's own code >=3 times):
-  keywords: if, elif, else, while, for, in, range(), break, continue, pass
-  modules:  itertools
-  methods:  zip(), enumerate()
-  concepts: short-circuit evaluation, truthiness, ternary expression,
-            for...else / while...else
+Tier-named convention (see generator/stage01.py for the full rationale):
+minimum two exercises per Basic/Mid/Advanced tier, script-style (plain
+top-level code, no function to implement) wherever the tier's own content
+doesn't itself require one. Stage 2 still hasn't taught `def` (that's
+Stage 3), so every exercise here is script-style *except* advanced01,
+which is deliberately class-based -- writing a custom iterator is this
+tier's own named learning objective (see data.js's Advanced tier text:
+"custom iterable/iterator class... the iterator protocol").
+
+Coverage:
+  Basic:    if/elif/else, while, for + range(), break, continue, pass,
+            nested loops
+  Mid:      for...else / while...else, short-circuit and/or, ternary
+            expressions, zip()
+  Advanced: a custom iterator class (__iter__/__next__/StopIteration),
+            itertools (chain, cycle, islice)
 """
+from generator.common import SCRIPT_INSTRUCTIONS
 
 STAGE = "stage02"
 TOPIC = "Control Flow"
 OVERVIEW = (
-    "Seven exercises covering every conditional and loop construct from "
-    "Topic 2 at least three times each, including the two idioms trainees "
-    "usually only see once: for...else/while...else, and the and/or "
-    "short-circuit guard pattern."
+    "Six exercises, two per tier, plus no separate setup exercise (Stage 1 "
+    "already covered that). Every one is a small scenario -- a grid scan, a "
+    "bus manifest, a restock check, a round-robin scheduler -- that forces "
+    "combining several of that tier's control-flow tools at once, not a "
+    "single isolated demo."
 )
 
 EXERCISES = [
     {
-        "name": "exercise01",
-        "title": "Number Patterns",
-        "summary": "if/elif/else, for, range(), a first for...else",
+        "name": "basic01",
+        "title": "Warehouse Grid Scanner",
+        "summary": "nested for + range(), if/elif/else, continue, pass, while + break",
+        "instructions": SCRIPT_INSTRUCTIONS,
         "readme": (
-            "Implement:\n\n"
-            "- `fizzbuzz(n: int) -> list[str]` -- the classic: for `1..n`, "
-            "`\"FizzBuzz\"` if divisible by 15, `\"Fizz\"` by 3, `\"Buzz\"` by 5, "
-            "else `str(i)`.\n"
-            "- `is_prime(n: int) -> bool` -- implement with a `for...else`: loop "
-            "`i` over `range(2, int(n ** 0.5) + 1)`, `break` the moment you find a "
-            "factor; the loop's `else` clause (which only runs if the loop finished "
-            "*without* breaking) is where you return `True`. This is the cleanest "
-            "way to express \"found something -> stop early\" vs. \"searched "
-            "everything, found nothing\" without a separate flag variable.\n\n"
-            "See the Study Reference presentation, Topic 2, for the theory."
+            "A warehouse floor is mapped as rows of characters -- given, "
+            "don't modify:\n\n"
+            "```python\n"
+            'grid_rows = ["..#..", ".##..", "?.#.#", "?????", "#..X."]\n'
+            "```\n"
+            '`"#"` is an obstacle, `"."` is empty floor, `"?"` is '
+            'deliberately unmapped (ignore it, don\'t count it as anything), '
+            "and any other character is invalid data.\n\n"
+            "Using nested `for` loops over `range(len(...))` (index both "
+            "the rows and each row's characters -- no `enumerate()` yet), "
+            "`if`/`elif`/`else`, `continue`, and `pass`, write plain "
+            "top-level code that computes:\n\n"
+            "- `obstacle_count` -- total `\"#\"` characters across the "
+            "whole grid.\n"
+            "- `unmapped_count` -- total `\"?\"` characters across the "
+            "whole grid.\n"
+            "- `invalid_char_count` -- total characters that are none of "
+            '`"#"`/`"."`/`"?"`.\n'
+            "- `first_obstacle_row`, `first_obstacle_col` -- the row/column "
+            "indices of the very first `\"#\"` found (scanning row by row, "
+            "left to right within a row); `-1`/`-1` if none. Track this "
+            "with an `if first_obstacle_row == -1:` guard inside the "
+            "obstacle branch -- don't overwrite it once set.\n"
+            "- `rows_skipped` -- **before** scanning a row's individual "
+            'characters, `continue` straight past any row that\'s entirely '
+            '`"?????"` (all-unmapped) -- there\'s nothing to learn from '
+            "scanning it character by character, so skip it outright and "
+            "count the skip.\n\n"
+            "Use `elif ...: pass` for the `\"?\"` case inside the "
+            "character-by-character scan (rows that aren't *entirely* "
+            "unmapped can still contain individual `\"?\"` cells) -- an "
+            "explicit, documented no-op, not an accident.\n\n"
+            "Then, **separately**, use a `while` loop (not the `for` loops "
+            "above) to scan the grid **from the bottom up** and find "
+            "`last_obstacle_row` -- the index of the last row (searching "
+            "backward) that contains at least one `\"#\"` (`\"#\" in "
+            "grid_rows[i]`); `break` the moment you find one. `-1` if none."
         ),
         "stub": '''\
-def fizzbuzz(n: int) -> list[str]:
-    """Return ["1", "2", "Fizz", "4", "Buzz", ...] for 1..n."""
-    raise NotImplementedError
+grid_rows = ["..#..", ".##..", "?.#.#", "?????", "#..X."]
 
+raise NotImplementedError  # delete this line once you've written the code below
 
-def is_prime(n: int) -> bool:
-    """Return True if n is prime. Implement with for...else (see README)."""
-    raise NotImplementedError
+# Write your code here: nested for-loops (with continue/pass) for
+# obstacle_count/unmapped_count/invalid_char_count/first_obstacle_row/
+# first_obstacle_col/rows_skipped, then a separate while-loop (with break)
+# for last_obstacle_row. See README.md for the exact requirements.
 ''',
         "reference": '''\
-def fizzbuzz(n: int) -> list[str]:
-    result = []
-    for i in range(1, n + 1):
-        if i % 15 == 0:
-            result.append("FizzBuzz")
-        elif i % 3 == 0:
-            result.append("Fizz")
-        elif i % 5 == 0:
-            result.append("Buzz")
-        else:
-            result.append(str(i))
-    return result
+grid_rows = ["..#..", ".##..", "?.#.#", "?????", "#..X."]
 
+obstacle_count = 0
+unmapped_count = 0
+invalid_char_count = 0
+first_obstacle_row = -1
+first_obstacle_col = -1
+rows_skipped = 0
 
-def is_prime(n: int) -> bool:
-    if n < 2:
-        return False
-    for i in range(2, int(n ** 0.5) + 1):
-        if n % i == 0:
-            break
-    else:
-        return True
-    return False
-''',
-        "test": '''\
-from exercises.stage02.exercise01.solution import fizzbuzz, is_prime
-
-
-def test_fizzbuzz():
-    assert fizzbuzz(15) == [
-        "1", "2", "Fizz", "4", "Buzz", "Fizz", "7", "8", "Fizz", "Buzz",
-        "11", "Fizz", "13", "14", "FizzBuzz",
-    ]
-
-
-def test_is_prime_true_cases():
-    assert is_prime(2) is True
-    assert is_prime(17) is True
-
-
-def test_is_prime_false_cases():
-    assert is_prime(1) is False
-    assert is_prime(18) is False
-''',
-    },
-    {
-        "name": "exercise02",
-        "title": "Loop Controls",
-        "summary": "break, continue, while, pass",
-        "readme": (
-            "Implement:\n\n"
-            "- `sum_until_negative(numbers: list[int]) -> int` -- sum numbers with "
-            "a `for` loop, `break`-ing the instant you hit a negative one (don't "
-            "include it in the sum).\n"
-            "- `skip_multiples(numbers: list[int], factor: int) -> list[int]` -- "
-            "`for` over numbers, `continue`-ing past (skipping) any multiple of "
-            "`factor`, collecting the rest.\n"
-            "- `countdown(n: int) -> list[int]` -- `[n, n-1, ..., 1]` built with a "
-            "`while` loop (not `range`).\n"
-            "- `safe_int_list(values: list) -> list[int]` -- try `int(v)` for each "
-            "`v`; on `ValueError`/`TypeError`, silently skip it with "
-            "`except (...): pass` and move on. This is the standard, idiomatic use "
-            "of `pass`: an intentionally empty except block.\n\n"
-            "See the Study Reference presentation, Topic 2, for the theory."
-        ),
-        "stub": '''\
-def sum_until_negative(numbers: list[int]) -> int:
-    """Sum numbers, stopping (break) at the first negative one."""
-    raise NotImplementedError
-
-
-def skip_multiples(numbers: list[int], factor: int) -> list[int]:
-    """Return numbers with any multiple of factor skipped (continue)."""
-    raise NotImplementedError
-
-
-def countdown(n: int) -> list[int]:
-    """[n, n-1, ..., 1] built with a while loop."""
-    raise NotImplementedError
-
-
-def safe_int_list(values: list) -> list[int]:
-    """int(v) for each value, silently skipping ones that fail (except: pass)."""
-    raise NotImplementedError
-''',
-        "reference": '''\
-def sum_until_negative(numbers: list[int]) -> int:
-    total = 0
-    for n in numbers:
-        if n < 0:
-            break
-        total += n
-    return total
-
-
-def skip_multiples(numbers: list[int], factor: int) -> list[int]:
-    result = []
-    for n in numbers:
-        if n % factor == 0:
-            continue
-        result.append(n)
-    return result
-
-
-def countdown(n: int) -> list[int]:
-    result = []
-    while n >= 1:
-        result.append(n)
-        n -= 1
-    return result
-
-
-def safe_int_list(values: list) -> list[int]:
-    result = []
-    for v in values:
-        try:
-            result.append(int(v))
-        except (ValueError, TypeError):
+for row_index in range(len(grid_rows)):
+    row = grid_rows[row_index]
+    if row == "?????":
+        rows_skipped += 1
+        continue
+    for col_index in range(len(row)):
+        char = row[col_index]
+        if char == "#":
+            obstacle_count += 1
+            if first_obstacle_row == -1:
+                first_obstacle_row = row_index
+                first_obstacle_col = col_index
+        elif char == "?":
             pass
-    return result
+        elif char == ".":
+            pass
+        else:
+            invalid_char_count += 1
+        if char == "?":
+            unmapped_count += 1
+
+last_obstacle_row = -1
+row_cursor = len(grid_rows) - 1
+while row_cursor >= 0:
+    if "#" in grid_rows[row_cursor]:
+        last_obstacle_row = row_cursor
+        break
+    row_cursor -= 1
 ''',
         "test": '''\
-from exercises.stage02.exercise02.solution import (
-    sum_until_negative,
-    skip_multiples,
-    countdown,
-    safe_int_list,
-)
+import exercises.stage02.basic01.solution as solution
 
 
-def test_sum_until_negative():
-    assert sum_until_negative([1, 2, 3, -1, 10]) == 6
+def test_obstacle_count():
+    """obstacle_count == total "#" characters across the grid."""
+    assert solution.obstacle_count == 6
 
 
-def test_sum_until_negative_no_negatives():
-    assert sum_until_negative([1, 2, 3]) == 6
+def test_unmapped_count():
+    """unmapped_count == total "?" characters, only from rows NOT skipped entirely."""
+    assert solution.unmapped_count == 1
 
 
-def test_skip_multiples():
-    assert skip_multiples([1, 2, 3, 4, 5, 6], 3) == [1, 2, 4, 5]
+def test_invalid_char_count():
+    """invalid_char_count == total characters that are none of "#"/"."/"?"."""
+    assert solution.invalid_char_count == 1
 
 
-def test_countdown():
-    assert countdown(5) == [5, 4, 3, 2, 1]
+def test_first_obstacle_position():
+    """first_obstacle_row/col == the first "#" found scanning row by row, left to right."""
+    assert solution.first_obstacle_row == 0
+    assert solution.first_obstacle_col == 2
 
 
-def test_safe_int_list():
-    assert safe_int_list(["1", "2", "oops", "3", None]) == [1, 2, 3]
+def test_rows_skipped():
+    """rows_skipped counts rows that are entirely "?????", skipped via continue before the inner scan."""
+    assert solution.rows_skipped == 1
+
+
+def test_last_obstacle_row_via_while_and_break():
+    """last_obstacle_row is found by a SEPARATE while-loop scanning from the bottom, breaking on the first hit."""
+    assert solution.last_obstacle_row == 4
 ''',
     },
     {
-        "name": "exercise03",
-        "title": "Pairing and Indexing",
-        "summary": "zip() x3, enumerate() x2",
+        "name": "basic02",
+        "title": "Bus Route Ticket Counter",
+        "summary": "while as the main loop, if/elif/else, break, continue, pass, nested for",
+        "instructions": SCRIPT_INSTRUCTIONS,
         "readme": (
-            "Implement:\n\n"
-            "- `pair_names_scores(names: list[str], scores: list[int]) -> list[tuple]` "
-            "-- `list(zip(names, scores))`.\n"
-            "- `merge_records(keys: list[str], values: list) -> dict` -- "
-            "`dict(zip(keys, values))`.\n"
-            "- `count_equal_pairs(list1: list, list2: list) -> int` -- count "
-            "positions where `list1[i] == list2[i]`, using `zip(list1, list2)` "
-            "to walk both lists together (don't index manually).\n"
-            "- `indexed_items(items: list[str]) -> list[str]` -- `[f\"{i}: {item}\" "
-            "for i, item in enumerate(items)]`.\n"
-            "- `labeled_from(items: list[str], start: int) -> dict` -- "
-            "`{i: item for i, item in enumerate(items, start)}` (note the second "
-            "argument to `enumerate` sets the starting index).\n\n"
-            "See the Study Reference presentation, Topic 2, for the theory."
+            "A bus's boarding log is a list of event strings -- given, "
+            "don't modify:\n\n"
+            "```python\n"
+            'events = ["IN:2", "IN:1", "OUT:1", "SKIP", "BAD", "IN:5", "OUT:2", "IN:0", "OUT:10"]\n'
+            "capacity = 6\n"
+            "```\n\n"
+            'Each event is `"IN:n"` (n people board), `"OUT:n"` (n people '
+            'leave), `"SKIP"` (an empty stop, nothing happens), or -- '
+            "anything else -- malformed data to be silently ignored.\n\n"
+            "Process `events` **in order with a `while` loop** (an index "
+            "cursor, not a `for`), tracking `passengers` starting at `0`:\n\n"
+            '- `"IN:n"` -- if adding `n` would push `passengers` over '
+            "`capacity`, the trip ends immediately: set `trip_ended_early "
+            "= True` and `break` (don't add those n people at all). "
+            "Otherwise add them.\n"
+            '- `"OUT:n"` -- subtract `n` from `passengers`; if that would '
+            "go negative, clamp it to `0` (people can't un-leave).\n"
+            '- `"SKIP"` -- advance the cursor and `continue` immediately, '
+            "no other change.\n"
+            "- anything else -- explicitly do nothing (`pass`); this is "
+            "malformed data, not a stop that affects the count.\n\n"
+            "`trip_ended_early` must start `False` (only the overflow case "
+            "sets it `True`).\n\n"
+            "Then, **separately**, using nested `for` loops (not the "
+            "`while` loop above), compute the bus's total seat count: "
+            "given `sections = 3`, `rows_per_section = 2`, "
+            "`seats_per_row = 2` (all given, don't modify), loop over "
+            "sections and, for each, over its rows, adding `seats_per_row` "
+            "to a running `total_seats` each time. Then set "
+            "`capacity_is_valid = capacity <= total_seats`."
         ),
         "stub": '''\
-def pair_names_scores(names: list[str], scores: list[int]) -> list[tuple]:
-    """list(zip(names, scores))."""
-    raise NotImplementedError
+events = ["IN:2", "IN:1", "OUT:1", "SKIP", "BAD", "IN:5", "OUT:2", "IN:0", "OUT:10"]
+capacity = 6
+sections = 3
+rows_per_section = 2
+seats_per_row = 2
 
+raise NotImplementedError  # delete this line once you've written the code below
 
-def merge_records(keys: list[str], values: list) -> dict:
-    """dict(zip(keys, values))."""
-    raise NotImplementedError
-
-
-def count_equal_pairs(list1: list, list2: list) -> int:
-    """Count positions i where list1[i] == list2[i], walking both with zip()."""
-    raise NotImplementedError
-
-
-def indexed_items(items: list[str]) -> list[str]:
-    """[f"{i}: {item}" for i, item in enumerate(items)]."""
-    raise NotImplementedError
-
-
-def labeled_from(items: list[str], start: int) -> dict:
-    """{i: item for i, item in enumerate(items, start)}."""
-    raise NotImplementedError
+# Write your code here: a while-loop processing `events` into `passengers`
+# and `trip_ended_early`, then a SEPARATE nested for-loop computing
+# `total_seats` and `capacity_is_valid`. See README.md for the exact
+# requirements.
 ''',
         "reference": '''\
-def pair_names_scores(names: list[str], scores: list[int]) -> list[tuple]:
-    return list(zip(names, scores))
+events = ["IN:2", "IN:1", "OUT:1", "SKIP", "BAD", "IN:5", "OUT:2", "IN:0", "OUT:10"]
+capacity = 6
+sections = 3
+rows_per_section = 2
+seats_per_row = 2
 
+passengers = 0
+trip_ended_early = False
+i = 0
+while i < len(events):
+    event = events[i]
+    if event.startswith("IN:"):
+        n = int(event.split(":")[1])
+        if passengers + n > capacity:
+            trip_ended_early = True
+            break
+        passengers += n
+    elif event.startswith("OUT:"):
+        n = int(event.split(":")[1])
+        passengers -= n
+        if passengers < 0:
+            passengers = 0
+    elif event == "SKIP":
+        i += 1
+        continue
+    else:
+        pass
+    i += 1
 
-def merge_records(keys: list[str], values: list) -> dict:
-    return dict(zip(keys, values))
+total_seats = 0
+for section in range(sections):
+    for row in range(rows_per_section):
+        total_seats += seats_per_row
 
-
-def count_equal_pairs(list1: list, list2: list) -> int:
-    return sum(1 for a, b in zip(list1, list2) if a == b)
-
-
-def indexed_items(items: list[str]) -> list[str]:
-    return [f"{i}: {item}" for i, item in enumerate(items)]
-
-
-def labeled_from(items: list[str], start: int) -> dict:
-    return {i: item for i, item in enumerate(items, start)}
+capacity_is_valid = capacity <= total_seats
 ''',
         "test": '''\
-from exercises.stage02.exercise03.solution import (
-    pair_names_scores,
-    merge_records,
-    count_equal_pairs,
-    indexed_items,
-    labeled_from,
-)
+import exercises.stage02.basic02.solution as solution
 
 
-def test_pair_names_scores():
-    assert pair_names_scores(["a", "b"], [1, 2]) == [("a", 1), ("b", 2)]
+def test_passengers_after_processing():
+    """passengers reflects IN:/OUT: events up to (not including) the one that triggers overflow."""
+    assert solution.passengers == 2
 
 
-def test_merge_records():
-    assert merge_records(["x", "y"], [1, 2]) == {"x": 1, "y": 2}
+def test_trip_ended_early_flag():
+    """trip_ended_early is True once an IN:n would push passengers over capacity."""
+    assert solution.trip_ended_early is True
 
 
-def test_count_equal_pairs():
-    assert count_equal_pairs([1, 2, 3], [1, 0, 3]) == 2
+def test_skip_event_uses_continue():
+    """A "SKIP" event must be a no-op -- passengers unaffected either way."""
+    # passengers already covers this indirectly: 2+1-1=2, SKIP contributes nothing.
+    assert solution.passengers == 2
 
 
-def test_indexed_items():
-    assert indexed_items(["a", "b"]) == ["0: a", "1: b"]
+def test_bad_event_uses_pass_not_a_crash():
+    """A malformed event ("BAD") must be silently ignored (pass), not raise or change state."""
+    assert solution.passengers == 2
 
 
-def test_labeled_from():
-    assert labeled_from(["a", "b"], 10) == {10: "a", 11: "b"}
+def test_total_seats_via_nested_for():
+    """total_seats == sections * rows_per_section * seats_per_row, built with nested for-loops and +=."""
+    assert solution.total_seats == 12
+
+
+def test_capacity_is_valid():
+    """capacity_is_valid == (capacity <= total_seats)."""
+    assert solution.capacity_is_valid is True
 ''',
     },
     {
-        "name": "exercise04",
-        "title": "Ranges and Itertools",
-        "summary": "range() with step, itertools.cycle/islice/chain/product",
+        "name": "mid01",
+        "title": "Shift Coverage Checker",
+        "summary": "for...else, a short-circuit guard, a ternary, zip()",
+        "instructions": SCRIPT_INSTRUCTIONS,
         "readme": (
-            "Implement:\n\n"
-            "- `stepped_range(start: int, stop: int, step: int) -> list[int]` -- "
-            "`list(range(start, stop, step))`.\n"
-            "- `numbered_multiples(n: int, factor: int) -> list[str]` -- build the "
-            "multiples of `factor` up to `n` with `range(factor, n + 1, factor)`, "
-            "then label each with its position via `enumerate(...)`, returning "
-            "`[f\"{i}: {v}\" for i, v in enumerate(multiples)]`.\n"
-            "- `cycle_colors(colors: list[str], count: int) -> list[str]` -- the "
-            "first `count` items of `colors` repeated forever, via "
-            "`itertools.islice(itertools.cycle(colors), count)`.\n"
-            "- `chain_lists(list1: list, list2: list) -> list` -- "
-            "`list(itertools.chain(list1, list2))`.\n"
-            "- `all_pairs(list1: list, list2: list) -> list[tuple]` -- every "
-            "`(a, b)` combination, via `list(itertools.product(list1, list2))`.\n\n"
-            "See the Study Reference presentation, Topic 2, for the theory."
+            "A shift roster -- given, don't modify:\n\n"
+            "```python\n"
+            'scheduled_names = ["Ana", "Ben", "Cy", "Dee", "Ella"]\n'
+            'checked_in_names = ["Ben", "Dee", "Ana"]\n'
+            "shift_hours = [8, 6, 10, 4, 9]\n"
+            "max_hours = 9\n"
+            "```\n\n"
+            "(`shift_hours[i]` is `scheduled_names[i]`'s scheduled hours.)\n\n"
+            "Using Mid-tier tools, write plain top-level code that "
+            "computes:\n\n"
+            "- `all_checked_in` -- a **`for...else`** loop over "
+            "`scheduled_names`: if a name isn't in `checked_in_names`, set "
+            "`all_checked_in = False` and `break`; the loop's `else` "
+            "clause (only reached if the loop never broke) sets "
+            "`all_checked_in = True`. Don't pre-initialize "
+            "`all_checked_in` before the loop -- both branches set it, so "
+            "it doesn't need one.\n"
+            "- `missing_list` -- a plain `for` loop collecting every "
+            "scheduled name **not** in `checked_in_names`, in order (not a "
+            "comprehension -- those aren't introduced until Stage 4).\n"
+            "- `first_missing_has_long_shift` -- **one short-circuit `and` "
+            "expression**: `len(missing_list) > 0 and "
+            "shift_hours[scheduled_names.index(missing_list[0])] > "
+            "max_hours`. The `len(...) > 0` check must come first -- it's "
+            "what makes indexing `missing_list[0]` safe on the right side.\n"
+            "- `coverage_status` -- a **ternary expression**: `\"full\"` if "
+            "`missing_list` is empty, else `\"short-staffed\"`.\n"
+            "- `overtime_names` -- a plain `for` loop using **`zip(scheduled_names, "
+            "shift_hours)`** to walk both lists together, collecting every "
+            "name whose hours exceed `max_hours`."
         ),
         "stub": '''\
-def stepped_range(start: int, stop: int, step: int) -> list[int]:
-    """list(range(start, stop, step))."""
-    raise NotImplementedError
+scheduled_names = ["Ana", "Ben", "Cy", "Dee", "Ella"]
+checked_in_names = ["Ben", "Dee", "Ana"]
+shift_hours = [8, 6, 10, 4, 9]
+max_hours = 9
+
+raise NotImplementedError  # delete this line once you've written the code below
+
+# Write your code here: all_checked_in (for...else), missing_list (plain
+# for loop), first_missing_has_long_shift (short-circuit and), coverage_status
+# (ternary), overtime_names (for + zip()). See README.md.
+''',
+        "reference": '''\
+scheduled_names = ["Ana", "Ben", "Cy", "Dee", "Ella"]
+checked_in_names = ["Ben", "Dee", "Ana"]
+shift_hours = [8, 6, 10, 4, 9]
+max_hours = 9
+
+for name in scheduled_names:
+    if name not in checked_in_names:
+        all_checked_in = False
+        break
+else:
+    all_checked_in = True
+
+missing_list = []
+for name in scheduled_names:
+    if name not in checked_in_names:
+        missing_list.append(name)
+
+first_missing_has_long_shift = (
+    len(missing_list) > 0
+    and shift_hours[scheduled_names.index(missing_list[0])] > max_hours
+)
+
+coverage_status = "full" if len(missing_list) == 0 else "short-staffed"
+
+overtime_names = []
+for name, hours in zip(scheduled_names, shift_hours):
+    if hours > max_hours:
+        overtime_names.append(name)
+''',
+        "test": '''\
+import exercises.stage02.mid01.solution as solution
 
 
-def numbered_multiples(n: int, factor: int) -> list[str]:
-    """Multiples of factor up to n, each labeled "i: value" via enumerate()."""
-    raise NotImplementedError
+def test_all_checked_in_via_for_else():
+    """all_checked_in must be False as soon as a scheduled name isn't checked in (for...else, break)."""
+    assert solution.all_checked_in is False
 
 
-def cycle_colors(colors: list[str], count: int) -> list[str]:
-    """First `count` items of colors repeated forever (itertools.cycle + islice)."""
-    raise NotImplementedError
+def test_missing_list():
+    """missing_list == every scheduled name not in checked_in_names, in original order."""
+    assert solution.missing_list == ["Cy", "Ella"]
 
 
-def chain_lists(list1: list, list2: list) -> list:
-    """list1 followed by list2, via itertools.chain (not list1 + list2)."""
-    raise NotImplementedError
+def test_first_missing_has_long_shift_short_circuit():
+    """One `and` expression: len(missing_list) > 0 guards indexing missing_list[0] safely."""
+    assert solution.first_missing_has_long_shift is True
 
 
-def all_pairs(list1: list, list2: list) -> list[tuple]:
-    """Every (a, b) combination, via itertools.product."""
-    raise NotImplementedError
+def test_coverage_status_ternary():
+    """coverage_status == "full" if missing_list is empty else "short-staffed", as a ternary expression."""
+    assert solution.coverage_status == "short-staffed"
+
+
+def test_overtime_names_via_zip():
+    """overtime_names built by walking zip(scheduled_names, shift_hours), not manual indexing."""
+    assert solution.overtime_names == ["Cy"]
+''',
+    },
+    {
+        "name": "mid02",
+        "title": "Inventory Restock Matcher",
+        "summary": "while...else, a short-circuit guard, a ternary, zip() -- a different combination",
+        "instructions": SCRIPT_INSTRUCTIONS,
+        "readme": (
+            "A stockroom inventory -- given, don't modify:\n\n"
+            "```python\n"
+            'item_names = ["bolts", "screws", "washers", "nuts"]\n'
+            "stock_levels = [12, 0, 5, 3]\n"
+            "reorder_threshold = 4\n"
+            "```\n\n"
+            "(`stock_levels[i]` is `item_names[i]`'s current stock.)\n\n"
+            "Same Mid-tier toolbox as the previous exercise, a different "
+            "combination -- write plain top-level code that computes:\n\n"
+            "- `out_of_stock_index` -- a **`while...else`** loop: walk an "
+            "index `i` from `0`, `break` the moment `stock_levels[i] == 0`; "
+            "the loop's `else` clause (reached only if the `while` "
+            "condition ran out without a `break`) sets `i = -1`. Assign "
+            "`out_of_stock_index = i` after the loop.\n"
+            "- `needs_urgent_reorder` -- **one short-circuit `and` "
+            "expression**: `out_of_stock_index != -1 and "
+            "item_names[out_of_stock_index] != \"\"`. The `!= -1` check "
+            "must come first -- it's what makes indexing "
+            "`item_names[out_of_stock_index]` safe.\n"
+            "- `stock_status` -- a **ternary expression**: `\"critical\"` "
+            "if `out_of_stock_index != -1` else `\"ok\"`.\n"
+            "- `low_stock_items` -- a plain `for` loop using "
+            "**`zip(item_names, stock_levels)`** to walk both lists "
+            "together, collecting every name whose stock is strictly below "
+            "`reorder_threshold`."
+        ),
+        "stub": '''\
+item_names = ["bolts", "screws", "washers", "nuts"]
+stock_levels = [12, 0, 5, 3]
+reorder_threshold = 4
+
+raise NotImplementedError  # delete this line once you've written the code below
+
+# Write your code here: out_of_stock_index (while...else), needs_urgent_reorder
+# (short-circuit and), stock_status (ternary), low_stock_items (for + zip()).
+# See README.md.
+''',
+        "reference": '''\
+item_names = ["bolts", "screws", "washers", "nuts"]
+stock_levels = [12, 0, 5, 3]
+reorder_threshold = 4
+
+i = 0
+while i < len(stock_levels):
+    if stock_levels[i] == 0:
+        break
+    i += 1
+else:
+    i = -1
+out_of_stock_index = i
+
+needs_urgent_reorder = out_of_stock_index != -1 and item_names[out_of_stock_index] != ""
+
+stock_status = "critical" if out_of_stock_index != -1 else "ok"
+
+low_stock_items = []
+for name, level in zip(item_names, stock_levels):
+    if level < reorder_threshold:
+        low_stock_items.append(name)
+''',
+        "test": '''\
+import exercises.stage02.mid02.solution as solution
+
+
+def test_out_of_stock_index_via_while_else():
+    """out_of_stock_index is the first index where stock_levels[i] == 0 (while...else, break)."""
+    assert solution.out_of_stock_index == 1
+
+
+def test_needs_urgent_reorder_short_circuit():
+    """One `and` expression: out_of_stock_index != -1 guards the item_names indexing on the right."""
+    assert solution.needs_urgent_reorder is True
+
+
+def test_stock_status_ternary():
+    """stock_status == "critical" if out_of_stock_index != -1 else "ok", as a ternary expression."""
+    assert solution.stock_status == "critical"
+
+
+def test_low_stock_items_via_zip():
+    """low_stock_items built by walking zip(item_names, stock_levels), not manual indexing."""
+    assert solution.low_stock_items == ["screws", "nuts"]
+''',
+    },
+    {
+        "name": "advanced01",
+        "title": "Custom Iterator: CountdownTimer",
+        "summary": "a class implementing the iterator protocol (__iter__/__next__/StopIteration) by hand",
+        "readme": (
+            "Implement a class `CountdownTimer` that is its own iterator, "
+            "counting down from `start` to `0` **inclusive**:\n\n"
+            "- `__init__(self, start)` -- store `start` and a `current` "
+            "counter beginning at `start`.\n"
+            "- `__iter__(self)` -- an iterator is required to return "
+            "itself from `__iter__`: `return self`.\n"
+            "- `__next__(self)` -- if `current < 0`, `raise StopIteration` "
+            "(the iterator is exhausted -- this must keep happening on "
+            "every subsequent call, not just the first time past the "
+            "end). Otherwise, save `current`'s value, decrement `current` "
+            "by 1, and return the saved value.\n\n"
+            "This is the exact protocol `for x in some_iterator:` relies "
+            "on under the hood: it calls `__iter__` once, then `__next__` "
+            "repeatedly until `StopIteration` is raised. `list(CountdownTimer(3))` "
+            "should give `[3, 2, 1, 0]`."
+        ),
+        "stub": '''\
+class CountdownTimer:
+    """Counts down from `start` to 0 inclusive; is its own iterator."""
+
+    def __init__(self, start):
+        raise NotImplementedError
+
+    def __iter__(self):
+        raise NotImplementedError
+
+    def __next__(self):
+        raise NotImplementedError
+''',
+        "reference": '''\
+class CountdownTimer:
+    """Counts down from `start` to 0 inclusive; is its own iterator."""
+
+    def __init__(self, start):
+        self.start = start
+        self.current = start
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.current < 0:
+            raise StopIteration
+        value = self.current
+        self.current -= 1
+        return value
+''',
+        "test": '''\
+import pytest
+
+from exercises.stage02.advanced01.solution import CountdownTimer
+
+
+def test_list_of_countdown_timer():
+    """list(CountdownTimer(3)) walks __iter__ then __next__ repeatedly -- [3, 2, 1, 0]."""
+    assert list(CountdownTimer(3)) == [3, 2, 1, 0]
+
+
+def test_iter_returns_self():
+    """__iter__ must return self -- CountdownTimer is its own iterator."""
+    timer = CountdownTimer(2)
+    assert iter(timer) is timer
+
+
+def test_next_raises_stopiteration_when_exhausted():
+    """__next__ must raise StopIteration once current < 0."""
+    timer = CountdownTimer(0)
+    assert next(timer) == 0
+    with pytest.raises(StopIteration):
+        next(timer)
+
+
+def test_next_keeps_raising_after_exhaustion():
+    """Calling __next__ again after StopIteration must raise StopIteration again, not resume or crash."""
+    timer = CountdownTimer(0)
+    next(timer)
+    with pytest.raises(StopIteration):
+        next(timer)
+    with pytest.raises(StopIteration):
+        next(timer)
+
+
+def test_for_loop_consumes_it_correctly():
+    """A real `for` loop must consume the whole sequence via the protocol, not just list()."""
+    collected = []
+    for value in CountdownTimer(2):
+        collected.append(value)
+    assert collected == [2, 1, 0]
+''',
+    },
+    {
+        "name": "advanced02",
+        "title": "Round-Robin Task Scheduler",
+        "summary": "itertools.chain + itertools.cycle + itertools.islice, combined",
+        "instructions": SCRIPT_INSTRUCTIONS,
+        "readme": (
+            "Given, don't modify:\n\n"
+            "```python\n"
+            'workers = ["alpha", "beta", "gamma"]\n'
+            'morning_tasks = ["t1", "t2", "t3"]\n'
+            'afternoon_tasks = ["t4", "t5", "t6", "t7"]\n'
+            "```\n\n"
+            "Using `itertools`, write plain top-level code that computes:\n\n"
+            "- `all_tasks` -- `morning_tasks` followed by `afternoon_tasks`, "
+            "via `list(itertools.chain(morning_tasks, afternoon_tasks))` "
+            "(not `morning_tasks + afternoon_tasks`).\n"
+            "- `assignments` -- each task in `all_tasks` paired round-robin "
+            "with a worker, via `list(zip(all_tasks, "
+            "itertools.cycle(workers)))`. Because `itertools.cycle` repeats "
+            "`workers` forever and `zip` stops at the shorter of its two "
+            "inputs, this naturally stops once `all_tasks` runs out, cycling "
+            "back through `workers` as many times as needed.\n"
+            "- `first_three_assignments` -- just the first 3 pairs of "
+            "`assignments`, via `list(itertools.islice(assignments, 3))` "
+            "(not `assignments[:3]`).\n"
+            "- `worker_task_counts` -- a `dict` mapping each worker to how "
+            "many tasks they were assigned, built with a plain `for "
+            "task, worker in assignments:` loop and "
+            "`worker_task_counts[worker] = worker_task_counts.get(worker, 0) + 1`."
+        ),
+        "stub": '''\
+import itertools
+
+workers = ["alpha", "beta", "gamma"]
+morning_tasks = ["t1", "t2", "t3"]
+afternoon_tasks = ["t4", "t5", "t6", "t7"]
+
+raise NotImplementedError  # delete this line once you've written the code below
+
+# Write your code here: all_tasks (itertools.chain), assignments (zip +
+# itertools.cycle), first_three_assignments (itertools.islice),
+# worker_task_counts (plain for-loop + dict.get). See README.md.
 ''',
         "reference": '''\
 import itertools
 
+workers = ["alpha", "beta", "gamma"]
+morning_tasks = ["t1", "t2", "t3"]
+afternoon_tasks = ["t4", "t5", "t6", "t7"]
 
-def stepped_range(start: int, stop: int, step: int) -> list[int]:
-    return list(range(start, stop, step))
+all_tasks = list(itertools.chain(morning_tasks, afternoon_tasks))
+assignments = list(zip(all_tasks, itertools.cycle(workers)))
+first_three_assignments = list(itertools.islice(assignments, 3))
 
-
-def numbered_multiples(n: int, factor: int) -> list[str]:
-    multiples = list(range(factor, n + 1, factor))
-    return [f"{i}: {v}" for i, v in enumerate(multiples)]
-
-
-def cycle_colors(colors: list[str], count: int) -> list[str]:
-    return list(itertools.islice(itertools.cycle(colors), count))
-
-
-def chain_lists(list1: list, list2: list) -> list:
-    return list(itertools.chain(list1, list2))
-
-
-def all_pairs(list1: list, list2: list) -> list[tuple]:
-    return list(itertools.product(list1, list2))
+worker_task_counts = {}
+for task, worker in assignments:
+    worker_task_counts[worker] = worker_task_counts.get(worker, 0) + 1
 ''',
         "test": '''\
-from exercises.stage02.exercise04.solution import (
-    stepped_range,
-    numbered_multiples,
-    cycle_colors,
-    chain_lists,
-    all_pairs,
-)
+import exercises.stage02.advanced02.solution as solution
 
 
-def test_stepped_range():
-    assert stepped_range(0, 10, 2) == [0, 2, 4, 6, 8]
+def test_all_tasks_via_chain():
+    """all_tasks == morning_tasks followed by afternoon_tasks, via itertools.chain."""
+    assert solution.all_tasks == ["t1", "t2", "t3", "t4", "t5", "t6", "t7"]
 
 
-def test_numbered_multiples():
-    assert numbered_multiples(12, 3) == ["0: 3", "1: 6", "2: 9", "3: 12"]
+def test_assignments_round_robin_via_cycle():
+    """assignments pairs each task with a worker, cycling through workers via itertools.cycle."""
+    assert solution.assignments == [
+        ("t1", "alpha"), ("t2", "beta"), ("t3", "gamma"),
+        ("t4", "alpha"), ("t5", "beta"), ("t6", "gamma"), ("t7", "alpha"),
+    ]
 
 
-def test_cycle_colors():
-    assert cycle_colors(["red", "green"], 5) == ["red", "green", "red", "green", "red"]
+def test_first_three_assignments_via_islice():
+    """first_three_assignments == the first 3 of assignments, via itertools.islice."""
+    assert solution.first_three_assignments == [("t1", "alpha"), ("t2", "beta"), ("t3", "gamma")]
 
 
-def test_chain_lists():
-    assert chain_lists([1, 2], [3, 4]) == [1, 2, 3, 4]
-
-
-def test_all_pairs():
-    assert all_pairs([1, 2], ["a", "b"]) == [(1, "a"), (1, "b"), (2, "a"), (2, "b")]
-''',
-    },
-    {
-        "name": "exercise05",
-        "title": "Short-Circuit Guards and Truthiness",
-        "summary": "and-short-circuit x3, truthiness x3",
-        "readme": (
-            "Implement:\n\n"
-            "- `is_valid_username(name) -> bool` -- `True` only if `name` is a "
-            "non-empty `str` of length <= 20. Use one chained `and` expression: "
-            "`isinstance(name, str) and len(name) > 0 and len(name) <= 20`. Because "
-            "`and` short-circuits, `len(name)` never runs if `name` isn't a `str` "
-            "in the first place -- that's the point, not just a style choice.\n"
-            "- `has_valid_first_item(items: list) -> bool` -- `True` only if "
-            "`items` is non-empty **and** its first item is truthy: "
-            "`bool(items) and bool(items[0])`. The short-circuit here protects "
-            "`items[0]` from ever running on an empty list.\n"
-            "- `is_within_bounds(numbers: list[int], index: int) -> bool` -- "
-            "`True` only if `0 <= index < len(numbers)` **and** "
-            "`numbers[index] >= 0`. Same guard pattern: the bounds check must pass "
-            "before `numbers[index]` is safe to evaluate.\n"
-            "- `describe_truthiness(value) -> str` -- `\"truthy\"` if `value` "
-            "(bare truthiness check, no `==`), else `\"falsy\"`.\n"
-            "- `filter_truthy(values: list) -> list` -- `[v for v in values if v]`.\n"
-            "- `count_falsy(values: list) -> int` -- `sum(1 for v in values if not v)`.\n\n"
-            "See the Study Reference presentation, Topic 2, for the theory."
-        ),
-        "stub": '''\
-def is_valid_username(name) -> bool:
-    """Non-empty str, len <= 20 -- one chained `and` expression."""
-    raise NotImplementedError
-
-
-def has_valid_first_item(items: list) -> bool:
-    """items is non-empty AND items[0] is truthy -- `and` guards items[0]."""
-    raise NotImplementedError
-
-
-def is_within_bounds(numbers: list[int], index: int) -> bool:
-    """0 <= index < len(numbers) AND numbers[index] >= 0."""
-    raise NotImplementedError
-
-
-def describe_truthiness(value) -> str:
-    """"truthy" or "falsy" based on bare truthiness of value."""
-    raise NotImplementedError
-
-
-def filter_truthy(values: list) -> list:
-    """Only the truthy values, order preserved."""
-    raise NotImplementedError
-
-
-def count_falsy(values: list) -> int:
-    """How many values are falsy."""
-    raise NotImplementedError
-''',
-        "reference": '''\
-def is_valid_username(name) -> bool:
-    return isinstance(name, str) and len(name) > 0 and len(name) <= 20
-
-
-def has_valid_first_item(items: list) -> bool:
-    return bool(items) and bool(items[0])
-
-
-def is_within_bounds(numbers: list[int], index: int) -> bool:
-    return 0 <= index < len(numbers) and numbers[index] >= 0
-
-
-def describe_truthiness(value) -> str:
-    return "truthy" if value else "falsy"
-
-
-def filter_truthy(values: list) -> list:
-    return [v for v in values if v]
-
-
-def count_falsy(values: list) -> int:
-    return sum(1 for v in values if not v)
-''',
-        "test": '''\
-from exercises.stage02.exercise05.solution import (
-    is_valid_username,
-    has_valid_first_item,
-    is_within_bounds,
-    describe_truthiness,
-    filter_truthy,
-    count_falsy,
-)
-
-
-def test_is_valid_username_true():
-    assert is_valid_username("ada") is True
-
-
-def test_is_valid_username_rejects_non_str():
-    assert is_valid_username(123) is False
-
-
-def test_is_valid_username_rejects_empty():
-    assert is_valid_username("") is False
-
-
-def test_has_valid_first_item_empty_list_is_safe():
-    assert has_valid_first_item([]) is False
-
-
-def test_has_valid_first_item_truthy_first():
-    assert has_valid_first_item([1, 2]) is True
-
-
-def test_is_within_bounds_out_of_range_is_safe():
-    assert is_within_bounds([1, 2, 3], 10) is False
-
-
-def test_is_within_bounds_true():
-    assert is_within_bounds([1, 2, 3], 1) is True
-
-
-def test_describe_truthiness():
-    assert describe_truthiness(0) == "falsy"
-    assert describe_truthiness("hi") == "truthy"
-    assert describe_truthiness([]) == "falsy"
-
-
-def test_filter_truthy():
-    assert filter_truthy([0, 1, "", "a", None, 2]) == [1, "a", 2]
-
-
-def test_count_falsy():
-    assert count_falsy([0, 1, "", "a", None, 2]) == 3
-''',
-    },
-    {
-        "name": "exercise06",
-        "title": "Ternary Expressions",
-        "summary": "conditional expressions x3",
-        "readme": (
-            "Implement three functions, each a single-line ternary "
-            "(`X if COND else Y`) -- no `if` statements:\n\n"
-            "- `grade_label(score: int) -> str` -- `\"pass\"` if `score >= 60`, "
-            "else `\"fail\"`.\n"
-            "- `abs_value(n: int) -> int` -- `n` if `n >= 0`, else `-n`.\n"
-            "- `clamp_to_range(n: int, lo: int, hi: int) -> int` -- `n` clamped "
-            "into `[lo, hi]`. Chain two ternaries: "
-            "`lo if n < lo else hi if n > hi else n`.\n\n"
-            "See the Study Reference presentation, Topic 2, for the theory."
-        ),
-        "stub": '''\
-def grade_label(score: int) -> str:
-    """"pass" if score >= 60 else "fail" -- as a ternary expression."""
-    raise NotImplementedError
-
-
-def abs_value(n: int) -> int:
-    """n if n >= 0 else -n -- as a ternary expression."""
-    raise NotImplementedError
-
-
-def clamp_to_range(n: int, lo: int, hi: int) -> int:
-    """n clamped into [lo, hi] -- as a chained ternary expression."""
-    raise NotImplementedError
-''',
-        "reference": '''\
-def grade_label(score: int) -> str:
-    return "pass" if score >= 60 else "fail"
-
-
-def abs_value(n: int) -> int:
-    return n if n >= 0 else -n
-
-
-def clamp_to_range(n: int, lo: int, hi: int) -> int:
-    return lo if n < lo else hi if n > hi else n
-''',
-        "test": '''\
-from exercises.stage02.exercise06.solution import grade_label, abs_value, clamp_to_range
-
-
-def test_grade_label():
-    assert grade_label(75) == "pass"
-    assert grade_label(50) == "fail"
-
-
-def test_abs_value():
-    assert abs_value(5) == 5
-    assert abs_value(-5) == 5
-    assert abs_value(0) == 0
-
-
-def test_clamp_to_range():
-    assert clamp_to_range(15, 0, 10) == 10
-    assert clamp_to_range(-5, 0, 10) == 0
-    assert clamp_to_range(5, 0, 10) == 5
-''',
-    },
-    {
-        "name": "exercise07",
-        "title": "The else Clause on Loops",
-        "summary": "for...else x2 more, while...else x3",
-        "readme": (
-            "`for` and `while` loops can both carry an `else` clause that runs "
-            "only if the loop finished *without* hitting a `break`. Implement:\n\n"
-            "- `contains_value(items: list, target) -> bool` -- `for...else`: "
-            "`break` when `item == target` is found; the `else` clause returns "
-            "`False`.\n"
-            "- `all_positive(numbers: list[int]) -> bool` -- `for...else`: "
-            "`break` the moment a non-positive number is found; the `else` clause "
-            "returns `True` (every number was positive).\n"
-            "- `find_first_negative_index(numbers: list[int]) -> int` -- "
-            "`while...else`: walk an index `i` with a `while` loop, `break` when "
-            "`numbers[i] < 0`; the `else` clause (loop ran out without breaking) "
-            "returns `-1`.\n"
-            "- `retry_until_success(attempts: list[bool]) -> bool` -- "
-            "`while...else`: walk `attempts` with a `while` loop, `break` on the "
-            "first `True`; the `else` clause returns `False` (never succeeded).\n"
-            "- `first_positive_index(numbers: list[int]) -> int` -- `while...else`: "
-            "same shape as `find_first_negative_index`, but for the first "
-            "positive number; `else` returns `-1`.\n\n"
-            "See the Study Reference presentation, Topic 2, for the theory."
-        ),
-        "stub": '''\
-def contains_value(items: list, target) -> bool:
-    """for...else: True if target is found in items."""
-    raise NotImplementedError
-
-
-def all_positive(numbers: list[int]) -> bool:
-    """for...else: True if every number in numbers is > 0."""
-    raise NotImplementedError
-
-
-def find_first_negative_index(numbers: list[int]) -> int:
-    """while...else: index of the first negative number, or -1."""
-    raise NotImplementedError
-
-
-def retry_until_success(attempts: list[bool]) -> bool:
-    """while...else: True if any attempt is True, else False."""
-    raise NotImplementedError
-
-
-def first_positive_index(numbers: list[int]) -> int:
-    """while...else: index of the first positive number, or -1."""
-    raise NotImplementedError
-''',
-        "reference": '''\
-def contains_value(items: list, target) -> bool:
-    for item in items:
-        if item == target:
-            break
-    else:
-        return False
-    return True
-
-
-def all_positive(numbers: list[int]) -> bool:
-    for n in numbers:
-        if n <= 0:
-            break
-    else:
-        return True
-    return False
-
-
-def find_first_negative_index(numbers: list[int]) -> int:
-    i = 0
-    while i < len(numbers):
-        if numbers[i] < 0:
-            break
-        i += 1
-    else:
-        return -1
-    return i
-
-
-def retry_until_success(attempts: list[bool]) -> bool:
-    i = 0
-    while i < len(attempts):
-        if attempts[i]:
-            break
-        i += 1
-    else:
-        return False
-    return True
-
-
-def first_positive_index(numbers: list[int]) -> int:
-    i = 0
-    while i < len(numbers):
-        if numbers[i] > 0:
-            break
-        i += 1
-    else:
-        return -1
-    return i
-''',
-        "test": '''\
-from exercises.stage02.exercise07.solution import (
-    contains_value,
-    all_positive,
-    find_first_negative_index,
-    retry_until_success,
-    first_positive_index,
-)
-
-
-def test_contains_value_found():
-    assert contains_value([1, 2, 3], 2) is True
-
-
-def test_contains_value_not_found():
-    assert contains_value([1, 2, 3], 9) is False
-
-
-def test_all_positive_true():
-    assert all_positive([1, 2, 3]) is True
-
-
-def test_all_positive_false():
-    assert all_positive([1, -2, 3]) is False
-
-
-def test_find_first_negative_index_found():
-    assert find_first_negative_index([1, 2, -3, 4]) == 2
-
-
-def test_find_first_negative_index_none():
-    assert find_first_negative_index([1, 2, 3]) == -1
-
-
-def test_retry_until_success_true():
-    assert retry_until_success([False, False, True]) is True
-
-
-def test_retry_until_success_false():
-    assert retry_until_success([False, False]) is False
-
-
-def test_first_positive_index_found():
-    assert first_positive_index([-1, -2, 3, 4]) == 2
-
-
-def test_first_positive_index_none():
-    assert first_positive_index([-1, -2]) == -1
+def test_worker_task_counts():
+    """worker_task_counts tallies assignments per worker via dict.get(..., 0) + 1."""
+    assert solution.worker_task_counts == {"alpha": 3, "beta": 2, "gamma": 2}
 ''',
     },
 ]
