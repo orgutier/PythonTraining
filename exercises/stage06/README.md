@@ -4,7 +4,7 @@ Five exercises covering class fundamentals from Topic 6 at least three times eac
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage06_exerciseXX`. Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage06_<name>` (e.g. `python tools/cli.py test stage06_exercise01`). Work through them in order.
 
 - **`exercise01/`** -- class, self, __init__, @property, @x.setter, @staticmethod, encapsulation
 - **`exercise02/`** -- class vs instance attributes, @classmethod x2, cls x2, @staticmethod

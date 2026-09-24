@@ -4,7 +4,7 @@ Seven exercises tour the everyday stdlib modules from Topic 9 -- filesystem acce
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage09_exerciseXX`. Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage09_<name>` (e.g. `python tools/cli.py test stage09_exercise01`). Work through them in order.
 
 - **`exercise01/`** -- os.listdir, os.path x2, pathlib.Path x2
 - **`exercise02/`** -- os.walk() x3, pathlib.Path glob

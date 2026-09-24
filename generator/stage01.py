@@ -1,641 +1,717 @@
 """
 Stage 1 -- Python Fundamentals.
 
-Coverage plan (every item below is exercised by the trainee's own code in
-at least 3 separate places across these 6 exercises -- not just mentioned
-in a docstring):
+Pilot of the tier-named exercise convention: a minimum of two exercises per
+Basic/Mid/Advanced tier (named "basic01"/"basic02"/"mid01"/... instead of a
+flat "exercise01".."exercise06" sequence), plus a "hello_world" exercise for
+the stage's Setup sub-stage. Every exercise here is deliberately
+**script-style**: plain top-level statements assigning specific
+module-level variable names, not a function/class to implement -- Stage 1
+hasn't taught `def` yet (that's Stage 3), so there's no reason to wrap
+anything in a function here. Tests import the module and read those
+variables directly (see generator/common.py's SCRIPT_INSTRUCTIONS).
 
-  keywords/builtins: int, float, str, bool, None, True, False, print(),
-                      input(), type(), isinstance(), and, or, not, is, in,
-                      annotated assignment (`x: int = 5`)
-  concepts:           type hints, mutability vs immutability,
-                      identity vs equality
+Coverage plan (every item below is exercised by the trainee's own code,
+generally 2+ times across these 7 exercises):
+
+  Basic:    int, float, str, bool, None, True, False, print(), input(),
+            type(), isinstance(), and, or, not, is, in, x: int = 5
+  Mid:      f-strings, the walrus operator (:=), augmented assignment (+=),
+            chained comparisons, operator precedence
+  Advanced: arbitrary-precision ints, small-int caching, string interning,
+            IEEE-754 float imprecision, Decimal, math.isclose()
 """
+from generator.common import SCRIPT_INSTRUCTIONS
 
 STAGE = "stage01"
 TOPIC = "Python Fundamentals"
 OVERVIEW = (
-    "Six small exercises, each in its own folder. Together they touch every "
-    "keyword, builtin, and concept from Topic 1 of the presentation at least "
-    "three times, so nothing here is a one-shot demo -- you'll see `isinstance()`, "
-    "`is`, `type()`, and the rest again and again in slightly different shapes."
+    "Seven small exercises, each in its own folder: hello_world (Setup), then "
+    "two apiece for the Basic, Mid, and Advanced tiers. Every one is plain "
+    "top-level code -- no function to implement -- since Stage 1 hasn't "
+    "introduced `def` yet. Each is a small, self-contained scenario (never "
+    "just \"print this value\") that forces you to actually combine that "
+    "tier's tools, not just demonstrate one in isolation."
 )
 
 EXERCISES = [
     {
-        "name": "exercise01",
-        "title": "Profile Basics",
-        "summary": "variables, type-hinted parameters, type(), print()",
+        "name": "hello_world",
+        "title": "Hello, World! (Environment Check)",
+        "summary": "print(), variable assignment, string concatenation -- confirms your environment and this repo's test runner both work",
+        "instructions": SCRIPT_INSTRUCTIONS,
         "readme": (
-            "Implement three small functions:\n\n"
-            "- `build_profile(name: str, age: int, height_m: float, is_student: bool) -> dict` "
-            "-- return a dict with keys `name`, `age`, `height_m`, `is_student` holding "
-            "those four values unchanged.\n"
-            "- `value_kind(x) -> str` -- return `type(x).__name__` (e.g. `\"int\"`, "
-            "`\"str\"`). This is your first use of `type()`; Exercise 3 goes deeper.\n"
-            "- `display_profile(profile: dict) -> None` -- `print()` a single line in "
-            "the exact form `\"NAME is AGE years old, HEIGHT_Mm tall, student=IS_STUDENT\"` "
-            "(e.g. `\"Ada is 30 years old, 1.7m tall, student=False\"`). Nothing to return.\n\n"
-            "All four parameters above use annotated types (`name: str`, `age: int`, ...) "
-            "-- keep doing that in every function you write this stage; it's not optional "
-            "decoration, `isinstance()` checks later in the stage assume callers respect it.\n\n"
-            "See the Study Reference presentation, Topic 1, for the theory."
+            "The very first program you'll run in this course. It exists purely "
+            "to prove your Python install, virtual environment, and this repo's "
+            "test runner (`python tools/cli.py test stage01_hello_world`) all "
+            "actually work, before we get into any real content.\n\n"
+            "Write two lines of code, in order, right in `solution.py` (no "
+            "function -- just plain statements):\n\n"
+            "1. Assign a variable `greeting` set to exactly `\"Hello, World!\"`, "
+            "then `print(greeting)`.\n"
+            "2. Assign a variable `author_name` to your own name as a "
+            "non-empty string (e.g. `\"Ada\"`), then print a second line built "
+            "with string **concatenation** (not an f-string -- those aren't "
+            "introduced until the Mid tier): "
+            "`print(\"This is \" + author_name + \"'s first Python program.\")`.\n\n"
+            "That's it. If `python tools/cli.py test stage01_hello_world` "
+            "passes, your setup is good and you're ready for the Basic tier."
         ),
         "stub": '''\
-def build_profile(name: str, age: int, height_m: float, is_student: bool) -> dict:
-    """Return {"name": name, "age": age, "height_m": height_m, "is_student": is_student}."""
-    raise NotImplementedError
+raise NotImplementedError  # delete this line once you've written the two lines below
 
-
-def value_kind(x) -> str:
-    """Return the name of x's type, e.g. value_kind(5) == "int"."""
-    raise NotImplementedError
-
-
-def display_profile(profile: dict) -> None:
-    """Print "NAME is AGE years old, HEIGHT_Mm tall, student=IS_STUDENT"."""
-    raise NotImplementedError
+# Write your code here: assign `greeting` and `author_name`, and print both
+# lines exactly as described in README.md.
 ''',
         "reference": '''\
-def build_profile(name: str, age: int, height_m: float, is_student: bool) -> dict:
-    return {"name": name, "age": age, "height_m": height_m, "is_student": is_student}
+greeting = "Hello, World!"
+print(greeting)
 
-
-def value_kind(x) -> str:
-    return type(x).__name__
-
-
-def display_profile(profile: dict) -> None:
-    print(
-        f"{profile['name']} is {profile['age']} years old, "
-        f"{profile['height_m']}m tall, student={profile['is_student']}"
-    )
+author_name = "Ada"
+print("This is " + author_name + "'s first Python program.")
 ''',
         "test": '''\
-from exercises.stage01.exercise01.solution import (
-    build_profile,
-    value_kind,
-    display_profile,
-)
+import sys
 
 
-def test_build_profile():
-    profile = build_profile("Ada", 30, 1.7, False)
-    assert profile == {"name": "Ada", "age": 30, "height_m": 1.7, "is_student": False}
+def test_hello_world_variables_and_output(capsys):
+    sys.modules.pop("exercises.stage01.hello_world.solution", None)
+    import exercises.stage01.hello_world.solution as solution
 
+    assert solution.greeting == "Hello, World!"
+    assert isinstance(solution.author_name, str)
+    assert solution.author_name != ""
 
-def test_value_kind_int():
-    assert value_kind(5) == "int"
-
-
-def test_value_kind_str():
-    assert value_kind("hi") == "str"
-
-
-def test_value_kind_float():
-    assert value_kind(3.14) == "float"
-
-
-def test_display_profile(capsys):
-    display_profile({"name": "Ada", "age": 30, "height_m": 1.7, "is_student": False})
     out = capsys.readouterr().out
-    assert out == "Ada is 30 years old, 1.7m tall, student=False\\n"
+    lines = out.rstrip("\\n").split("\\n")
+    assert lines[0] == "Hello, World!"
+    assert lines[1] == "This is " + solution.author_name + "'s first Python program."
 ''',
     },
     {
-        "name": "exercise02",
-        "title": "Temperature and BMI",
-        "summary": "float arithmetic, isinstance() with a bool-exclusion twist",
+        "name": "basic01",
+        "title": "Road Trip Fuel Ledger",
+        "summary": "explicit int()/float() casting, arithmetic operators, isinstance(), no f-strings yet",
+        "instructions": SCRIPT_INSTRUCTIONS,
         "readme": (
-            "Implement:\n\n"
-            "- `celsius_to_fahrenheit(celsius: float) -> float` -- the standard "
-            "conversion `celsius * 9 / 5 + 32`.\n"
-            "- `bmi_calculator(weight_kg: float, height_m: float) -> float` -- "
-            "`weight_kg / height_m ** 2`, rounded to 2 decimals.\n"
-            "- `validate_measurement(value) -> bool` -- return `True` only if `value` "
-            "is an `int` or `float` **and not** a `bool`. This matters because in "
-            "Python `bool` is a subclass of `int`, so `isinstance(True, int)` is "
-            "`True` -- a naive `isinstance(value, (int, float))` check would wrongly "
-            "accept `True`/`False` as measurements. You have to check `isinstance()` "
-            "twice and combine the two with `and`/`not`.\n\n"
-            "See the Study Reference presentation, Topic 1, for the theory."
+            "Four friends are splitting the fuel cost of a road trip. The raw "
+            "trip data below arrives as **strings** (as if read from a form) "
+            "-- do not modify these four given lines:\n\n"
+            "```python\n"
+            'distance_km_text = "742.5"\n'
+            'fuel_efficiency_l_per_100km_text = "6.8"\n'
+            'fuel_price_per_liter_text = "1.53"\n'
+            'passengers_text = "3"\n'
+            "```\n\n"
+            "Using only what the Basic tier has covered so far (arithmetic "
+            "operators, explicit `int()`/`float()` casting, comparison "
+            "operators, `isinstance()`, `type()`, `print()`) -- **no "
+            "`if`/`for`/`while`, no f-strings, no `+=`** (all of those are "
+            "Mid/Advanced-tier tools, saved for later exercises) -- write "
+            "plain top-level code that computes:\n\n"
+            "- `distance_km`, `fuel_efficiency_l_per_100km`, "
+            "`fuel_price_per_liter` (each cast to `float`) and `passengers` "
+            "(cast to `int`).\n"
+            "- `is_price_a_float` -- `True` iff `fuel_price_per_liter` is a "
+            "genuine `float` (use `isinstance()`; this should obviously be "
+            "`True` here, but writing the check is the point -- you'll rely "
+            "on this exact pattern again once the numbers aren't guaranteed "
+            "like they are here).\n"
+            "- `total_fuel_liters` -- liters needed for the whole trip: "
+            "`distance_km / 100 * fuel_efficiency_l_per_100km`.\n"
+            "- `total_cost` -- `total_fuel_liters * fuel_price_per_liter`.\n"
+            "- `cost_per_passenger` -- `total_cost / passengers`.\n\n"
+            "Finish with one `print()` call summarizing the trip, built with "
+            "string concatenation and `str()` (still no f-strings) -- "
+            'something like `"Total cost: " + str(total_cost)`.'
         ),
         "stub": '''\
-def celsius_to_fahrenheit(celsius: float) -> float:
-    """Convert a Celsius temperature to Fahrenheit."""
-    raise NotImplementedError
+distance_km_text = "742.5"
+fuel_efficiency_l_per_100km_text = "6.8"
+fuel_price_per_liter_text = "1.53"
+passengers_text = "3"
 
+raise NotImplementedError  # delete this line once you've written the code below
 
-def bmi_calculator(weight_kg: float, height_m: float) -> float:
-    """Return BMI = weight_kg / height_m ** 2, rounded to 2 decimals."""
-    raise NotImplementedError
-
-
-def validate_measurement(value) -> bool:
-    """True if value is an int or float, but explicitly NOT a bool."""
-    raise NotImplementedError
+# Write your code here: cast the four values above, compute
+# is_price_a_float/total_fuel_liters/total_cost/cost_per_passenger, and
+# print a one-line summary. See README.md for the exact requirements.
 ''',
         "reference": '''\
-def celsius_to_fahrenheit(celsius: float) -> float:
-    return celsius * 9 / 5 + 32
+distance_km_text = "742.5"
+fuel_efficiency_l_per_100km_text = "6.8"
+fuel_price_per_liter_text = "1.53"
+passengers_text = "3"
 
+distance_km = float(distance_km_text)
+fuel_efficiency_l_per_100km = float(fuel_efficiency_l_per_100km_text)
+fuel_price_per_liter = float(fuel_price_per_liter_text)
+passengers = int(passengers_text)
 
-def bmi_calculator(weight_kg: float, height_m: float) -> float:
-    return round(weight_kg / height_m ** 2, 2)
+is_price_a_float = isinstance(fuel_price_per_liter, float)
 
+total_fuel_liters = distance_km / 100 * fuel_efficiency_l_per_100km
+total_cost = total_fuel_liters * fuel_price_per_liter
+cost_per_passenger = total_cost / passengers
 
-def validate_measurement(value) -> bool:
-    return isinstance(value, (int, float)) and not isinstance(value, bool)
+print("Total cost: " + str(total_cost) + ", per passenger: " + str(cost_per_passenger))
 ''',
         "test": '''\
-from exercises.stage01.exercise02.solution import (
-    celsius_to_fahrenheit,
-    bmi_calculator,
-    validate_measurement,
-)
+import pytest
+
+import exercises.stage01.basic01.solution as solution
 
 
-def test_celsius_to_fahrenheit_freezing():
-    assert celsius_to_fahrenheit(0) == 32.0
+def test_casts_to_correct_types():
+    assert isinstance(solution.distance_km, float)
+    assert isinstance(solution.fuel_efficiency_l_per_100km, float)
+    assert isinstance(solution.fuel_price_per_liter, float)
+    assert isinstance(solution.passengers, int)
+    assert not isinstance(solution.passengers, bool)
 
 
-def test_celsius_to_fahrenheit_boiling():
-    assert celsius_to_fahrenheit(100) == 212.0
+def test_is_price_a_float_flag():
+    assert solution.is_price_a_float is True
 
 
-def test_bmi_calculator():
-    assert abs(bmi_calculator(70, 1.75) - 22.86) < 0.01
+def test_total_fuel_liters():
+    assert solution.total_fuel_liters == pytest.approx(50.49)
 
 
-def test_validate_measurement_accepts_int_and_float():
-    assert validate_measurement(70) is True
-    assert validate_measurement(1.75) is True
+def test_total_cost():
+    assert solution.total_cost == pytest.approx(77.2497)
 
 
-def test_validate_measurement_rejects_bool():
-    assert validate_measurement(True) is False
-    assert validate_measurement(False) is False
-
-
-def test_validate_measurement_rejects_str():
-    assert validate_measurement("70") is False
+def test_cost_per_passenger():
+    assert solution.cost_per_passenger == pytest.approx(25.7499)
 ''',
     },
     {
-        "name": "exercise03",
-        "title": "Type Inspector",
-        "summary": "type() vs isinstance(), None, bool-before-int classification, print()",
+        "name": "basic02",
+        "title": "Digital Clock Decoder",
+        "summary": "// and % chained together, explicit bool-from-string casting (avoiding the bool(str) trap)",
+        "instructions": SCRIPT_INSTRUCTIONS,
         "readme": (
-            "Implement:\n\n"
-            "- `describe_value(value) -> str` -- if `value is None`, return the exact "
-            "string `\"None (the absence of a value)\"`. Otherwise return "
-            "`f\"{value!r} is a {type(value).__name__}\"` (use `type()`, not "
-            "`isinstance()`, here).\n"
-            "- `print_type_report(value) -> None` -- `print()` the result of "
-            "`describe_value(value)`. Nothing to return.\n"
-            "- `classify_values(values: list) -> dict` -- return a dict with keys "
-            "`\"ints\"`, `\"floats\"`, `\"strs\"`, `\"bools\"`, `\"nones\"`, each mapped "
-            "to a list of the matching items from `values`, preserving order. **`bool` "
-            "must be checked before `int`**: since `True`/`False` are technically ints, "
-            "checking `isinstance(v, int)` first would put them in the wrong bucket. "
-            "Use `type(v) is bool` (not `isinstance`) to catch booleans precisely, "
-            "then `isinstance(v, int)` / `isinstance(v, float)` / `isinstance(v, str)` "
-            "for the rest, and `v is None` for the last bucket.\n\n"
-            "See the Study Reference presentation, Topic 1, for the theory."
+            "A monitoring system logs elapsed time as a raw seconds count, "
+            "and a daylight-saving flag as literal text -- both as strings, "
+            "don't modify:\n\n"
+            "```python\n"
+            'total_seconds_text = "9384"\n'
+            'is_daylight_saving_text = "False"\n'
+            "```\n\n"
+            "Using only Basic-tier tools, write plain top-level code that "
+            "computes:\n\n"
+            "- `total_seconds` -- `total_seconds_text` cast to `int`.\n"
+            "- `hours`, `minutes`, `seconds` -- decompose `total_seconds` "
+            "into hours/minutes/seconds using `//` and `%` (chain them: get "
+            "`hours` and a remainder, then get `minutes` from that remainder "
+            "and a second remainder, then `seconds` from that).\n"
+            "- `is_daylight_saving` -- a genuine `bool`, `True` only if "
+            '`is_daylight_saving_text` is literally the text `"True"`. '
+            '**Do not write `bool(is_daylight_saving_text)`** -- in Python, '
+            '`bool("False")` is `True`, because *any* non-empty string is '
+            'truthy, including the string `"False"` itself. Compare the '
+            'text against the string `"True"` instead (`==`) to get a '
+            "correct result.\n\n"
+            "Finish with one `print()` call (concatenation + `str()`, no "
+            "f-strings yet) summarizing the decoded time, e.g. something "
+            'like `"9384s = " + str(hours) + "h " + str(minutes) + "m " + '
+            'str(seconds) + "s"`.'
         ),
         "stub": '''\
-def describe_value(value) -> str:
-    """"None (the absence of a value)" for None, else f"{value!r} is a {type(value).__name__}"."""
-    raise NotImplementedError
+total_seconds_text = "9384"
+is_daylight_saving_text = "False"
 
+raise NotImplementedError  # delete this line once you've written the code below
 
-def print_type_report(value) -> None:
-    """print(describe_value(value))."""
-    raise NotImplementedError
-
-
-def classify_values(values: list) -> dict:
-    """Bucket values into {"ints": [...], "floats": [...], "strs": [...], "bools": [...], "nones": [...]}."""
-    raise NotImplementedError
+# Write your code here: cast total_seconds, decompose it into
+# hours/minutes/seconds with // and %, correctly derive is_daylight_saving
+# (watch the bool("False") trap!), and print a summary. See README.md.
 ''',
         "reference": '''\
-def describe_value(value) -> str:
-    if value is None:
-        return "None (the absence of a value)"
-    return f"{value!r} is a {type(value).__name__}"
+total_seconds_text = "9384"
+is_daylight_saving_text = "False"
 
+total_seconds = int(total_seconds_text)
 
-def print_type_report(value) -> None:
-    print(describe_value(value))
+hours = total_seconds // 3600
+remaining_after_hours = total_seconds % 3600
+minutes = remaining_after_hours // 60
+seconds = remaining_after_hours % 60
 
+is_daylight_saving = is_daylight_saving_text == "True"
 
-def classify_values(values: list) -> dict:
-    buckets = {"ints": [], "floats": [], "strs": [], "bools": [], "nones": []}
-    for v in values:
-        if v is None:
-            buckets["nones"].append(v)
-        elif type(v) is bool:
-            buckets["bools"].append(v)
-        elif isinstance(v, int):
-            buckets["ints"].append(v)
-        elif isinstance(v, float):
-            buckets["floats"].append(v)
-        elif isinstance(v, str):
-            buckets["strs"].append(v)
-    return buckets
+print(
+    str(total_seconds) + "s = " + str(hours) + "h " + str(minutes) + "m " +
+    str(seconds) + "s"
+)
 ''',
         "test": '''\
-from exercises.stage01.exercise03.solution import (
-    describe_value,
-    print_type_report,
-    classify_values,
-)
+import exercises.stage01.basic02.solution as solution
 
 
-def test_describe_value_none():
-    assert describe_value(None) == "None (the absence of a value)"
+def test_total_seconds_cast():
+    assert solution.total_seconds == 9384
+    assert isinstance(solution.total_seconds, int)
 
 
-def test_describe_value_int():
-    assert describe_value(5) == "5 is a int"
+def test_decomposition():
+    assert solution.hours == 2
+    assert solution.minutes == 36
+    assert solution.seconds == 24
 
 
-def test_describe_value_str():
-    assert describe_value("hi") == "'hi' is a str"
+def test_decomposition_reconstructs_total():
+    assert solution.hours * 3600 + solution.minutes * 60 + solution.seconds == 9384
 
 
-def test_print_type_report(capsys):
-    print_type_report(5)
-    assert capsys.readouterr().out == "5 is a int\\n"
-
-
-def test_classify_values_separates_bool_from_int():
-    result = classify_values([1, 2, True, False, 3.5, "x", None])
-    assert result["ints"] == [1, 2]
-    assert result["bools"] == [True, False]
-    assert result["floats"] == [3.5]
-    assert result["strs"] == ["x"]
-    assert result["nones"] == [None]
+def test_is_daylight_saving_avoids_bool_string_trap():
+    assert solution.is_daylight_saving is False
 ''',
     },
     {
-        "name": "exercise04",
-        "title": "Boolean Logic",
-        "summary": "and, or, not, in, is/is not, explicit True/False",
+        "name": "mid01",
+        "title": "Precision Price Comparator",
+        "summary": "operator precedence, chained comparisons, the walrus operator, f-strings, augmented assignment",
+        "instructions": SCRIPT_INSTRUCTIONS,
         "readme": (
-            "Implement four small boolean/string functions:\n\n"
-            "- `can_enter_venue(age, has_ticket: bool, is_vip: bool) -> bool` -- `True` "
-            "only if `age` is known (`age is not None`) **and** `age >= 18`, **and** "
-            "(`has_ticket` **or** `is_vip`).\n"
-            "- `access_level(has_ticket: bool, is_vip: bool, is_staff: bool) -> str` -- "
-            "return `\"backstage\"` if `is_staff` **or** `is_vip`; else `\"general\"` if "
-            "`has_ticket`; else `\"denied\"`.\n"
-            "- `is_valid_choice(choice, allowed: list[str]) -> bool` -- `True` only if "
-            "`choice` is a `str` (`isinstance`) **and** `choice` is **in** `allowed` "
-            "**and not** an empty string.\n"
-            "- `toggle_flag(flag: bool) -> bool` -- **must** use the literal keywords "
-            "`True`/`False` (via an `if flag is True: ... else: ...`), not the `not` "
-            "operator, even though `not flag` would be shorter. The point here is "
-            "practicing the `True`/`False` literals directly, and `is True` as the "
-            "idiomatic way to compare against the singleton.\n\n"
-            "See the Study Reference presentation, Topic 1, for the theory."
+            "Two suppliers quote prices for the same part; you're comparing "
+            "them for a bulk order. Given, don't modify:\n\n"
+            "```python\n"
+            'price_a_text = "19.99"\n'
+            'price_b_text = "18.995"\n'
+            'quantity_text = "4"\n'
+            "```\n\n"
+            "Using Mid-tier tools this time (f-strings, the walrus operator, "
+            "chained comparisons, augmented assignment, operator precedence "
+            "-- still no `if`/`for`/`while`), write plain top-level code "
+            "that computes:\n\n"
+            "- `price_a`, `price_b` (`float`), `quantity` (`int`).\n"
+            "- `savings_message` -- an f-string that computes the total "
+            "savings of buying `quantity` units from the cheaper supplier "
+            "**using the walrus operator inside the f-string's expression** "
+            "to both compute and capture a `savings` value in one go, e.g. "
+            'shaped like `f"...{(savings := abs(price_a - price_b) * '
+            'quantity):.2f}..."`. After this line, `savings` must exist as '
+            "its own module-level name too (that's exactly what the walrus "
+            "operator gives you -- the assignment happens as a side effect "
+            "of evaluating the f-string expression, so you're not computing "
+            "the value twice).\n"
+            "- `both_under_20` -- `True` iff *both* prices are in `[0, 20)`, "
+            "written as **one chained comparison** per price, combined with "
+            "`and` (`0 <= price_a < 20 and 0 <= price_b < 20`).\n"
+            "- `total_cost` -- start it at `0.0`, then use **augmented "
+            "assignment** (`+=`) twice, once per supplier's "
+            "`price * quantity`, to build up the total (don't just write "
+            "`price_a * quantity + price_b * quantity` directly -- the "
+            "point here is practicing `+=`).\n"
+            "- `weighted_score` -- `2 + 3 * price_a ** 2`, written in "
+            "exactly that form so you have to get the precedence right "
+            "(`**` binds tighter than `*`, which binds tighter than `+`) "
+            "rather than adding parentheses to force the order yourself.\n\n"
+            "Finish with `print(savings_message)`."
         ),
         "stub": '''\
-def can_enter_venue(age, has_ticket: bool, is_vip: bool) -> bool:
-    """True if age is known and >= 18, and (has_ticket or is_vip)."""
-    raise NotImplementedError
+price_a_text = "19.99"
+price_b_text = "18.995"
+quantity_text = "4"
 
+raise NotImplementedError  # delete this line once you've written the code below
 
-def access_level(has_ticket: bool, is_vip: bool, is_staff: bool) -> str:
-    """"backstage" if staff/vip, else "general" if has_ticket, else "denied"."""
-    raise NotImplementedError
-
-
-def is_valid_choice(choice, allowed: list[str]) -> bool:
-    """True if choice is a non-empty str that appears in allowed."""
-    raise NotImplementedError
-
-
-def toggle_flag(flag: bool) -> bool:
-    """Opposite of flag -- implement with `if flag is True: ... else: ...`, not `not`."""
-    raise NotImplementedError
+# Write your code here: cast the three values above, then compute
+# savings_message (walrus + f-string), both_under_20 (chained comparison),
+# total_cost (+=, twice), and weighted_score (precedence-sensitive).
+# See README.md for the exact requirements.
 ''',
         "reference": '''\
-def can_enter_venue(age, has_ticket: bool, is_vip: bool) -> bool:
-    return (age is not None and age >= 18) and (has_ticket or is_vip)
+price_a_text = "19.99"
+price_b_text = "18.995"
+quantity_text = "4"
 
+price_a = float(price_a_text)
+price_b = float(price_b_text)
+quantity = int(quantity_text)
 
-def access_level(has_ticket: bool, is_vip: bool, is_staff: bool) -> str:
-    if is_staff or is_vip:
-        return "backstage"
-    if has_ticket:
-        return "general"
-    return "denied"
+savings_message = f"Switching suppliers saves {(savings := abs(price_a - price_b) * quantity):.2f}"
 
+both_under_20 = 0 <= price_a < 20 and 0 <= price_b < 20
 
-def is_valid_choice(choice, allowed: list[str]) -> bool:
-    return isinstance(choice, str) and choice in allowed and not choice == ""
+total_cost = 0.0
+total_cost += price_a * quantity
+total_cost += price_b * quantity
 
+weighted_score = 2 + 3 * price_a ** 2
 
-def toggle_flag(flag: bool) -> bool:
-    if flag is True:
-        return False
-    return True
+print(savings_message)
 ''',
         "test": '''\
-from exercises.stage01.exercise04.solution import (
-    can_enter_venue,
-    access_level,
-    is_valid_choice,
-    toggle_flag,
-)
+import pytest
+
+import exercises.stage01.mid01.solution as solution
 
 
-def test_can_enter_venue_adult_with_ticket():
-    assert can_enter_venue(20, True, False) is True
+def test_casts_to_correct_types():
+    assert isinstance(solution.price_a, float)
+    assert isinstance(solution.price_b, float)
+    assert isinstance(solution.quantity, int)
 
 
-def test_can_enter_venue_minor_rejected():
-    assert can_enter_venue(15, True, True) is False
+def test_walrus_computed_savings_is_exposed_as_module_variable():
+    assert solution.savings == pytest.approx(3.98)
 
 
-def test_can_enter_venue_unknown_age_rejected():
-    assert can_enter_venue(None, True, True) is False
+def test_savings_message_contains_the_formatted_value():
+    assert "3.98" in solution.savings_message
 
 
-def test_can_enter_venue_vip_without_ticket():
-    assert can_enter_venue(25, False, True) is True
+def test_both_under_20_chained_comparison():
+    assert solution.both_under_20 is True
 
 
-def test_access_level_backstage_for_staff():
-    assert access_level(False, False, True) == "backstage"
+def test_total_cost_via_augmented_assignment():
+    assert solution.total_cost == pytest.approx(155.94)
 
 
-def test_access_level_general_for_ticket_only():
-    assert access_level(True, False, False) == "general"
-
-
-def test_access_level_denied():
-    assert access_level(False, False, False) == "denied"
-
-
-def test_is_valid_choice_true():
-    assert is_valid_choice("red", ["red", "blue"]) is True
-
-
-def test_is_valid_choice_not_in_list():
-    assert is_valid_choice("green", ["red", "blue"]) is False
-
-
-def test_is_valid_choice_empty_string():
-    assert is_valid_choice("", ["", "blue"]) is False
-
-
-def test_is_valid_choice_non_string():
-    assert is_valid_choice(5, ["red", "blue"]) is False
-
-
-def test_toggle_flag():
-    assert toggle_flag(True) is False
-    assert toggle_flag(False) is True
+def test_weighted_score_respects_operator_precedence():
+    assert solution.weighted_score == pytest.approx(1200.8003)
 ''',
     },
     {
-        "name": "exercise05",
-        "title": "CLI Interaction",
-        "summary": "input(), print(), composing small functions",
+        "name": "mid02",
+        "title": "Marathon Pace Report",
+        "summary": "more precedence/walrus/chained-comparison/augmented-assignment practice, a different scenario",
+        "instructions": SCRIPT_INSTRUCTIONS,
         "readme": (
-            "Implement five functions that model a tiny command-line interaction "
-            "(these are exactly the building blocks `tools/cli.py` itself is built "
-            "from -- see the Appendix topic in the presentation for more):\n\n"
-            "- `ask_name() -> str` -- `return input(\"What is your name? \")`.\n"
-            "- `ask_age() -> int` -- `return int(input(\"How old are you? \"))`.\n"
-            "- `ask_yes_no(prompt: str) -> bool` -- read `input(prompt)`, "
-            "`.strip().lower()` it, and return `True` only if the result is `\"y\"` "
-            "**or** `\"yes\"` (use `in (\"y\", \"yes\")`).\n"
-            "- `greet(name: str) -> None` -- `print(f\"Hello, {name}!\")`.\n"
-            "- `greeting_flow() -> str` -- call `ask_name()`, pass the result to "
-            "`greet()`, then return the name.\n\n"
-            "The tests simulate a user typing by patching `builtins.input` with "
-            "`monkeypatch` and capture `print()` output with `capsys` -- you don't "
-            "need to do anything special in your code for that; just call the real "
-            "`input()`/`print()` builtins normally.\n\n"
-            "See the Study Reference presentation, Topic 1, for the theory."
+            "A runner's marathon result needs analyzing. Given, don't "
+            "modify:\n\n"
+            "```python\n"
+            'race_distance_km_text = "42.195"\n'
+            'elapsed_minutes_text = "255"\n'
+            'target_minutes_text = "240"\n'
+            "```\n\n"
+            "Same Mid-tier toolbox as the previous exercise, different "
+            "combination -- write plain top-level code that computes:\n\n"
+            "- `race_distance_km` (`float`), `elapsed_minutes`, "
+            "`target_minutes` (`int`).\n"
+            "- `pace_min_per_km` -- `elapsed_minutes / race_distance_km`.\n"
+            "- `pace_report` -- an f-string that uses the **walrus "
+            "operator** to compute and capture `minutes_over` "
+            "(`elapsed_minutes - target_minutes`) as part of building the "
+            'message, e.g. shaped like `f"...{(minutes_over := '
+            'elapsed_minutes - target_minutes)}...{pace_min_per_km:.2f}..."`. '
+            "`minutes_over` must exist as its own module-level name "
+            "afterward.\n"
+            "- `minutes_over_per_km` -- `minutes_over / race_distance_km`, "
+            "computed using the `minutes_over` the walrus operator gave you "
+            "(don't recompute `elapsed_minutes - target_minutes` a second "
+            "time).\n"
+            "- `on_pace` -- `True` iff `pace_min_per_km` is strictly "
+            "greater than `0` and at most `6.5`, written as **one chained "
+            "comparison**: `0 < pace_min_per_km <= 6.5`.\n"
+            "- `total_penalty_seconds` -- start it at `0`, then use "
+            "**augmented assignment** twice: add a flat `30`, then add "
+            "`minutes_over * 2`.\n"
+            "- `fatigue_index` -- `2 + 3 * pace_min_per_km ** 2`, written "
+            "in exactly that form (precedence, no extra parentheses).\n\n"
+            "Finish with `print(pace_report)`."
         ),
         "stub": '''\
-def ask_name() -> str:
-    """Prompt "What is your name? " and return the typed string."""
-    raise NotImplementedError
+race_distance_km_text = "42.195"
+elapsed_minutes_text = "255"
+target_minutes_text = "240"
 
+raise NotImplementedError  # delete this line once you've written the code below
 
-def ask_age() -> int:
-    """Prompt "How old are you? " and return the typed answer as an int."""
-    raise NotImplementedError
-
-
-def ask_yes_no(prompt: str) -> bool:
-    """Prompt with `prompt`; True if the (lowercased, stripped) answer is "y" or "yes"."""
-    raise NotImplementedError
-
-
-def greet(name: str) -> None:
-    """print(f"Hello, {name}!")."""
-    raise NotImplementedError
-
-
-def greeting_flow() -> str:
-    """ask_name(), greet() it, then return the name."""
-    raise NotImplementedError
+# Write your code here: cast the three values above, then compute
+# pace_min_per_km, pace_report (walrus + f-string), minutes_over_per_km,
+# on_pace (chained comparison), total_penalty_seconds (+=, twice), and
+# fatigue_index (precedence-sensitive). See README.md.
 ''',
         "reference": '''\
-def ask_name() -> str:
-    return input("What is your name? ")
+race_distance_km_text = "42.195"
+elapsed_minutes_text = "255"
+target_minutes_text = "240"
 
+race_distance_km = float(race_distance_km_text)
+elapsed_minutes = int(elapsed_minutes_text)
+target_minutes = int(target_minutes_text)
 
-def ask_age() -> int:
-    return int(input("How old are you? "))
+pace_min_per_km = elapsed_minutes / race_distance_km
 
-
-def ask_yes_no(prompt: str) -> bool:
-    answer = input(prompt).strip().lower()
-    return answer in ("y", "yes")
-
-
-def greet(name: str) -> None:
-    print(f"Hello, {name}!")
-
-
-def greeting_flow() -> str:
-    name = ask_name()
-    greet(name)
-    return name
-''',
-        "test": '''\
-from exercises.stage01.exercise05.solution import (
-    ask_name,
-    ask_age,
-    ask_yes_no,
-    greet,
-    greeting_flow,
+pace_report = (
+    f"{(minutes_over := elapsed_minutes - target_minutes)} minutes over target, "
+    f"averaging {pace_min_per_km:.2f} min/km"
 )
 
+minutes_over_per_km = minutes_over / race_distance_km
 
-def test_ask_name(monkeypatch):
-    monkeypatch.setattr("builtins.input", lambda prompt="": "Ada")
-    assert ask_name() == "Ada"
+on_pace = 0 < pace_min_per_km <= 6.5
 
+total_penalty_seconds = 0
+total_penalty_seconds += 30
+total_penalty_seconds += minutes_over * 2
 
-def test_ask_age(monkeypatch):
-    monkeypatch.setattr("builtins.input", lambda prompt="": "30")
-    assert ask_age() == 30
+fatigue_index = 2 + 3 * pace_min_per_km ** 2
 
+print(pace_report)
+''',
+        "test": '''\
+import pytest
 
-def test_ask_yes_no_true_for_y(monkeypatch):
-    monkeypatch.setattr("builtins.input", lambda prompt="": "y")
-    assert ask_yes_no("Continue? ") is True
-
-
-def test_ask_yes_no_true_for_yes_mixed_case(monkeypatch):
-    monkeypatch.setattr("builtins.input", lambda prompt="": "YES")
-    assert ask_yes_no("Continue? ") is True
+import exercises.stage01.mid02.solution as solution
 
 
-def test_ask_yes_no_false_for_no(monkeypatch):
-    monkeypatch.setattr("builtins.input", lambda prompt="": "n")
-    assert ask_yes_no("Continue? ") is False
+def test_casts_to_correct_types():
+    assert isinstance(solution.race_distance_km, float)
+    assert isinstance(solution.elapsed_minutes, int)
+    assert isinstance(solution.target_minutes, int)
 
 
-def test_greet(capsys):
-    greet("Ada")
-    assert capsys.readouterr().out == "Hello, Ada!\\n"
+def test_pace_min_per_km():
+    assert solution.pace_min_per_km == pytest.approx(6.04337)
 
 
-def test_greeting_flow(monkeypatch, capsys):
-    monkeypatch.setattr("builtins.input", lambda prompt="": "Ada")
-    result = greeting_flow()
-    assert result == "Ada"
-    assert capsys.readouterr().out == "Hello, Ada!\\n"
+def test_walrus_computed_minutes_over_is_exposed_as_module_variable():
+    assert solution.minutes_over == 15
+
+
+def test_pace_report_contains_minutes_over_and_formatted_pace():
+    assert "15" in solution.pace_report
+    assert "6.04" in solution.pace_report
+
+
+def test_minutes_over_per_km_reuses_walrus_value():
+    assert solution.minutes_over_per_km == pytest.approx(0.35549, abs=1e-4)
+
+
+def test_on_pace_chained_comparison():
+    assert solution.on_pace is True
+
+
+def test_total_penalty_seconds_via_augmented_assignment():
+    assert solution.total_penalty_seconds == 60
+
+
+def test_fatigue_index_respects_operator_precedence():
+    assert solution.fatigue_index == pytest.approx(111.56697)
 ''',
     },
     {
-        "name": "exercise06",
-        "title": "Mutability and Identity",
-        "summary": "mutability vs immutability, identity (is) vs equality (==), None",
+        "name": "advanced01",
+        "title": "Exact Ledger vs. Float Drift",
+        "summary": "Decimal built from string (not float), math.isclose() vs ==, the classic 0.1+0.2 case",
+        "instructions": SCRIPT_INSTRUCTIONS,
         "readme": (
-            "Implement five functions that make mutability and identity concrete "
-            "instead of abstract:\n\n"
-            "- `append_and_return(lst: list, item) -> list` -- `lst.append(item)` "
-            "then `return lst`. Because lists are mutable, the object you return is "
-            "the *same* object the caller passed in.\n"
-            "- `concat_strings(a: str, b: str) -> str` -- `return a + b`. Because "
-            "strings are immutable, the result is always a *new* object, never `a` "
-            "or `b` themselves.\n"
-            "- `same_object(a, b) -> bool` -- `return a is b` (identity, not equality).\n"
-            "- `equal_but_not_identical() -> tuple` -- return a tuple of two separately "
-            "built but `==`-equal lists, e.g. `([1, 2, 3], [1, 2, 3])`, to demonstrate "
-            "equality without identity.\n"
-            "- `default_if_none(value, default)` -- `return default if value is None "
-            "else value`.\n\n"
-            "See the Study Reference presentation, Topic 1 (mutability vs immutability, "
-            "identity vs equality), for the theory."
+            "An invoicing system needs exact currency totals, but float "
+            "arithmetic can't reliably give you that. Given, don't "
+            "modify:\n\n"
+            "```python\n"
+            'price_each_text = "19.99"\n'
+            'quantity_text = "7"\n'
+            "```\n\n"
+            "Using Advanced-tier tools (`decimal.Decimal`, "
+            "`math.isclose`), write plain top-level code that computes:\n\n"
+            "- `price_each_float` (`float`), `quantity` (`int`).\n"
+            "- `float_total` -- `price_each_float * quantity`, plain float "
+            "arithmetic.\n"
+            "- `exact_total` -- a `decimal.Decimal`, built from "
+            "`Decimal(price_each_text) * Decimal(quantity_text)` -- "
+            "**construct both `Decimal`s from the original string text, "
+            "not from the float** (`Decimal(price_each_float)` would "
+            "already have inherited the float's rounding error before you "
+            "even start).\n"
+            "- `totals_are_exactly_equal` -- "
+            "`float(exact_total) == float_total`.\n"
+            "- `totals_are_close` -- "
+            "`math.isclose(float(exact_total), float_total)`. "
+            "(`math.isclose` is the correct way to compare floats; a bare "
+            "`==` is not reliable, which is exactly what the previous two "
+            "variables demonstrate.)\n"
+            "- The textbook version of the same lesson, with fixed "
+            "literals (not derived from the ledger above): "
+            "`point_one_plus_point_two = 0.1 + 0.2`, "
+            "`is_exactly_point_three = point_one_plus_point_two == 0.3`, "
+            "and `is_close_to_point_three = "
+            "math.isclose(point_one_plus_point_two, 0.3)`.\n\n"
+            "Finish with one `print()` call (f-strings are fine now) "
+            "reporting `exact_total` and whether the two totals matched "
+            "exactly."
         ),
         "stub": '''\
-def append_and_return(lst: list, item) -> list:
-    """Mutate lst in place (append item) and return that same object."""
-    raise NotImplementedError
+price_each_text = "19.99"
+quantity_text = "7"
 
+raise NotImplementedError  # delete this line once you've written the code below
 
-def concat_strings(a: str, b: str) -> str:
-    """Return a + b -- always a new string object (str is immutable)."""
-    raise NotImplementedError
-
-
-def same_object(a, b) -> bool:
-    """True if a and b are the identical object (use `is`, not `==`)."""
-    raise NotImplementedError
-
-
-def equal_but_not_identical() -> tuple:
-    """Return two separately-built, `==`-equal lists that are NOT the same object."""
-    raise NotImplementedError
-
-
-def default_if_none(value, default):
-    """Return default if value is None, else value unchanged."""
-    raise NotImplementedError
+# Write your code here: cast price_each_text/quantity_text, compute
+# float_total and exact_total (Decimal built FROM THE STRINGS), the two
+# totals_are_* comparisons, and the 0.1+0.2 textbook demo. See README.md.
 ''',
         "reference": '''\
-def append_and_return(lst: list, item) -> list:
-    lst.append(item)
-    return lst
+import math
+from decimal import Decimal
 
+price_each_text = "19.99"
+quantity_text = "7"
 
-def concat_strings(a: str, b: str) -> str:
-    return a + b
+price_each_float = float(price_each_text)
+quantity = int(quantity_text)
 
+float_total = price_each_float * quantity
+exact_total = Decimal(price_each_text) * Decimal(quantity_text)
 
-def same_object(a, b) -> bool:
-    return a is b
+totals_are_exactly_equal = float(exact_total) == float_total
+totals_are_close = math.isclose(float(exact_total), float_total)
 
+point_one_plus_point_two = 0.1 + 0.2
+is_exactly_point_three = point_one_plus_point_two == 0.3
+is_close_to_point_three = math.isclose(point_one_plus_point_two, 0.3)
 
-def equal_but_not_identical() -> tuple:
-    return ([1, 2, 3], [1, 2, 3])
-
-
-def default_if_none(value, default):
-    return default if value is None else value
+print(f"Exact total: {exact_total}, exactly matched float total: {totals_are_exactly_equal}")
 ''',
         "test": '''\
-from exercises.stage01.exercise06.solution import (
-    append_and_return,
-    concat_strings,
-    same_object,
-    equal_but_not_identical,
-    default_if_none,
-)
+import math
+from decimal import Decimal
+
+import exercises.stage01.advanced01.solution as solution
 
 
-def test_append_and_return_mutates_in_place_and_is_same_object():
-    original = [1, 2]
-    result = append_and_return(original, 3)
-    assert result == [1, 2, 3]
-    assert result is original
+def test_casts_and_float_total():
+    assert isinstance(solution.price_each_float, float)
+    assert isinstance(solution.quantity, int)
+    assert solution.float_total == solution.price_each_float * 7
 
 
-def test_concat_strings_returns_new_object():
-    a = "foo"
-    b = "bar"
-    result = concat_strings(a, b)
-    assert result == "foobar"
-    assert result is not a
-    assert result is not b
+def test_exact_total_is_precise_decimal():
+    assert solution.exact_total == Decimal("139.93")
 
 
-def test_same_object_true_for_shared_reference():
-    x = [1, 2, 3]
-    y = x
-    assert same_object(x, y) is True
+def test_totals_are_not_exactly_equal_due_to_float_drift():
+    assert solution.totals_are_exactly_equal is False
 
 
-def test_same_object_false_for_equal_but_distinct_objects():
-    x = [1, 2, 3]
-    y = [1, 2, 3]
-    assert x == y
-    assert same_object(x, y) is False
+def test_totals_are_close():
+    assert solution.totals_are_close is True
 
 
-def test_equal_but_not_identical():
-    l1, l2 = equal_but_not_identical()
-    assert l1 == l2
-    assert l1 is not l2
+def test_point_one_plus_point_two_textbook_case():
+    assert solution.is_exactly_point_three is False
+    assert solution.is_close_to_point_three is True
+    assert math.isclose(solution.point_one_plus_point_two, 0.3)
+''',
+    },
+    {
+        "name": "advanced02",
+        "title": "Big Numbers and String Identity",
+        "summary": "arbitrary-precision integers, small-int caching, string interning (and its limits)",
+        "instructions": SCRIPT_INSTRUCTIONS,
+        "readme": (
+            "Given, don't modify:\n\n"
+            "```python\n"
+            'base_text = "97"\n'
+            'exponent_text = "42"\n'
+            "```\n\n"
+            "Using Advanced-tier tools, write plain top-level code that "
+            "computes:\n\n"
+            "- `base`, `exponent` (`int`).\n"
+            "- `huge_power` -- `base ** exponent`. Python integers have "
+            "arbitrary precision, so this doesn't overflow no matter how "
+            "large it gets.\n"
+            "- `huge_power_digit_count` -- `len(str(huge_power))`, proving "
+            "`huge_power` is genuinely bigger than any fixed-width integer "
+            "could hold.\n"
+            "- `small_int_a`, `small_int_b` -- both set to the literal "
+            "`100`.\n"
+            "- `small_ints_share_identity` -- `small_int_a is "
+            "small_int_b`. CPython caches small integers (`-5` to `256`), "
+            "so this is `True`.\n"
+            "- `large_int_from_literal`, `large_int_from_conversion` -- "
+            "the first is the literal `1_000_000`; the second is "
+            '`int("1000000")` (built at runtime, **not** a second literal '
+            "-- two identical literals in the same file can get folded "
+            "into a single cached object by the compiler, which would "
+            "defeat the point of this exercise).\n"
+            "- `large_ints_share_identity` -- `large_int_from_literal is "
+            "large_int_from_conversion`. Large integers are **not** "
+            "guaranteed to be cached, so (with the runtime-constructed "
+            "value above) this is `False`.\n"
+            "- `string_literal_a`, `string_literal_b` -- both set to the "
+            'literal `"python_stage01"`.\n'
+            "- `string_literals_share_identity` -- `string_literal_a is "
+            "string_literal_b`. Simple string literals are interned at "
+            "compile time, so this is `True`.\n"
+            "- `string_built_at_runtime` -- "
+            '`"".join(["python_", "stage01"])` (same text, built '
+            "dynamically).\n"
+            "- `runtime_string_shares_identity` -- `string_literal_a is "
+            "string_built_at_runtime`. Dynamically built strings are "
+            "**not** automatically interned, so this is `False` even "
+            "though the two strings are `==`-equal.\n\n"
+            "Finish with one `print()` call reporting "
+            "`huge_power_digit_count`."
+        ),
+        "stub": '''\
+base_text = "97"
+exponent_text = "42"
+
+raise NotImplementedError  # delete this line once you've written the code below
+
+# Write your code here: cast base/exponent, compute huge_power and its
+# digit count, then work through the small-int-caching, large-int, and
+# string-interning identity checks described in README.md.
+''',
+        "reference": '''\
+base_text = "97"
+exponent_text = "42"
+
+base = int(base_text)
+exponent = int(exponent_text)
+
+huge_power = base ** exponent
+huge_power_digit_count = len(str(huge_power))
+
+small_int_a = 100
+small_int_b = 100
+small_ints_share_identity = small_int_a is small_int_b
+
+large_int_from_literal = 1_000_000
+large_int_from_conversion = int("1000000")
+large_ints_share_identity = large_int_from_literal is large_int_from_conversion
+
+string_literal_a = "python_stage01"
+string_literal_b = "python_stage01"
+string_literals_share_identity = string_literal_a is string_literal_b
+
+string_built_at_runtime = "".join(["python_", "stage01"])
+runtime_string_shares_identity = string_literal_a is string_built_at_runtime
+
+print(f"huge_power has {huge_power_digit_count} digits")
+''',
+        "test": '''\
+import exercises.stage01.advanced02.solution as solution
 
 
-def test_default_if_none_uses_default_for_none():
-    assert default_if_none(None, "fallback") == "fallback"
+def test_huge_power_has_arbitrary_precision():
+    assert solution.huge_power == 97 ** 42
+    assert solution.huge_power_digit_count > 19  # bigger than any 64-bit int could hold
 
 
-def test_default_if_none_keeps_real_value():
-    assert default_if_none(0, "fallback") == 0
+def test_small_int_caching():
+    assert solution.small_ints_share_identity is True
+
+
+def test_large_ints_not_guaranteed_cached():
+    assert solution.large_int_from_literal == solution.large_int_from_conversion
+    assert solution.large_ints_share_identity is False
+
+
+def test_string_literal_interning():
+    assert solution.string_literals_share_identity is True
+
+
+def test_runtime_built_string_not_interned():
+    assert solution.string_literal_a == solution.string_built_at_runtime
+    assert solution.runtime_string_shares_identity is False
 ''',
     },
 ]

@@ -22,11 +22,17 @@
 
 granularity="${1:-exercise}"
 
+# An exercise folder is named "exerciseXX" on most stages, or (a stage
+# piloting the tier-named convention) "basicXX"/"midXX"/"advancedXX"/
+# "hello_world".
+EX_NAME='exercise[0-9][0-9]\|basic[0-9][0-9]\|mid[0-9][0-9]\|advanced[0-9][0-9]\|hello_world'
+
 case "$granularity" in
     exercise)
         # stage01/exercise03/whatever.py -> stage01_exercise03
+        # stage01/basic01/whatever.py -> stage01_basic01
         ids=$(sed -n \
-            -e 's#^exercises/\(stage[0-9][0-9]\)/\(exercise[0-9][0-9]\)/.*\.py$#\1_\2#p' \
+            -e "s#^exercises/\\(stage[0-9][0-9]\\)/\\($EX_NAME\\)/.*\\.py\$#\\1_\\2#p" \
             -e 's#^exams/\(exam[0-9][0-9]\)/solution\.py$#\1#p' \
             -e 's#^challenges/\(challenge[0-9][0-9]\)/solution\.py$#\1#p' \
             | sort -u)
@@ -34,7 +40,7 @@ case "$granularity" in
     stage)
         # stage01/exercise03/whatever.py -> stage01 (every exercise in it)
         ids=$(sed -n \
-            -e 's#^exercises/\(stage[0-9][0-9]\)/exercise[0-9][0-9]/.*\.py$#\1#p' \
+            -e "s#^exercises/\\(stage[0-9][0-9]\\)/\\($EX_NAME\\)/.*\\.py\$#\\1#p" \
             -e 's#^exams/\(exam[0-9][0-9]\)/solution\.py$#\1#p' \
             -e 's#^challenges/\(challenge[0-9][0-9]\)/solution\.py$#\1#p' \
             | sort -u)

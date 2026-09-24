@@ -19,7 +19,7 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Setup", details: "Install Python 3.11+, create and activate a virtual environment (python -m venv .venv), pip install -r requirements.txt, and open the repo in VS Code. Run python tools/cli.py list and python tools/cli.py test stage01 to see the starter tests fail, try tools/gui.py, and do a git basics pass (status/add/commit). Tour exercises/, reference_solutions/, tests/, and open presentation/index.html to keep alongside the editor all course long." },
+    { step: "1", title: "Setup", details: "Install Python 3.11+, create and activate a virtual environment (python -m venv .venv), pip install -r requirements.txt, and open the repo in VS Code. Run python tools/cli.py list, try tools/gui.py, and do a git basics pass (status/add/commit). Tour exercises/, reference_solutions/, tests/, and open presentation/index.html to keep alongside the editor all course long. Finish with exercises/stage01/hello_world/ -- python tools/cli.py test stage01_hello_world -- the first graded, green checkmark of the course." },
     { step: "2", title: "Learn", details: "Variables, Python's five foundational types, and operators, building up through precedence, f-strings, and the walrus operator to arbitrary-precision integers and IEEE-754 float internals.", tiers: [
       { label: "Basic tier", guideKey: "stage01-basic", keywords: ["int", "float", "str", "bool", "None", "True", "False", "print()", "input()", "type()", "isinstance()", "and", "or", "not", "is", "in", "x: int = 5"], concepts: ["type hints"] },
       { label: "Mid tier", guideKey: "stage01-mid" },

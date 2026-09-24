@@ -4,7 +4,7 @@ Eight exercises covering every function-definition keyword and functools tool fr
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage03_exerciseXX`. Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage03_<name>` (e.g. `python tools/cli.py test stage03_exercise01`). Work through them in order.
 
 - **`exercise01/`** -- def, return, ->, recursion
 - **`exercise02/`** -- *args, **kwargs

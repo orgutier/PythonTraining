@@ -4,7 +4,7 @@ Five exercises covering the requests library and Python threading from Topic 12 
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage12_exerciseXX`. Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage12_<name>` (e.g. `python tools/cli.py test stage12_exercise01`). Work through them in order.
 
 - **`exercise01/`** -- requests.get() x3, response.json() x3, requests.post(), raise_for_status()
 - **`exercise02/`** -- requests.Session() x3, retry/backoff strategy

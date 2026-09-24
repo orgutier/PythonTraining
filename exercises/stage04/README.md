@@ -4,7 +4,7 @@ Six exercises covering every builtin container, comprehension style, and collect
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage04_exerciseXX`. Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage04_<name>` (e.g. `python tools/cli.py test stage04_exercise01`). Work through them in order.
 
 - **`exercise01/`** -- list, tuple, append(), sort()/sorted(), zip(), enumerate(), len()
 - **`exercise02/`** -- dict comprehension x3, enumerate/zip reinforced, set operations x3

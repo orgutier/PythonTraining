@@ -4,7 +4,7 @@ Seven exercises, each built around one or more small classes, cover every dunder
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage08_exerciseXX`. Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage08_<name>` (e.g. `python tools/cli.py test stage08_exercise01`). Work through them in order.
 
 - **`exercise01/`** -- __repr__, __str__, __eq__, __add__, __radd__, __hash__, __bool__, __getitem__
 - **`exercise02/`** -- __repr__, __str__, __len__, __getitem__, __iter__, __contains__, __add__

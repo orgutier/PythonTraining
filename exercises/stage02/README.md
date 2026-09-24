@@ -4,7 +4,7 @@ Seven exercises covering every conditional and loop construct from Topic 2 at le
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage02_exerciseXX`. Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage02_<name>` (e.g. `python tools/cli.py test stage02_exercise01`). Work through them in order.
 
 - **`exercise01/`** -- if/elif/else, for, range(), a first for...else
 - **`exercise02/`** -- break, continue, while, pass

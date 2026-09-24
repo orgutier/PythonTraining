@@ -164,7 +164,7 @@ def _run_one_test_file(worktree_dir: Path, relative_path: str) -> bool:
 # --------------------------------------------------------------------------- stage grouping
 
 def exercise_stage(exercise_id: str) -> str:
-    return exercise_id.split("_exercise")[0]
+    return exercise_id.split("_", 1)[0]
 
 
 def challenge_stage(challenge_id: str) -> str:
@@ -253,8 +253,9 @@ def _write_grid_sheet(wb, title: str, rows: list, ids: list, stage_of, results_k
             if end > start:
                 ws.merge_cells(start_row=1, start_column=start, end_row=1, end_column=end)
             prev_stage = w
-        short_label = id_.split("_exercise")[-1] if "_exercise" in id_ else id_.replace("challenge", "")
-        label = ("Ex " + short_label) if "_exercise" in id_ else ("Ch " + short_label)
+        is_exercise = id_.startswith("stage")
+        short_label = id_.split("_", 1)[1] if is_exercise else id_.replace("challenge", "")
+        label = ("Ex " + short_label) if is_exercise else ("Ch " + short_label)
         c = ws.cell(row=2, column=col, value=label)
         c.font = HEADER_FONT
         c.fill = HEADER_FILL

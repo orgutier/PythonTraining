@@ -10,25 +10,27 @@ PythonTraining/
 ├── exercises/            One folder per stage, one subfolder per exercise --
 │   └── stageNN/            trainees edit each exercise's own solution.py.
 │       ├── README.md      Stage overview + list of that stage's exercises
-│       └── exerciseXX/
-│           ├── README.md    That exercise's own problem statement
-│           └── solution.py  Stub with signatures + docstrings, raises
-│                            NotImplementedError until filled in. No
+│       └── <name>/          "exerciseXX" on most stages; "basicXX"/"midXX"/
+│           ├── README.md    "advancedXX"/"hello_world" on a stage piloting
+│           └── solution.py  the tier-named convention -- see below.
+│                            Stub with signatures + docstrings (or, for a
+│                            script-style exercise, top-level statements),
+│                            raises NotImplementedError until filled in. No
 │                            `if __name__ == "__main__":` block by design --
 │                            this stays a plain importable module. Add a
 │                            helper submodule (e.g. helpers.py) right next
 │                            to it if you want to split your solution up --
 │                            solution.py just has to stay the entry point.
 ├── reference_solutions/  Fully worked answer key, mirroring exercises/'s
-│   └── stageNN/             stageNN/exerciseXX/ layout exactly -- not
-│       └── exerciseXX/      visible to trainees during the course.
+│   └── stageNN/             stageNN/<name>/ layout exactly -- not visible
+│       └── <name>/          to trainees during the course.
 │           └── solution.py
 │   ├── challenges/        Worked answers for challenges/, same idea.
 │   │   └── challengeNN/solution.py
 │   └── exams/             Worked answers for exams/, same idea.
 │       └── examNN/solution.py
 ├── tests/                 Staff-authored pytest files, one per EXERCISE --
-│   ├── test_stageNN_exerciseXX.py  each exercise is independently testable
+│   ├── test_stageNN_<name>.py      each exercise is independently testable
 │   ├── test_challengeNN.py         and its own git-hook target (plus one
 │   └── test_examNN.py              file per challenge, one per exam). Kept
 │                          separate from exercises/, challenges/, and
@@ -65,7 +67,7 @@ PythonTraining/
 │   ├── dayguides.js         Day-guide deep dives (2 verified examples each)
 │   ├── highlight.js         Dependency-free VS Code-style syntax highlighter
 │   └── script.js / style.css
-├── conftest.py            Makes `from exercises.stageNN.exerciseXX.solution
+├── conftest.py            Makes `from exercises.stageNN.<name>.solution
 │                          import ...` work from pytest (plain implicit
 │                          namespace packages, no __init__.py anywhere).
 ├── requirements.txt
@@ -87,6 +89,38 @@ handful of constructs from a different angle, not to introduce new scope.
 Stage 14 (Capstone) is the one exception -- see `generator/stage14.py` for
 why.
 
+### Stage 1's tier-named exercise convention (pilot)
+
+Stage 1 pilots a different exercise shape, which the rest of the stages may
+move to later once this holds up in practice:
+
+- **Named by tier, not sequence.** Instead of `exercise01`..`exercise06`,
+  Stage 1 has `hello_world` (for the Setup sub-stage -- see "Presentation"
+  below) plus a **minimum of two exercises per Basic/Mid/Advanced tier**:
+  `basic01`/`basic02`, `mid01`/`mid02`, `advanced01`/`advanced02`. Test ids
+  follow the same shape, e.g. `python tools/cli.py test stage01_basic01`.
+- **Script-style, not function-style.** Every one of these is plain
+  top-level code -- specific module-level variable names the tests import
+  and read directly -- not a function/class to implement. Stage 1 hasn't
+  taught `def` yet (that's Stage 3), so there's no reason to force
+  anything into a function just to have something to call from a test.
+  Other stages still use the function-based stub pattern where it's the
+  natural fit; script-style is used where it lets a trainee write real
+  code without a premature abstraction, not as a blanket rule.
+- **Non-trivial by design.** None of these are a bare "print this value."
+  Each is a small, self-contained scenario (a fuel-cost ledger, a marathon
+  pace report, exact-vs-float currency drift, ...) that forces you to
+  combine several of that tier's tools at once, the same "integration
+  over demonstration" philosophy the interview challenges and exams use
+  at a bigger scale.
+- **One consequence worth knowing:** because a script-style exercise
+  raises `NotImplementedError` at *import* time rather than inside a
+  function body, pytest treats an unfilled one as a **collection error**
+  for that file, not a per-test failure. `tools/core.py` always runs
+  pytest with `--continue-on-collection-errors` specifically so that one
+  unfilled Stage 1 exercise never takes down the rest of the suite's
+  results.
+
 ## Setup
 
 ```bash
@@ -105,7 +139,7 @@ point of the GUI. Both tools call the same underlying test-running code
 ```bash
 python tools/cli.py list                    # see all 14 stages, their exercises, 26 challenges, + 3 exams
 python tools/cli.py test stage01             # run every exercise in one stage
-python tools/cli.py test stage01_exercise03  # run just that one exercise
+python tools/cli.py test stage01_basic01     # run just that one exercise (stage02_exercise03 on most other stages)
 python tools/cli.py test challenge01        # run one interview challenge
 python tools/cli.py test exam01             # run one evaluation exam
 python tools/cli.py test --all              # run everything (stages + challenges + exams)
@@ -124,12 +158,12 @@ let a `test --all` pick them up.
 
 A ready-to-run pre-commit + pre-push hook is included:
 
-- **pre-commit** looks at which `exercises/stageNN/exerciseXX/*.py` files
+- **pre-commit** looks at which `exercises/stageNN/<name>/*.py` files
   (`solution.py` itself, or a helper submodule you added next to it),
   `exams/examNN/solution.py`, or `challenges/challengeNN/solution.py`
   files are staged, maps each one to its own exercise/exam/challenge id,
   and runs `python tools/cli.py test <id>` for **only** that one --
-  `stage01_exercise03`, not all of `stage01`. Fast, focused feedback on
+  `stage02_exercise03`, not all of `stage02`. Fast, focused feedback on
   exactly what you just changed. Always this granularity, not
   configurable.
 - **pre-push** does the same mapping over whatever changed between the
@@ -218,8 +252,10 @@ day-by-day calendar -- how long each sub-stage takes is up to the
 trainer/trainee, not fixed to a training-stage's number of days. Stage 1
 (Python Fundamentals) is the only one with a **Setup** sub-stage --
 installing Python, creating the virtual environment, running
-`tools/cli.py` for the first time, and touring the repo -- since it's
-the only point in the course where none of that exists yet. Every
+`tools/cli.py` for the first time, touring the repo, and finishing with
+the `hello_world` exercise (`python tools/cli.py test stage01_hello_world`)
+as the first graded, green checkmark of the course -- since it's the
+only point in the course where none of that exists yet. Every
 stage then goes **Learn**, **Practice** (work the stage's exercises),
 and **Review** (finish up, get the stage's tests green, review as a
 group). Stage 14 (Capstone) swaps that shape for its own 4-sub-stage

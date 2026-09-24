@@ -20,7 +20,9 @@ EXAMPLES = """\
 examples:
   python tools/cli.py list                    list all 14 stages, their exercises, the challenges, and the exams
   python tools/cli.py test stage01              run every exercise in stage01
-  python tools/cli.py test stage01_exercise03   run just that one exercise
+  python tools/cli.py test stage01_basic01      run just that one exercise (stage01 uses tier-named
+                                                 exercises -- basic01/basic02/mid01/.../hello_world;
+                                                 most other stages still use exercise01/02/...)
   python tools/cli.py test challenge01         run one interview challenge's tests
   python tools/cli.py test exam01              run one evaluation exam's tests
   python tools/cli.py test --all               run the full test suite (stages + challenges + exams)
@@ -86,7 +88,7 @@ def main():
     if args.command == "list":
         exercises_by_stage = {}
         for ex_id in EXERCISES:
-            stage = ex_id.split("_exercise")[0]
+            stage = ex_id.split("_", 1)[0]
             exercises_by_stage.setdefault(stage, []).append(ex_id)
         for w in STAGES:
             stage_exercises = exercises_by_stage.get(w, [])

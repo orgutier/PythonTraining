@@ -14,13 +14,16 @@ EXAMS = [f"exam{n:02d}" for n in range(1, 4)]
 
 
 def _discover_exercises() -> list:
-    """Every "stageNN_exerciseXX" id with a tests/test_stageNN_exerciseXX.py
-    file on disk, sorted. Computed from the filesystem (not hardcoded) so
-    it can't drift out of sync with what generate.py actually produced."""
+    """Every "stageNN_<name>" id with a tests/test_stageNN_<name>.py file on
+    disk, sorted. "<name>" is whatever generate.py named that exercise's
+    folder -- historically "exerciseXX", but a stage piloting the tier-named
+    convention (e.g. "basic01", "hello_world") works the same way. Computed
+    from the filesystem (not hardcoded) so it can't drift out of sync with
+    what generate.py actually produced."""
     tests_dir = REPO_ROOT / "tests"
     ids = [
         path.stem.removeprefix("test_")
-        for path in tests_dir.glob("test_stage[0-9][0-9]_exercise[0-9][0-9].py")
+        for path in tests_dir.glob("test_stage[0-9][0-9]_*.py")
     ]
     return sorted(ids)
 
@@ -51,14 +54,14 @@ def _test_targets(id: str) -> list:
     "stage01_exercise03" (or "challenge01") maps to its own single test
     file. A plain stage id like "stage01" has no test file of its own --
     it maps to every exercise test file for that stage
-    (test_stage01_exercise*.py), so testing "stage01" always covers
-    everything currently in it, however many exercises that turns out to
-    be.
+    (test_stage01_*.py), so testing "stage01" always covers everything
+    currently in it, however many exercises that turns out to be and
+    whatever they're named.
     """
     exact = REPO_ROOT / "tests" / f"test_{id}.py"
     if exact.exists():
         return [exact]
-    return sorted((REPO_ROOT / "tests").glob(f"test_{id}_exercise*.py"))
+    return sorted((REPO_ROOT / "tests").glob(f"test_{id}_*.py"))
 
 
 def run_stage_tests(id: str) -> subprocess.CompletedProcess:
@@ -68,7 +71,8 @@ def run_stage_tests(id: str) -> subprocess.CompletedProcess:
     if not targets:
         raise FileNotFoundError(f"No test file(s) found for {id}")
     return subprocess.run(
-        [sys.executable, "-m", "pytest", *(str(t) for t in targets), "-v"],
+        [sys.executable, "-m", "pytest", *(str(t) for t in targets),
+         "-v", "--continue-on-collection-errors"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -76,9 +80,19 @@ def run_stage_tests(id: str) -> subprocess.CompletedProcess:
 
 
 def run_all_tests() -> subprocess.CompletedProcess:
-    """Run the full test suite across every stage."""
+    """Run the full test suite across every stage.
+
+    --continue-on-collection-errors matters here specifically: a
+    script-style exercise (see generator/stage01.py) raises
+    NotImplementedError at module *import* time rather than when some
+    function gets called, which pytest treats as a collection error for
+    that one file. Without this flag, pytest aborts the entire run the
+    moment it hits one -- an unfilled-in stage01 exercise would silently
+    take down every other stage's/challenge's/exam's results too.
+    """
     return subprocess.run(
-        [sys.executable, "-m", "pytest", "tests/", "-v"],
+        [sys.executable, "-m", "pytest", "tests/",
+         "-v", "--continue-on-collection-errors"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,

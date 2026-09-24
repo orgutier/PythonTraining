@@ -4,7 +4,7 @@ Six exercises covering file I/O, the full try/except/finally/raise toolkit (incl
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage05_exerciseXX`. Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage05_<name>` (e.g. `python tools/cli.py test stage05_exercise01`). Work through them in order.
 
 - **`exercise01/`** -- open(), with, as -- x3 each
 - **`exercise02/`** -- try, except, finally, raise, Exception, exception hierarchies
