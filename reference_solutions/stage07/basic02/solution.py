@@ -1,3 +1,6 @@
+from typing import List
+
+
 class Vehicle:
     def __init__(self, make, model):
         self.make = make
@@ -25,8 +28,8 @@ class ElectricCar(Car):
         return super().describe() + f", {self.battery_kwh}kWh battery"
 
 
-def total_description(vehicles: list) -> list:
-    return [v.describe() for v in vehicles]
+def fleet_summary(vehicles: List[Vehicle]) -> str:
+    return ", ".join(v.describe() for v in vehicles)
 
 
 def is_car(vehicle) -> bool:

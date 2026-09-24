@@ -1,35 +1,18 @@
 """
-OOP II -- Mixins and Protocols
+OOP II -- Protocol Structural Typing
 Implement the function(s)/class(es) below.
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module -- the test suite in
-tests/test_stage07_exercise05.py imports directly from here. Need a helper
+tests/test_stage07_advanced02.py imports directly from here. Need a helper
 function or class of your own? Add another .py file next to this one inside
-exercises/stage07/exercise05/ and import it as a submodule (e.g.
-`from exercises.stage07.exercise05 import helpers`) -- solution.py just has to
+exercises/stage07/advanced02/ and import it as a submodule (e.g.
+`from exercises.stage07.advanced02 import helpers`) -- solution.py just has to
 stay the entry point these tests import from.
 """
 
 
 from typing import Protocol, runtime_checkable
-
-
-class LoggingMixin:
-    def log(self, message: str) -> str:
-        """f"[{self.__class__.__name__}] {message}"."""
-        raise NotImplementedError
-
-
-class SerializableMixin:
-    def to_dict(self) -> dict:
-        """dict(self.__dict__)."""
-        raise NotImplementedError
-
-
-class Widget(LoggingMixin, SerializableMixin):
-    def __init__(self, name):
-        raise NotImplementedError
 
 
 @runtime_checkable

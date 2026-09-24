@@ -1,15 +1,18 @@
 """
-OOP II -- super() and Polymorphism
+OOP II -- Vehicle Fleet
 Implement the function(s)/class(es) below.
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module -- the test suite in
-tests/test_stage07_exercise02.py imports directly from here. Need a helper
+tests/test_stage07_basic02.py imports directly from here. Need a helper
 function or class of your own? Add another .py file next to this one inside
-exercises/stage07/exercise02/ and import it as a submodule (e.g.
-`from exercises.stage07.exercise02 import helpers`) -- solution.py just has to
+exercises/stage07/basic02/ and import it as a submodule (e.g.
+`from exercises.stage07.basic02 import helpers`) -- solution.py just has to
 stay the entry point these tests import from.
 """
+
+
+from typing import List
 
 
 class Vehicle:
@@ -41,8 +44,8 @@ class ElectricCar(Car):
         raise NotImplementedError
 
 
-def total_description(vehicles: list) -> list:
-    """[v.describe() for v in vehicles]."""
+def fleet_summary(vehicles: List[Vehicle]) -> str:
+    """", ".join(v.describe() for v in vehicles)."""
     raise NotImplementedError
 
 

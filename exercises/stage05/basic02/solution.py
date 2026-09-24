@@ -16,22 +16,22 @@ import re
 
 
 def extract_ticket_ids(text: str) -> list[str]:
-    """re.findall(r"TICKET-\d+", text)."""
+    r"""re.findall(r"TICKET-\d+", text)."""
     raise NotImplementedError
 
 
 def contains_urgent_flag(text: str) -> bool:
-    """re.search(r"\bURGENT\b", text) is not None."""
+    r"""re.search(r"URGENT", text) is not None."""
     raise NotImplementedError
 
 
 def clean_ticket_text(text: str) -> str:
-    """re.sub(r"\s+", " ", text).strip()."""
+    r"""re.sub(r"\s+", " ", text).strip()."""
     raise NotImplementedError
 
 
 def looks_like_ticket_id(text: str) -> bool:
-    """re.match(r"TICKET-\d+$", text) is not None -- the WHOLE text must be one ticket id."""
+    r"""re.match(r"TICKET-\d+$", text) is not None -- the WHOLE text must be one ticket id."""
     raise NotImplementedError
 
 

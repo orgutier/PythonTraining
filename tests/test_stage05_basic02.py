@@ -18,18 +18,18 @@ TEXT = "TICKET-101 is URGENT, also TICKET-202 reported.  Please   check."
 
 
 def test_extract_ticket_ids():
-    """extract_ticket_ids == re.findall(r"TICKET-\d+", text)."""
+    r"""extract_ticket_ids == re.findall(r"TICKET-\d+", text)."""
     assert extract_ticket_ids(TEXT) == ["TICKET-101", "TICKET-202"]
 
 
 def test_contains_urgent_flag():
-    """contains_urgent_flag uses re.search with a \bURGENT\b word-boundary pattern."""
+    r"""contains_urgent_flag uses re.search with a URGENT word-boundary pattern."""
     assert contains_urgent_flag(TEXT) is True
     assert contains_urgent_flag("nothing to see here") is False
 
 
 def test_clean_ticket_text_collapses_whitespace():
-    """clean_ticket_text uses re.sub(r"\s+", " ", text).strip()."""
+    r"""clean_ticket_text uses re.sub(r"\s+", " ", text).strip()."""
     assert clean_ticket_text(TEXT) == (
         "TICKET-101 is URGENT, also TICKET-202 reported. Please check."
     )

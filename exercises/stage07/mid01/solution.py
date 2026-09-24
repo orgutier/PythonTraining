@@ -4,10 +4,10 @@ Implement the function(s)/class(es) below.
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module -- the test suite in
-tests/test_stage07_exercise04.py imports directly from here. Need a helper
+tests/test_stage07_mid01.py imports directly from here. Need a helper
 function or class of your own? Add another .py file next to this one inside
-exercises/stage07/exercise04/ and import it as a submodule (e.g.
-`from exercises.stage07.exercise04 import helpers`) -- solution.py just has to
+exercises/stage07/mid01/ and import it as a submodule (e.g.
+`from exercises.stage07.mid01 import helpers`) -- solution.py just has to
 stay the entry point these tests import from.
 """
 

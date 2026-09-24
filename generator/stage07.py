@@ -1,30 +1,39 @@
 """
 Stage 7 -- OOP II.
 
-Coverage plan (each item exercised by the trainee's own code >=3 times):
-  keywords: class Child(Parent), super(), isinstance(), abc, ABC,
-            @abstractmethod
-  modules:  abc, typing
-  concepts: polymorphism, duck typing, composition vs inheritance, mixins,
-            Protocol structural typing
+Rolled onto the tier-named exercise convention: a minimum of two exercises
+per Basic/Mid/Advanced tier. Every exercise here is class-based -- Stage
+7's whole subject is inheritance/composition/abstraction, which are
+inherently class-shaped content.
+
+Coverage plan (every item below is exercised by the trainee's own code,
+generally 2+ times across these 6 exercises):
+
+  Basic:    class Child(Parent), super(), isinstance(), typing module,
+            polymorphism, duck typing
+  Mid:      abc, ABC, @abstractmethod, abc module, composition vs
+            inheritance
+  Advanced: mixins, Protocol structural typing
 """
 
 STAGE = "stage07"
 TOPIC = "OOP II"
 OVERVIEW = (
-    "Five exercises covering inheritance, composition, duck typing, "
-    "abstract base classes, mixins, and typing.Protocol from Topic 7 at "
-    "least three times each -- ending with a runtime_checkable Protocol so "
-    "isinstance() and structural typing meet in the same exercise."
+    "Six exercises, two per tier: inheritance/super()/polymorphism "
+    "contrasted with duck typing in Basic, abstract base classes "
+    "contrasted with composition's runtime flexibility in Mid, and mixins "
+    "plus a runtime_checkable Protocol in Advanced."
 )
 
 EXERCISES = [
     {
-        "name": "exercise01",
-        "title": "Inheritance Basics",
-        "summary": "class Child(Parent), a first super(), polymorphism",
+        "name": "basic01",
+        "title": "Animal Sounds: Inheritance and Duck Typing",
+        "summary": "class Child(Parent), super(), polymorphism, duck typing (side by side)",
         "readme": (
-            "Implement:\n\n"
+            "Two different mechanisms for \"the same call does the right "
+            "thing for different types\" -- inheritance-based, and "
+            "duck-typed. Implement:\n\n"
             "- `Animal.__init__(self, name: str)` -- store `self.name`.\n"
             "- `Animal.speak(self) -> str` -- `raise NotImplementedError` "
             "(the base class defines the *interface*, not a default "
@@ -35,11 +44,22 @@ EXERCISES = [
             "`super().__init__(name)` then stores `self.indoor`; "
             "`speak(self) -> str` returns `f\"{self.name} says Meow!\"`.\n"
             "- `describe_animal(animal) -> str` -- `return animal.speak()`. "
-            "This function doesn't care whether `animal` is a `Dog`, a `Cat`, "
-            "or anything else with a `.speak()` method -- that's "
-            "**polymorphism**: the same call (`animal.speak()`) does the "
-            "right thing for whatever type is actually passed in.\n\n"
-            "See the Study Reference presentation, Topic 7, for the theory."
+            "Works for any `Animal` subclass -- **polymorphism** through a "
+            "shared base class.\n\n"
+            "Now the duck-typed version, with **no shared base class at "
+            "all**:\n\n"
+            "- `Duck.quack(self) -> str` -- `\"Quack!\"`.\n"
+            "- `Person.quack(self) -> str` -- `\"I'm quacking like a "
+            "duck!\"`. `Duck` and `Person` share nothing in common.\n"
+            "- `make_it_quack(obj) -> str` -- `obj.quack()`. This works for "
+            "*any* object with a `.quack()` method -- **duck typing**: "
+            "\"if it quacks like a duck, treat it like a duck,\" no "
+            "inheritance required. Compare it with `describe_animal` "
+            "above: both get \"the right behavior for the type passed in\", "
+            "but one relies on a shared `Animal` base class and the other "
+            "relies on nothing but a matching method name.\n\n"
+            "See the Study Reference presentation, Topic 7 (Basic tier), "
+            "for the theory."
         ),
         "stub": '''\
 class Animal:
@@ -68,7 +88,24 @@ class Cat(Animal):
 
 
 def describe_animal(animal) -> str:
-    """animal.speak() -- works for any Animal subclass (polymorphism)."""
+    """animal.speak() -- works for any Animal subclass (polymorphism via inheritance)."""
+    raise NotImplementedError
+
+
+class Duck:
+    def quack(self) -> str:
+        """"Quack!"."""
+        raise NotImplementedError
+
+
+class Person:
+    def quack(self) -> str:
+        """"I'm quacking like a duck!"."""
+        raise NotImplementedError
+
+
+def make_it_quack(obj) -> str:
+    """obj.quack() -- works for anything with a .quack() method (duck typing, no shared base)."""
     raise NotImplementedError
 ''',
         "reference": '''\
@@ -96,16 +133,40 @@ class Cat(Animal):
 
 def describe_animal(animal) -> str:
     return animal.speak()
+
+
+class Duck:
+    def quack(self) -> str:
+        return "Quack!"
+
+
+class Person:
+    def quack(self) -> str:
+        return "I'm quacking like a duck!"
+
+
+def make_it_quack(obj) -> str:
+    return obj.quack()
 ''',
         "test": '''\
-from exercises.stage07.exercise01.solution import Animal, Dog, Cat, describe_animal
+from exercises.stage07.basic01.solution import (
+    Animal,
+    Dog,
+    Cat,
+    describe_animal,
+    Duck,
+    Person,
+    make_it_quack,
+)
 
 
 def test_dog_speak():
+    """Dog overrides Animal.speak()."""
     assert Dog("Rex").speak() == "Rex says Woof!"
 
 
 def test_cat_speak_and_super_init():
+    """Cat.__init__ must call super().__init__(name) before setting its own indoor attribute."""
     cat = Cat("Whiskers")
     assert cat.speak() == "Whiskers says Meow!"
     assert cat.name == "Whiskers"
@@ -113,19 +174,29 @@ def test_cat_speak_and_super_init():
 
 
 def test_describe_animal_polymorphism():
+    """describe_animal works for any Animal subclass via inheritance-based polymorphism."""
     assert describe_animal(Dog("Rex")) == "Rex says Woof!"
     assert describe_animal(Cat("Whiskers", indoor=False)) == "Whiskers says Meow!"
 
 
 def test_dog_and_cat_are_animals():
+    """Dog/Cat must both be real Animal subclasses."""
     assert isinstance(Dog("Rex"), Animal)
     assert isinstance(Cat("Whiskers"), Animal)
+
+
+def test_make_it_quack_duck_typing_with_no_shared_base_class():
+    """make_it_quack works on Duck and Person alike -- neither shares a base class, only a matching .quack() method."""
+    assert make_it_quack(Duck()) == "Quack!"
+    assert make_it_quack(Person()) == "I'm quacking like a duck!"
+    assert Duck.__bases__ == (object,)
+    assert Person.__bases__ == (object,)
 ''',
     },
     {
-        "name": "exercise02",
-        "title": "super() and Polymorphism",
-        "summary": "super() x3 (three-level chain), isinstance(), polymorphism again",
+        "name": "basic02",
+        "title": "Vehicle Fleet",
+        "summary": "super() (three-level chain), isinstance(), typing module, polymorphism",
         "readme": (
             "Implement a three-level inheritance chain where each level "
             "*extends* the one before it, rather than just calling its "
@@ -135,21 +206,28 @@ def test_dog_and_cat_are_animals():
             "- `Car(Vehicle)` -- `__init__(self, make, model, doors)` calls "
             "`super().__init__(make, model)` then stores `self.doors`; "
             "`describe(self) -> str` returns `super().describe() + f\" "
-            "({self.doors} doors)\"` -- it calls the **parent's** `describe()` "
-            "and appends to it, instead of rewriting the whole string.\n"
+            "({self.doors} doors)\"` -- it calls the **parent's** "
+            "`describe()` and appends to it, instead of rewriting the "
+            "whole string.\n"
             "- `ElectricCar(Car)` -- `__init__(self, make, model, doors, "
-            "battery_kwh)` calls `super().__init__(make, model, doors)` then "
-            "stores `self.battery_kwh`; `describe(self) -> str` returns "
-            "`super().describe() + f\", {self.battery_kwh}kWh battery\"`.\n"
-            "- `total_description(vehicles: list) -> list[str]` -- "
-            "`[v.describe() for v in vehicles]` (polymorphism again: works "
-            "across all three classes in one list).\n"
-            "- `is_car(vehicle) -> bool` -- `isinstance(vehicle, Car)` -- note "
-            "an `ElectricCar` **is** a `Car` too (it inherits from it), so "
-            "this returns `True` for both.\n\n"
-            "See the Study Reference presentation, Topic 7, for the theory."
+            "battery_kwh)` calls `super().__init__(make, model, doors)` "
+            "then stores `self.battery_kwh`; `describe(self) -> str` "
+            "returns `super().describe() + f\", {self.battery_kwh}kWh "
+            "battery\"`.\n"
+            "- `fleet_summary(vehicles: typing.List[Vehicle]) -> str` -- "
+            "`\", \".join(v.describe() for v in vehicles)` (note the "
+            "`typing.List[Vehicle]` type hint -- polymorphism means this "
+            "one function handles a list mixing all three classes).\n"
+            "- `is_car(vehicle) -> bool` -- `isinstance(vehicle, Car)` -- "
+            "note an `ElectricCar` **is** a `Car` too (it inherits from "
+            "it), so this returns `True` for both.\n\n"
+            "See the Study Reference presentation, Topic 7 (Basic tier), "
+            "for the theory."
         ),
         "stub": '''\
+from typing import List
+
+
 class Vehicle:
     def __init__(self, make, model):
         raise NotImplementedError
@@ -179,8 +257,8 @@ class ElectricCar(Car):
         raise NotImplementedError
 
 
-def total_description(vehicles: list) -> list:
-    """[v.describe() for v in vehicles]."""
+def fleet_summary(vehicles: List[Vehicle]) -> str:
+    """", ".join(v.describe() for v in vehicles)."""
     raise NotImplementedError
 
 
@@ -189,6 +267,9 @@ def is_car(vehicle) -> bool:
     raise NotImplementedError
 ''',
         "reference": '''\
+from typing import List
+
+
 class Vehicle:
     def __init__(self, make, model):
         self.make = make
@@ -216,197 +297,79 @@ class ElectricCar(Car):
         return super().describe() + f", {self.battery_kwh}kWh battery"
 
 
-def total_description(vehicles: list) -> list:
-    return [v.describe() for v in vehicles]
+def fleet_summary(vehicles: List[Vehicle]) -> str:
+    return ", ".join(v.describe() for v in vehicles)
 
 
 def is_car(vehicle) -> bool:
     return isinstance(vehicle, Car)
 ''',
         "test": '''\
-from exercises.stage07.exercise02.solution import (
+from exercises.stage07.basic02.solution import (
     Vehicle,
     Car,
     ElectricCar,
-    total_description,
+    fleet_summary,
     is_car,
 )
 
 
 def test_vehicle_describe():
+    """Vehicle.describe() == f"{make} {model}"."""
     assert Vehicle("Honda", "Civic").describe() == "Honda Civic"
 
 
-def test_car_describe_extends_vehicle():
+def test_car_describe_extends_vehicle_via_super():
+    """Car.describe() must call super().describe() and append to it, not rewrite the whole string."""
     assert Car("Honda", "Civic", 4).describe() == "Honda Civic (4 doors)"
 
 
-def test_electric_car_describe_extends_car():
+def test_electric_car_describe_extends_car_via_super():
+    """ElectricCar.describe() extends Car.describe() via super(), which itself extends Vehicle.describe() -- a three-level chain."""
     car = ElectricCar("Tesla", "Model 3", 4, 75)
     assert car.describe() == "Tesla Model 3 (4 doors), 75kWh battery"
 
 
-def test_total_description_polymorphism():
+def test_fleet_summary_polymorphism_across_all_three_classes():
+    """fleet_summary works across a mixed list of Vehicle/Car/ElectricCar via polymorphism."""
     vehicles = [Vehicle("A", "B"), Car("C", "D", 2), ElectricCar("E", "F", 4, 50)]
-    result = total_description(vehicles)
-    assert result == [
-        "A B",
-        "C D (2 doors)",
-        "E F (4 doors), 50kWh battery",
-    ]
+    assert fleet_summary(vehicles) == "A B, C D (2 doors), E F (4 doors), 50kWh battery"
 
 
 def test_is_car():
+    """is_car == isinstance(vehicle, Car) -- True for ElectricCar too (it IS a Car), False for a plain Vehicle."""
     assert is_car(Car("C", "D", 2)) is True
     assert is_car(ElectricCar("E", "F", 4, 50)) is True
     assert is_car(Vehicle("A", "B")) is False
 ''',
     },
     {
-        "name": "exercise03",
-        "title": "Duck Typing and Composition",
-        "summary": "duck typing, composition vs inheritance, isinstance()",
-        "readme": (
-            "Implement:\n\n"
-            "- `Engine.start(self) -> str` -- `\"Engine starting...\"`.\n"
-            "- `Boat.__init__(self, engine)` -- store `self.engine = engine` "
-            "(a `Boat` **has an** `Engine` -- **composition**, not "
-            "inheritance: `Boat` doesn't extend `Engine`, it just holds one). "
-            "`start(self) -> str` -- `self.engine.start()`.\n"
-            "- `Duck.quack(self) -> str` -- `\"Quack!\"`.\n"
-            "- `Person.quack(self) -> str` -- `\"I'm quacking like a duck!\"`. "
-            "`Duck` and `Person` share **no** base class in common.\n"
-            "- `make_it_quack(obj) -> str` -- `obj.quack()`. This works for "
-            "*any* object with a `.quack()` method, `Duck` or `Person` or "
-            "anything else -- **duck typing**: \"if it quacks like a duck, "
-            "treat it like a duck,\" no shared inheritance required.\n"
-            "- `is_duck_instance(obj) -> bool` -- `isinstance(obj, Duck)`. "
-            "Unlike `make_it_quack`, this one *does* care about the actual "
-            "type -- contrast the two.\n\n"
-            "See the Study Reference presentation, Topic 7, for the theory."
-        ),
-        "stub": '''\
-class Engine:
-    def start(self) -> str:
-        """"Engine starting..."."""
-        raise NotImplementedError
-
-
-class Boat:
-    def __init__(self, engine):
-        """Store self.engine = engine (composition: Boat HAS an Engine)."""
-        raise NotImplementedError
-
-    def start(self) -> str:
-        """self.engine.start()."""
-        raise NotImplementedError
-
-
-class Duck:
-    def quack(self) -> str:
-        """"Quack!"."""
-        raise NotImplementedError
-
-
-class Person:
-    def quack(self) -> str:
-        """"I'm quacking like a duck!"."""
-        raise NotImplementedError
-
-
-def make_it_quack(obj) -> str:
-    """obj.quack() -- works for anything with a .quack() method (duck typing)."""
-    raise NotImplementedError
-
-
-def is_duck_instance(obj) -> bool:
-    """isinstance(obj, Duck)."""
-    raise NotImplementedError
-''',
-        "reference": '''\
-class Engine:
-    def start(self) -> str:
-        return "Engine starting..."
-
-
-class Boat:
-    def __init__(self, engine):
-        self.engine = engine
-
-    def start(self) -> str:
-        return self.engine.start()
-
-
-class Duck:
-    def quack(self) -> str:
-        return "Quack!"
-
-
-class Person:
-    def quack(self) -> str:
-        return "I'm quacking like a duck!"
-
-
-def make_it_quack(obj) -> str:
-    return obj.quack()
-
-
-def is_duck_instance(obj) -> bool:
-    return isinstance(obj, Duck)
-''',
-        "test": '''\
-from exercises.stage07.exercise03.solution import (
-    Engine,
-    Boat,
-    Duck,
-    Person,
-    make_it_quack,
-    is_duck_instance,
-)
-
-
-def test_boat_composition_delegates_to_engine():
-    boat = Boat(Engine())
-    assert boat.start() == "Engine starting..."
-
-
-def test_make_it_quack_duck():
-    assert make_it_quack(Duck()) == "Quack!"
-
-
-def test_make_it_quack_person_duck_typing():
-    assert make_it_quack(Person()) == "I'm quacking like a duck!"
-
-
-def test_is_duck_instance():
-    assert is_duck_instance(Duck()) is True
-    assert is_duck_instance(Person()) is False
-''',
-    },
-    {
-        "name": "exercise04",
+        "name": "mid01",
         "title": "Abstract Base Classes",
-        "summary": "abc module, ABC, @abstractmethod x3",
+        "summary": "abc module, ABC, @abstractmethod",
         "readme": (
-            "Implement `Shape(ABC)` with three `@abstractmethod`s, plus two "
-            "concrete subclasses:\n\n"
+            "Implement `Shape(ABC)` with three `@abstractmethod`s, plus "
+            "two concrete subclasses:\n\n"
             "- `Shape.area(self) -> float` (`@abstractmethod`).\n"
             "- `Shape.perimeter(self) -> float` (`@abstractmethod`).\n"
-            "- `Shape.name(self) -> str` (`@abstractmethod`) -- a short label "
-            "like `\"circle\"`.\n"
+            "- `Shape.name(self) -> str` (`@abstractmethod`) -- a short "
+            "label like `\"circle\"`.\n"
             "- `Circle(Shape)` -- `__init__(self, radius)`; `area()` = "
-            "`3.14159 * radius ** 2`; `perimeter()` = `2 * 3.14159 * radius`; "
-            "`name()` = `\"circle\"`.\n"
+            "`3.14159 * radius ** 2`; `perimeter()` = `2 * 3.14159 * "
+            "radius`; `name()` = `\"circle\"`.\n"
             "- `Square(Shape)` -- `__init__(self, side)`; `area()` = "
-            "`side ** 2`; `perimeter()` = `4 * side`; `name()` = `\"square\"`.\n\n"
+            "`side ** 2`; `perimeter()` = `4 * side`; `name()` = "
+            "`\"square\"`.\n\n"
             "`Shape` inherits from `abc.ABC` and declares three abstract "
-            "methods -- that makes `Shape` itself impossible to instantiate "
-            "directly (`Shape()` raises `TypeError`), and forces every "
-            "concrete subclass to implement *all three* methods before it "
-            "can be instantiated at all. This is a stronger guarantee than "
-            "`Animal.speak()` in Exercise 1, which only fails if you *call* "
-            "the unoverridden method.\n\n"
-            "See the Study Reference presentation, Topic 7, for the theory."
+            "methods -- that makes `Shape` itself impossible to "
+            "instantiate directly (`Shape()` raises `TypeError`), and "
+            "forces every concrete subclass to implement *all three* "
+            "methods before it can be instantiated at all. This is a "
+            "stronger guarantee than an ordinary base method that merely "
+            "`raise`s if left unoverridden: that only fails if you *call* "
+            "it, while `@abstractmethod` fails at **instantiation** time.\n\n"
+            "See the Study Reference presentation, Topic 7 (Mid tier), "
+            "for the theory."
         ),
         "stub": '''\
 from abc import ABC, abstractmethod
@@ -500,15 +463,17 @@ class Square(Shape):
 ''',
         "test": '''\
 import pytest
-from exercises.stage07.exercise04.solution import Shape, Circle, Square
+from exercises.stage07.mid01.solution import Shape, Circle, Square
 
 
 def test_shape_cannot_be_instantiated():
+    """Shape(ABC) with @abstractmethods must raise TypeError on direct instantiation."""
     with pytest.raises(TypeError):
         Shape()
 
 
 def test_circle_area_and_perimeter():
+    """Circle implements all three abstract methods."""
     c = Circle(2)
     assert round(c.area(), 2) == 12.57
     assert round(c.perimeter(), 2) == 12.57
@@ -516,6 +481,7 @@ def test_circle_area_and_perimeter():
 
 
 def test_square_area_and_perimeter():
+    """Square implements all three abstract methods."""
     s = Square(4)
     assert s.area() == 16
     assert s.perimeter() == 16
@@ -523,47 +489,148 @@ def test_square_area_and_perimeter():
 
 
 def test_circle_and_square_are_shapes():
+    """Circle/Square must both be real Shape subclasses."""
     assert isinstance(Circle(1), Shape)
     assert isinstance(Square(1), Shape)
 ''',
     },
     {
-        "name": "exercise05",
-        "title": "Mixins and Protocols",
-        "summary": "mixins, typing.Protocol structural typing, isinstance()",
+        "name": "mid02",
+        "title": "Composition and Swappable Engines",
+        "summary": "composition vs inheritance",
         "readme": (
-            "Implement:\n\n"
-            "- `LoggingMixin.log(self, message: str) -> str` -- "
-            "`f\"[{self.__class__.__name__}] {message}\"`. A **mixin**: a "
-            "small class meant to be combined with others via multiple "
-            "inheritance, adding one focused piece of reusable behavior -- "
-            "never instantiated on its own.\n"
-            "- `SerializableMixin.to_dict(self) -> dict` -- `dict(self.__dict__)`.\n"
-            "- `Widget(LoggingMixin, SerializableMixin)` -- `__init__(self, "
-            "name)` stores `self.name`. `Widget` gets both `.log()` and "
-            "`.to_dict()` for free by combining the two mixins -- no shared "
-            "\"is-a\" hierarchy needed, just behavior composed in.\n"
-            "- `SupportsArea` (`typing.Protocol`, `@runtime_checkable`) -- "
-            "declares `def area(self) -> float: ...` as the interface.\n"
-            "- `Coin.__init__(self, radius)` / `Coin.area(self) -> float` "
-            "(`3.14159 * radius ** 2`) -- `Coin` **never inherits from** "
-            "`SupportsArea`. It just happens to have a matching `area()` "
-            "method.\n"
-            "- `total_area(shapes: list) -> float` -- "
-            "`sum(s.area() for s in shapes)`.\n"
-            "- `supports_area(obj) -> bool` -- `isinstance(obj, SupportsArea)`. "
-            "Because `SupportsArea` is `@runtime_checkable`, this actually "
-            "works on `Coin` even though `Coin` never inherits from it -- "
-            "`isinstance()` checks the *shape* of the object (does it have "
-            "an `area()` method?), not its class hierarchy. This is "
-            "**structural typing**: the formal, type-checker-friendly "
-            "version of the duck typing from Exercise 3.\n\n"
-            "See the Study Reference presentation, Topic 7, for the theory."
+            "Two interchangeable engines and a boat that **has an** "
+            "engine, rather than **is an** engine -- the point of "
+            "composition. Implement:\n\n"
+            "- `GasEngine.start(self) -> str` -- "
+            "`\"Gas engine roaring to life...\"`.\n"
+            "- `ElectricEngine.start(self) -> str` -- "
+            "`\"Electric engine humming...\"`.\n"
+            "- `Boat.__init__(self, engine)` -- store `self.engine = "
+            "engine` (**composition**: `Boat` doesn't extend `GasEngine`/"
+            "`ElectricEngine`, it just *holds one*). `start(self) -> str` "
+            "-- `self.engine.start()` (delegates to whichever engine it "
+            "was given).\n"
+            "- `swap_engine(boat, new_engine) -> None` -- "
+            "`boat.engine = new_engine`.\n\n"
+            "This is what composition buys you that inheritance can't: "
+            "`swap_engine` changes a `Boat`'s behavior **at runtime**, "
+            "with no class hierarchy to touch at all. Rewriting this with "
+            "inheritance would mean either a `GasBoat`/`ElectricBoat` "
+            "class pair (can't switch after construction) or multiple "
+            "inheritance from both engine classes at once (`Boat` would "
+            "*be* both kinds of engine, which doesn't make sense).\n\n"
+            "See the Study Reference presentation, Topic 7 (Mid tier), "
+            "for the theory."
         ),
         "stub": '''\
-from typing import Protocol, runtime_checkable
+class GasEngine:
+    def start(self) -> str:
+        """"Gas engine roaring to life..."."""
+        raise NotImplementedError
 
 
+class ElectricEngine:
+    def start(self) -> str:
+        """"Electric engine humming..."."""
+        raise NotImplementedError
+
+
+class Boat:
+    def __init__(self, engine):
+        """Store self.engine = engine (composition: Boat HAS an engine, doesn't extend one)."""
+        raise NotImplementedError
+
+    def start(self) -> str:
+        """self.engine.start() -- delegates to whichever engine it holds."""
+        raise NotImplementedError
+
+
+def swap_engine(boat, new_engine) -> None:
+    """boat.engine = new_engine -- swap behavior at runtime, no class hierarchy involved."""
+    raise NotImplementedError
+''',
+        "reference": '''\
+class GasEngine:
+    def start(self) -> str:
+        return "Gas engine roaring to life..."
+
+
+class ElectricEngine:
+    def start(self) -> str:
+        return "Electric engine humming..."
+
+
+class Boat:
+    def __init__(self, engine):
+        self.engine = engine
+
+    def start(self) -> str:
+        return self.engine.start()
+
+
+def swap_engine(boat, new_engine) -> None:
+    boat.engine = new_engine
+''',
+        "test": '''\
+from exercises.stage07.mid02.solution import GasEngine, ElectricEngine, Boat, swap_engine
+
+
+def test_boat_composition_delegates_to_gas_engine():
+    """Boat.start() delegates to whatever engine object it holds (composition, not inheritance)."""
+    boat = Boat(GasEngine())
+    assert boat.start() == "Gas engine roaring to life..."
+
+
+def test_boat_composition_delegates_to_electric_engine():
+    """The same Boat class works with a completely different engine object, with no shared inheritance needed."""
+    boat = Boat(ElectricEngine())
+    assert boat.start() == "Electric engine humming..."
+
+
+def test_swap_engine_changes_behavior_at_runtime():
+    """swap_engine replaces boat.engine after construction -- behavior changes without touching any class hierarchy."""
+    boat = Boat(GasEngine())
+    assert boat.start() == "Gas engine roaring to life..."
+    swap_engine(boat, ElectricEngine())
+    assert boat.start() == "Electric engine humming..."
+
+
+def test_boat_is_not_an_engine():
+    """Boat must NOT inherit from either engine class -- it holds one, it isn't one."""
+    boat = Boat(GasEngine())
+    assert not isinstance(boat, GasEngine)
+    assert not isinstance(boat, ElectricEngine)
+''',
+    },
+    {
+        "name": "advanced01",
+        "title": "Mixins",
+        "summary": "mixins (multiple inheritance for composed-in behavior)",
+        "readme": (
+            "Implement two **mixins** -- small classes meant to be "
+            "combined with others via multiple inheritance, each adding "
+            "one focused piece of reusable behavior, never instantiated "
+            "on their own:\n\n"
+            "- `LoggingMixin.log(self, message: str) -> str` -- "
+            "`f\"[{self.__class__.__name__}] {message}\"`.\n"
+            "- `SerializableMixin.to_dict(self) -> dict` -- "
+            "`dict(self.__dict__)`.\n"
+            "- `Widget(LoggingMixin, SerializableMixin)` -- "
+            "`__init__(self, name)` stores `self.name`. `Widget` gets "
+            "both `.log()` and `.to_dict()` for free by combining the two "
+            "mixins -- no shared \"is-a\" hierarchy needed beyond the "
+            "mixins themselves, just behavior composed in through "
+            "multiple inheritance.\n\n"
+            "Note `self.__class__.__name__` inside `LoggingMixin.log` -- "
+            "because it reads the *actual* class of whatever instance "
+            "calls it (`\"Widget\"`), not `\"LoggingMixin\"`, the same "
+            "mixin code produces a correctly-labeled message no matter "
+            "which class mixes it in.\n\n"
+            "See the Study Reference presentation, Topic 7 (Advanced "
+            "tier), for the theory."
+        ),
+        "stub": '''\
 class LoggingMixin:
     def log(self, message: str) -> str:
         """f"[{self.__class__.__name__}] {message}"."""
@@ -579,6 +646,80 @@ class SerializableMixin:
 class Widget(LoggingMixin, SerializableMixin):
     def __init__(self, name):
         raise NotImplementedError
+''',
+        "reference": '''\
+class LoggingMixin:
+    def log(self, message: str) -> str:
+        return f"[{self.__class__.__name__}] {message}"
+
+
+class SerializableMixin:
+    def to_dict(self) -> dict:
+        return dict(self.__dict__)
+
+
+class Widget(LoggingMixin, SerializableMixin):
+    def __init__(self, name):
+        self.name = name
+''',
+        "test": '''\
+from exercises.stage07.advanced01.solution import LoggingMixin, SerializableMixin, Widget
+
+
+def test_widget_uses_both_mixins():
+    """Widget gets .log() and .to_dict() for free by combining both mixins."""
+    w = Widget("gadget")
+    assert w.log("created") == "[Widget] created"
+    assert w.to_dict() == {"name": "gadget"}
+
+
+def test_log_reports_the_actual_class_name():
+    """LoggingMixin.log must read self.__class__.__name__, so it reports "Widget", not "LoggingMixin"."""
+    w = Widget("gadget")
+    assert "Widget" in w.log("test")
+    assert "LoggingMixin" not in w.log("test")
+
+
+def test_widget_is_instance_of_both_mixins():
+    """Widget must be a real instance of both mixin classes via multiple inheritance."""
+    w = Widget("gadget")
+    assert isinstance(w, LoggingMixin)
+    assert isinstance(w, SerializableMixin)
+''',
+    },
+    {
+        "name": "advanced02",
+        "title": "Protocol Structural Typing",
+        "summary": "typing.Protocol, @runtime_checkable, isinstance() (structural)",
+        "readme": (
+            "Implement a `typing.Protocol` and a class that satisfies it "
+            "**without ever inheriting from it**:\n\n"
+            "- `SupportsArea` (`typing.Protocol`, `@runtime_checkable`) -- "
+            "declares `def area(self) -> float: ...` as the interface "
+            "(already given).\n"
+            "- `Coin.__init__(self, radius)` / `Coin.area(self) -> float` "
+            "(`3.14159 * radius ** 2`) -- `Coin` **never inherits from** "
+            "`SupportsArea`. It just happens to have a matching `area()` "
+            "method.\n"
+            "- `total_area(shapes: list) -> float` -- "
+            "`sum(s.area() for s in shapes)`.\n"
+            "- `supports_area(obj) -> bool` -- "
+            "`isinstance(obj, SupportsArea)`. Because `SupportsArea` is "
+            "`@runtime_checkable`, this actually works on `Coin` even "
+            "though `Coin` never inherits from it -- `isinstance()` "
+            "checks the *shape* of the object (does it have an `area()` "
+            "method?), not its class hierarchy.\n\n"
+            "This is **structural typing**: the formal, type-checker-"
+            "friendly version of the duck typing from the first Basic "
+            "exercise (`make_it_quack`) -- same underlying idea (match by "
+            "shape, not ancestry), but now expressed as a real type "
+            "(`SupportsArea`) that both `isinstance()` and a static type "
+            "checker can understand.\n\n"
+            "See the Study Reference presentation, Topic 7 (Advanced "
+            "tier), for the theory."
+        ),
+        "stub": '''\
+from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -608,21 +749,6 @@ def supports_area(obj) -> bool:
 from typing import Protocol, runtime_checkable
 
 
-class LoggingMixin:
-    def log(self, message: str) -> str:
-        return f"[{self.__class__.__name__}] {message}"
-
-
-class SerializableMixin:
-    def to_dict(self) -> dict:
-        return dict(self.__dict__)
-
-
-class Widget(LoggingMixin, SerializableMixin):
-    def __init__(self, name):
-        self.name = name
-
-
 @runtime_checkable
 class SupportsArea(Protocol):
     def area(self) -> float: ...
@@ -644,39 +770,22 @@ def supports_area(obj) -> bool:
     return isinstance(obj, SupportsArea)
 ''',
         "test": '''\
-from exercises.stage07.exercise05.solution import (
-    LoggingMixin,
-    SerializableMixin,
-    Widget,
-    SupportsArea,
-    Coin,
-    total_area,
-    supports_area,
-)
-
-
-def test_widget_uses_both_mixins():
-    w = Widget("gadget")
-    assert w.log("created") == "[Widget] created"
-    assert w.to_dict() == {"name": "gadget"}
-
-
-def test_widget_is_instance_of_both_mixins():
-    w = Widget("gadget")
-    assert isinstance(w, LoggingMixin)
-    assert isinstance(w, SerializableMixin)
+from exercises.stage07.advanced02.solution import SupportsArea, Coin, total_area, supports_area
 
 
 def test_total_area():
+    """total_area == sum(s.area() for s in shapes)."""
     assert round(total_area([Coin(1), Coin(2)]), 2) == round(3.14159 + 12.56636, 2)
 
 
 def test_supports_area_structural_typing():
+    """supports_area(Coin(...)) is True via structural typing, despite Coin never inheriting from SupportsArea."""
     assert supports_area(Coin(1)) is True
     assert supports_area("not a shape") is False
 
 
 def test_coin_never_inherits_from_supports_area():
+    """Coin must satisfy SupportsArea purely structurally -- SupportsArea must not appear in its base classes."""
     assert SupportsArea not in Coin.__bases__
 ''',
     },

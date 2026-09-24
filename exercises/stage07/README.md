@@ -1,13 +1,14 @@
 # OOP II
 
-Five exercises covering inheritance, composition, duck typing, abstract base classes, mixins, and typing.Protocol from Topic 7 at least three times each -- ending with a runtime_checkable Protocol so isinstance() and structural typing meet in the same exercise.
+Six exercises, two per tier: inheritance/super()/polymorphism contrasted with duck typing in Basic, abstract base classes contrasted with composition's runtime flexibility in Mid, and mixins plus a runtime_checkable Protocol in Advanced.
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage07_<name>` (e.g. `python tools/cli.py test stage07_exercise01`). Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage07_<name>` (e.g. `python tools/cli.py test stage07_basic01`). Work through them in order.
 
-- **`exercise01/`** -- class Child(Parent), a first super(), polymorphism
-- **`exercise02/`** -- super() x3 (three-level chain), isinstance(), polymorphism again
-- **`exercise03/`** -- duck typing, composition vs inheritance, isinstance()
-- **`exercise04/`** -- abc module, ABC, @abstractmethod x3
-- **`exercise05/`** -- mixins, typing.Protocol structural typing, isinstance()
+- **`basic01/`** -- class Child(Parent), super(), polymorphism, duck typing (side by side)
+- **`basic02/`** -- super() (three-level chain), isinstance(), typing module, polymorphism
+- **`mid01/`** -- abc module, ABC, @abstractmethod
+- **`mid02/`** -- composition vs inheritance
+- **`advanced01/`** -- mixins (multiple inheritance for composed-in behavior)
+- **`advanced02/`** -- typing.Protocol, @runtime_checkable, isinstance() (structural)
