@@ -1,42 +1,52 @@
 """
 Stage 5 -- Files, Exceptions, Regex.
 
-Coverage plan (each item exercised by the trainee's own code >=3 times):
-  keywords: open(), with, as, try, except, finally, raise, Exception,
-            re.search(), re.findall(), re.compile()
-  dunders:  __enter__, __exit__
-  modules:  re, contextlib
-  methods:  re.match(), re.sub(), contextlib.contextmanager
-  concepts: exception chaining (raise ... from ...), exception hierarchies,
-            custom context managers, regex named groups
+Rolled onto the tier-named exercise convention: a minimum of two exercises
+per Basic/Mid/Advanced tier. All exercises here are function-based (plus a
+handful of small classes for the exception hierarchies and class-based
+context managers, which are inherently class-shaped content).
+
+Coverage plan (every item below is exercised by the trainee's own code,
+generally 2+ times across these 6 exercises):
+
+  Basic:    open(), with, as, try, except, finally, raise, Exception,
+            re.search(), re.findall(), re.match(), re.sub()
+  Mid:      re.compile(), contextlib module, exception chaining
+            (raise ... from ...), exception hierarchies, regex named groups
+  Advanced: contextlib.contextmanager, __enter__, __exit__, custom context
+            managers
 """
 
 STAGE = "stage05"
 TOPIC = "Files, Exceptions, Regex"
 OVERVIEW = (
-    "Six exercises covering file I/O, the full try/except/finally/raise "
-    "toolkit (including exception chaining and custom hierarchies), every "
-    "common re function, and both ways to write a context manager -- a "
-    "class with __enter__/__exit__, and @contextlib.contextmanager."
+    "Six exercises, two per tier: file I/O and everyday try/except/finally/"
+    "raise plus basic regex in Basic; custom exception hierarchies with "
+    "raise ... from ... chaining, and compiled named-group regex, in Mid; "
+    "both ways to write a context manager -- a class with __enter__/"
+    "__exit__, and @contextlib.contextmanager -- in Advanced."
 )
 
 EXERCISES = [
     {
-        "name": "exercise01",
-        "title": "File Basics",
-        "summary": "open(), with, as -- x3 each",
+        "name": "basic01",
+        "title": "Session Log Files",
+        "summary": "open(), with, as",
         "readme": (
             "Implement four small file-handling functions, each using "
-            "`with open(...) as f:` (never a bare `open()`/`close()` pair):\n\n"
+            "`with open(...) as f:` (never a bare `open()`/`close()` "
+            "pair):\n\n"
             "- `write_lines(path: str, lines: list[str]) -> None` -- open "
-            "`path` for writing (`\"w\"`), write each line followed by `\"\\n\"`.\n"
-            "- `read_lines(path: str) -> list[str]` -- open `path` for reading, "
-            "return `f.read().splitlines()`.\n"
-            "- `append_line(path: str, line: str) -> None` -- open `path` for "
-            "appending (`\"a\"`), write `line + \"\\n\"`.\n"
+            "`path` for writing (`\"w\"`), write each line followed by "
+            "`\"\\n\"`.\n"
+            "- `read_lines(path: str) -> list[str]` -- open `path` for "
+            "reading, return `f.read().splitlines()`.\n"
+            "- `append_line(path: str, line: str) -> None` -- open `path` "
+            "for appending (`\"a\"`), write `line + \"\\n\"`.\n"
             "- `count_lines(path: str) -> int` -- open `path` for reading, "
             "return how many lines it has.\n\n"
-            "See the Study Reference presentation, Topic 5, for the theory."
+            "See the Study Reference presentation, Topic 5 (Basic tier), "
+            "for the theory."
         ),
         "stub": '''\
 def write_lines(path: str, lines: list[str]) -> None:
@@ -80,7 +90,7 @@ def count_lines(path: str) -> int:
         return len(f.read().splitlines())
 ''',
         "test": '''\
-from exercises.stage05.exercise01.solution import (
+from exercises.stage05.basic01.solution import (
     write_lines,
     read_lines,
     append_line,
@@ -89,12 +99,14 @@ from exercises.stage05.exercise01.solution import (
 
 
 def test_write_and_read_lines(tmp_path):
+    """write_lines/read_lines must each use `with open(...) as f:` -- writing "line\\n" per entry, reading via f.read().splitlines()."""
     path = str(tmp_path / "data.txt")
     write_lines(path, ["a", "b", "c"])
     assert read_lines(path) == ["a", "b", "c"]
 
 
 def test_append_line(tmp_path):
+    """append_line opens in "a" mode and writes line + "\\n" without truncating existing content."""
     path = str(tmp_path / "data.txt")
     write_lines(path, ["a"])
     append_line(path, "b")
@@ -102,564 +114,512 @@ def test_append_line(tmp_path):
 
 
 def test_count_lines(tmp_path):
+    """count_lines opens for reading and returns the number of lines."""
     path = str(tmp_path / "data.txt")
     write_lines(path, ["a", "b", "c", "d"])
     assert count_lines(path) == 4
 ''',
     },
     {
-        "name": "exercise02",
-        "title": "Exceptions and Hierarchies",
-        "summary": "try, except, finally, raise, Exception, exception hierarchies",
+        "name": "basic02",
+        "title": "Support Ticket Intake",
+        "summary": "try, except, finally, raise, Exception, re.search(), re.findall(), re.match(), re.sub()",
         "readme": (
+            "A support inbox's raw ticket text needs scanning and cleaning. "
             "Implement:\n\n"
-            "- `ValidationError(Exception)` -- an empty custom exception class "
-            "(`class ValidationError(Exception): pass`).\n"
-            "- `NegativeValueError(ValidationError)` -- another empty class, "
-            "this time subclassing `ValidationError` (not `Exception` "
-            "directly) -- a two-level hierarchy: `NegativeValueError` **is a** "
-            "`ValidationError` **is a** `Exception`.\n"
-            "- `validate_positive(n: int) -> int` -- return `n` if `n >= 0`, "
-            "else `raise NegativeValueError(f\"negative value: {n}\")`.\n"
-            "- `safe_parse_int(s: str)` -- `try: return int(s)` `except "
-            "ValueError: return None`.\n"
-            "- `divide_with_cleanup(a: float, b: float) -> float` -- "
-            "`try: return a / b` `except ZeroDivisionError: raise` (re-raise "
-            "unchanged) `finally:` increment the module-level `_attempts` "
-            "counter -- `finally` runs whether or not an exception occurred, "
+            "- `extract_ticket_ids(text: str) -> list[str]` -- "
+            "`re.findall(r\"TICKET-\\d+\", text)`.\n"
+            "- `contains_urgent_flag(text: str) -> bool` -- "
+            "`re.search(r\"\\bURGENT\\b\", text) is not None`.\n"
+            "- `clean_ticket_text(text: str) -> str` -- "
+            "`re.sub(r\"\\s+\", \" \", text).strip()` (collapse whitespace "
+            "runs to a single space).\n"
+            "- `looks_like_ticket_id(text: str) -> bool` -- "
+            "`re.match(r\"TICKET-\\d+$\", text) is not None` (`re.match` only "
+            "anchors at the **start**, and `$` anchors the **end**, so this "
+            "is `True` only if `text` is *entirely* a ticket id, unlike "
+            "`extract_ticket_ids` above which finds ids anywhere).\n"
+            "- `parse_priority(raw: str) -> int` -- "
+            "`try: return int(raw)` `except ValueError: raise "
+            "Exception(f\"invalid priority: {raw!r}\")` (catch the specific "
+            "error, then `raise` a plain `Exception` with a clearer "
+            "message).\n"
+            "- `parse_priority_with_default(raw: str, default: int = 0) -> int` "
+            "-- `try: return int(raw)` `except ValueError: return default` "
+            "`finally:` increment the module-level `_parse_attempts` "
+            "counter -- `finally` runs whether or not the `except` fired, "
             "which is exactly why it's the right place to count *every* "
-            "attempt, successful or not.\n"
-            "- `get_attempts() -> int` / `reset_attempts() -> None` -- read/"
-            "reset `_attempts`.\n\n"
-            "See the Study Reference presentation, Topic 5, for the theory."
-        ),
-        "stub": '''\
-class ValidationError(Exception):
-    pass
-
-
-class NegativeValueError(ValidationError):
-    pass
-
-
-def validate_positive(n: int) -> int:
-    """Return n if n >= 0, else raise NegativeValueError."""
-    raise NotImplementedError
-
-
-def safe_parse_int(s: str):
-    """int(s), or None if that raises ValueError."""
-    raise NotImplementedError
-
-
-_attempts = 0
-
-
-def divide_with_cleanup(a: float, b: float) -> float:
-    """a / b; re-raise ZeroDivisionError unchanged; always count the attempt in finally."""
-    raise NotImplementedError
-
-
-def get_attempts() -> int:
-    raise NotImplementedError
-
-
-def reset_attempts() -> None:
-    raise NotImplementedError
-''',
-        "reference": '''\
-class ValidationError(Exception):
-    pass
-
-
-class NegativeValueError(ValidationError):
-    pass
-
-
-def validate_positive(n: int) -> int:
-    if n < 0:
-        raise NegativeValueError(f"negative value: {n}")
-    return n
-
-
-def safe_parse_int(s: str):
-    try:
-        return int(s)
-    except ValueError:
-        return None
-
-
-_attempts = 0
-
-
-def divide_with_cleanup(a: float, b: float) -> float:
-    global _attempts
-    try:
-        return a / b
-    except ZeroDivisionError:
-        raise
-    finally:
-        _attempts += 1
-
-
-def get_attempts() -> int:
-    return _attempts
-
-
-def reset_attempts() -> None:
-    global _attempts
-    _attempts = 0
-''',
-        "test": '''\
-import pytest
-from exercises.stage05.exercise02.solution import (
-    ValidationError,
-    NegativeValueError,
-    validate_positive,
-    safe_parse_int,
-    divide_with_cleanup,
-    get_attempts,
-    reset_attempts,
-)
-
-
-def test_validate_positive_passthrough():
-    assert validate_positive(5) == 5
-
-
-def test_validate_positive_raises_negative_value_error():
-    with pytest.raises(NegativeValueError):
-        validate_positive(-1)
-
-
-def test_negative_value_error_is_a_validation_error():
-    assert issubclass(NegativeValueError, ValidationError)
-    assert issubclass(ValidationError, Exception)
-
-
-def test_safe_parse_int_valid():
-    assert safe_parse_int("42") == 42
-
-
-def test_safe_parse_int_invalid():
-    assert safe_parse_int("nope") is None
-
-
-def test_divide_with_cleanup_success():
-    reset_attempts()
-    assert divide_with_cleanup(10, 2) == 5.0
-    assert get_attempts() == 1
-
-
-def test_divide_with_cleanup_counts_failed_attempts_too():
-    reset_attempts()
-    with pytest.raises(ZeroDivisionError):
-        divide_with_cleanup(10, 0)
-    assert get_attempts() == 1
-''',
-    },
-    {
-        "name": "exercise03",
-        "title": "Exception Chaining",
-        "summary": "raise ... from ... x3",
-        "readme": (
-            "Implement three functions that catch a low-level exception and "
-            "re-raise a higher-level, more meaningful one **chained** to it "
-            "with `raise ... from ...`:\n\n"
-            "- `ConfigError(Exception)` / `ConfigParseError(ConfigError)` -- "
-            "`load_config_value(raw: str) -> int`: `try: return int(raw)` "
-            "`except ValueError as e: raise ConfigParseError(f\"bad config "
-            "value: {raw!r}\") from e`.\n"
-            "- `NetworkError(Exception)` / `RetryError(Exception)` -- "
-            "`fetch_with_retry_simulation(should_fail: bool) -> str`: if "
-            "`should_fail`, `raise NetworkError(\"connection refused\")`; catch "
-            "that and `raise RetryError(\"failed after retries\") from e`; if "
-            "`should_fail` is `False`, just `return \"ok\"`.\n"
-            "- `ScoreError(Exception)` -- `parse_score(raw: str) -> int`: parse "
-            "`raw` as `int`; on `ValueError as e`, `raise ScoreError(f\"invalid "
-            "score: {raw!r}\") from e`. Then if the parsed score isn't in "
-            "`0..100`, `raise ScoreError(f\"score out of range: {score}\") "
-            "from None` -- `from None` **explicitly suppresses** chaining "
-            "(there's no underlying exception to chain to here, just a "
-            "validation failure), which is the other legal form of this "
-            "syntax.\n\n"
-            "The chained exception is available afterward as "
-            "`exc.__cause__` -- that's what the tests check.\n\n"
-            "See the Study Reference presentation, Topic 5, for the theory."
-        ),
-        "stub": '''\
-class ConfigError(Exception):
-    pass
-
-
-class ConfigParseError(ConfigError):
-    pass
-
-
-def load_config_value(raw: str) -> int:
-    """int(raw); on ValueError, raise ConfigParseError(...) from e."""
-    raise NotImplementedError
-
-
-class NetworkError(Exception):
-    pass
-
-
-class RetryError(Exception):
-    pass
-
-
-def fetch_with_retry_simulation(should_fail: bool) -> str:
-    """"ok" normally; if should_fail, raise NetworkError, catch it, raise RetryError(...) from e."""
-    raise NotImplementedError
-
-
-class ScoreError(Exception):
-    pass
-
-
-def parse_score(raw: str) -> int:
-    """int(raw) (chain ValueError via `from e`); validate 0..100 (raise ... from None if not)."""
-    raise NotImplementedError
-''',
-        "reference": '''\
-class ConfigError(Exception):
-    pass
-
-
-class ConfigParseError(ConfigError):
-    pass
-
-
-def load_config_value(raw: str) -> int:
-    try:
-        return int(raw)
-    except ValueError as e:
-        raise ConfigParseError(f"bad config value: {raw!r}") from e
-
-
-class NetworkError(Exception):
-    pass
-
-
-class RetryError(Exception):
-    pass
-
-
-def fetch_with_retry_simulation(should_fail: bool) -> str:
-    try:
-        if should_fail:
-            raise NetworkError("connection refused")
-        return "ok"
-    except NetworkError as e:
-        raise RetryError("failed after retries") from e
-
-
-class ScoreError(Exception):
-    pass
-
-
-def parse_score(raw: str) -> int:
-    try:
-        score = int(raw)
-    except ValueError as e:
-        raise ScoreError(f"invalid score: {raw!r}") from e
-    if not (0 <= score <= 100):
-        raise ScoreError(f"score out of range: {score}") from None
-    return score
-''',
-        "test": '''\
-import pytest
-from exercises.stage05.exercise03.solution import (
-    ConfigError,
-    ConfigParseError,
-    load_config_value,
-    NetworkError,
-    RetryError,
-    fetch_with_retry_simulation,
-    ScoreError,
-    parse_score,
-)
-
-
-def test_load_config_value_valid():
-    assert load_config_value("42") == 42
-
-
-def test_load_config_value_chains_value_error():
-    with pytest.raises(ConfigParseError) as exc_info:
-        load_config_value("abc")
-    assert isinstance(exc_info.value.__cause__, ValueError)
-    assert isinstance(exc_info.value, ConfigError)
-
-
-def test_fetch_with_retry_simulation_success():
-    assert fetch_with_retry_simulation(False) == "ok"
-
-
-def test_fetch_with_retry_simulation_chains_network_error():
-    with pytest.raises(RetryError) as exc_info:
-        fetch_with_retry_simulation(True)
-    assert isinstance(exc_info.value.__cause__, NetworkError)
-
-
-def test_parse_score_valid():
-    assert parse_score("85") == 85
-
-
-def test_parse_score_chains_value_error():
-    with pytest.raises(ScoreError) as exc_info:
-        parse_score("abc")
-    assert isinstance(exc_info.value.__cause__, ValueError)
-
-
-def test_parse_score_out_of_range_suppresses_chaining():
-    with pytest.raises(ScoreError) as exc_info:
-        parse_score("150")
-    assert exc_info.value.__cause__ is None
-''',
-    },
-    {
-        "name": "exercise04",
-        "title": "Regex Basics",
-        "summary": "re.search(), re.findall(), re.match(), re.sub(), re.compile()",
-        "readme": (
-            "Implement:\n\n"
-            "- `contains_digit(text: str) -> bool` -- "
-            "`re.search(r\"\\d\", text) is not None`.\n"
-            "- `find_all_numbers(text: str) -> list[str]` -- "
-            "`re.findall(r\"\\d+\", text)`.\n"
-            "- `starts_with_word(text: str, word: str) -> bool` -- "
-            "`re.match(re.escape(word), text) is not None` (`re.match` only "
-            "anchors at the *start* of the string, unlike `re.search`).\n"
-            "- `normalize_whitespace(text: str) -> str` -- "
-            "`re.sub(r\"\\s+\", \" \", text).strip()` (collapse runs of "
-            "whitespace to a single space).\n"
-            "- `EMAIL_PATTERN` (module level) -- "
-            "`re.compile(r\"[\\w.+-]+@[\\w-]+\\.[\\w.-]+\")`, and "
-            "`extract_emails(text: str) -> list[str]` -- `EMAIL_PATTERN.findall(text)`. "
-            "Compiling once at module level (instead of calling `re.search`/`re.findall` "
-            "with a raw string every time) is the idiomatic move when a pattern is reused.\n\n"
-            "See the Study Reference presentation, Topic 5, for the theory."
+            "attempt.\n"
+            "- `get_parse_attempts() -> int` -- read `_parse_attempts`.\n\n"
+            "See the Study Reference presentation, Topic 5 (Basic tier), "
+            "for the theory."
         ),
         "stub": '''\
 import re
 
-EMAIL_PATTERN = re.compile(r"[\\w.+-]+@[\\w-]+\\.[\\w.-]+")
 
-
-def contains_digit(text: str) -> bool:
-    """re.search(r"\\d", text) is not None."""
+def extract_ticket_ids(text: str) -> list[str]:
+    """re.findall(r"TICKET-\\d+", text)."""
     raise NotImplementedError
 
 
-def find_all_numbers(text: str) -> list[str]:
-    """re.findall(r"\\d+", text)."""
+def contains_urgent_flag(text: str) -> bool:
+    """re.search(r"\\bURGENT\\b", text) is not None."""
     raise NotImplementedError
 
 
-def starts_with_word(text: str, word: str) -> bool:
-    """re.match(re.escape(word), text) is not None."""
-    raise NotImplementedError
-
-
-def normalize_whitespace(text: str) -> str:
+def clean_ticket_text(text: str) -> str:
     """re.sub(r"\\s+", " ", text).strip()."""
     raise NotImplementedError
 
 
-def extract_emails(text: str) -> list[str]:
-    """EMAIL_PATTERN.findall(text)."""
+def looks_like_ticket_id(text: str) -> bool:
+    """re.match(r"TICKET-\\d+$", text) is not None -- the WHOLE text must be one ticket id."""
+    raise NotImplementedError
+
+
+def parse_priority(raw: str) -> int:
+    """int(raw); on ValueError, raise a plain Exception with a clearer message."""
+    raise NotImplementedError
+
+
+_parse_attempts = 0
+
+
+def parse_priority_with_default(raw: str, default: int = 0) -> int:
+    """int(raw), or default on ValueError; always count the attempt in finally."""
+    raise NotImplementedError
+
+
+def get_parse_attempts() -> int:
+    """Return _parse_attempts."""
     raise NotImplementedError
 ''',
         "reference": '''\
 import re
 
-EMAIL_PATTERN = re.compile(r"[\\w.+-]+@[\\w-]+\\.[\\w.-]+")
+
+def extract_ticket_ids(text: str) -> list[str]:
+    return re.findall(r"TICKET-\\d+", text)
 
 
-def contains_digit(text: str) -> bool:
-    return re.search(r"\\d", text) is not None
+def contains_urgent_flag(text: str) -> bool:
+    return re.search(r"\\bURGENT\\b", text) is not None
 
 
-def find_all_numbers(text: str) -> list[str]:
-    return re.findall(r"\\d+", text)
-
-
-def starts_with_word(text: str, word: str) -> bool:
-    return re.match(re.escape(word), text) is not None
-
-
-def normalize_whitespace(text: str) -> str:
+def clean_ticket_text(text: str) -> str:
     return re.sub(r"\\s+", " ", text).strip()
 
 
-def extract_emails(text: str) -> list[str]:
-    return EMAIL_PATTERN.findall(text)
+def looks_like_ticket_id(text: str) -> bool:
+    return re.match(r"TICKET-\\d+$", text) is not None
+
+
+def parse_priority(raw: str) -> int:
+    try:
+        return int(raw)
+    except ValueError:
+        raise Exception(f"invalid priority: {raw!r}")
+
+
+_parse_attempts = 0
+
+
+def parse_priority_with_default(raw: str, default: int = 0) -> int:
+    global _parse_attempts
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+    finally:
+        _parse_attempts += 1
+
+
+def get_parse_attempts() -> int:
+    return _parse_attempts
 ''',
         "test": '''\
-from exercises.stage05.exercise04.solution import (
-    contains_digit,
-    find_all_numbers,
-    starts_with_word,
-    normalize_whitespace,
-    extract_emails,
+import pytest
+from exercises.stage05.basic02.solution import (
+    extract_ticket_ids,
+    contains_urgent_flag,
+    clean_ticket_text,
+    looks_like_ticket_id,
+    parse_priority,
+    parse_priority_with_default,
+    get_parse_attempts,
 )
 
-
-def test_contains_digit():
-    assert contains_digit("room 42") is True
-    assert contains_digit("no numbers here") is False
+TEXT = "TICKET-101 is URGENT, also TICKET-202 reported.  Please   check."
 
 
-def test_find_all_numbers():
-    assert find_all_numbers("a1 b22 c333") == ["1", "22", "333"]
+def test_extract_ticket_ids():
+    """extract_ticket_ids == re.findall(r"TICKET-\\d+", text)."""
+    assert extract_ticket_ids(TEXT) == ["TICKET-101", "TICKET-202"]
 
 
-def test_starts_with_word():
-    assert starts_with_word("hello world", "hello") is True
-    assert starts_with_word("say hello", "hello") is False
+def test_contains_urgent_flag():
+    """contains_urgent_flag uses re.search with a \\bURGENT\\b word-boundary pattern."""
+    assert contains_urgent_flag(TEXT) is True
+    assert contains_urgent_flag("nothing to see here") is False
 
 
-def test_normalize_whitespace():
-    assert normalize_whitespace("a   b\\t\\tc\\n\\nd") == "a b c d"
+def test_clean_ticket_text_collapses_whitespace():
+    """clean_ticket_text uses re.sub(r"\\s+", " ", text).strip()."""
+    assert clean_ticket_text(TEXT) == (
+        "TICKET-101 is URGENT, also TICKET-202 reported. Please check."
+    )
 
 
-def test_extract_emails():
-    text = "contact ada@example.com or grace@nav.mil for details"
-    assert extract_emails(text) == ["ada@example.com", "grace@nav.mil"]
+def test_looks_like_ticket_id_requires_whole_string_match():
+    """looks_like_ticket_id must anchor at both start (re.match) and end ($) -- only a bare ticket id matches."""
+    assert looks_like_ticket_id("TICKET-101") is True
+    assert looks_like_ticket_id("TICKET-101 is URGENT") is False
+
+
+def test_parse_priority_raises_plain_exception():
+    """parse_priority catches ValueError and re-raises as a plain Exception with a clearer message."""
+    assert parse_priority("5") == 5
+    with pytest.raises(Exception):
+        parse_priority("abc")
+
+
+def test_parse_priority_with_default_and_finally_counts_every_attempt():
+    """parse_priority_with_default falls back to default on ValueError, and finally must count BOTH the success and the failure."""
+    _ = get_parse_attempts()
+    parse_priority_with_default("abc", default=3)
+    after_failure = get_parse_attempts()
+    parse_priority_with_default("7", default=3)
+    after_success = get_parse_attempts()
+    assert after_success == after_failure + 1
+    assert parse_priority_with_default("abc", default=3) == 3
+    assert parse_priority_with_default("7", default=3) == 7
 ''',
     },
     {
-        "name": "exercise05",
-        "title": "Regex Named Groups",
-        "summary": "regex named groups x3",
+        "name": "mid01",
+        "title": "Order Validation Pipeline",
+        "summary": "exception hierarchies, exception chaining (raise ... from ...)",
         "readme": (
-            "Implement three parsers, each using `re` **named groups** "
-            "(`(?P<name>...)`) and returning `match.groupdict()`:\n\n"
-            "- `parse_log_line(line: str) -> dict` -- parse `\"LEVEL: message\"` "
-            "(e.g. `\"ERROR: disk full\"`) with "
-            "`re.match(r\"(?P<level>\\w+): (?P<message>.+)\", line)`. Raise "
-            "`ValueError` if it doesn't match.\n"
-            "- `parse_date(text: str) -> dict` -- find the first `YYYY-MM-DD` "
-            "date anywhere in `text` with `re.search(r\"(?P<year>\\d{4})-"
-            "(?P<month>\\d{2})-(?P<day>\\d{2})\", text)`. Raise `ValueError` "
-            "if none is found.\n"
-            "- `parse_key_value(text: str) -> dict` -- parse `\"key=value\"` "
-            "with `re.match(r\"(?P<key>\\w+)=(?P<value>.+)\", text)`. Raise "
-            "`ValueError` if it doesn't match.\n\n"
+            "Implement a small order-processing pipeline with a two-level "
+            "custom exception hierarchy:\n\n"
+            "```python\n"
+            "class OrderError(Exception): pass\n"
+            "class OrderValidationError(OrderError): pass  # bad input\n"
+            "class OrderProcessingError(OrderError): pass  # bad business state\n"
+            "```\n\n"
+            "Implement:\n\n"
+            "- `parse_order_quantity(raw: str) -> int` -- `try: qty = "
+            "int(raw)` `except ValueError as e: raise "
+            "OrderValidationError(f\"invalid quantity: {raw!r}\") from e` "
+            "(chained -- there's a real underlying `ValueError` to point "
+            "to). Then, separately, if `qty <= 0`: `raise "
+            "OrderValidationError(f\"quantity must be positive: {qty}\")` "
+            "(no `from` here -- this isn't wrapping another exception, it's "
+            "a fresh validation failure). Otherwise return `qty`.\n"
+            "- `apply_bulk_discount(quantity: int, discount_pct_raw: str) -> float` "
+            "-- `try: pct = float(discount_pct_raw)` `except ValueError as "
+            "e: raise OrderProcessingError(f\"invalid discount: "
+            "{discount_pct_raw!r}\") from e`. Then if `not (0 <= pct <= "
+            "100)`: `raise OrderProcessingError(f\"discount out of range: "
+            "{pct}\") from None` -- `from None` **explicitly suppresses** "
+            "chaining (there's no underlying exception here, just an "
+            "out-of-range value). Otherwise return "
+            "`quantity * (1 - pct / 100)`.\n"
+            "- `fulfill_order(quantity: int, stock: int) -> int` -- if "
+            "`quantity > stock`: `raise OrderProcessingError(f\"insufficient "
+            "stock: need {quantity}, have {stock}\")`; otherwise return "
+            "`stock - quantity`.\n\n"
+            "The chained exception is available afterward as "
+            "`exc.__cause__` (`None` when `from None` was used) -- that's "
+            "what the tests check, along with `OrderValidationError`/"
+            "`OrderProcessingError` both being `OrderError` subclasses.\n\n"
+            "See the Study Reference presentation, Topic 5 (Mid tier), for "
+            "the theory."
+        ),
+        "stub": '''\
+class OrderError(Exception):
+    pass
+
+
+class OrderValidationError(OrderError):
+    pass
+
+
+class OrderProcessingError(OrderError):
+    pass
+
+
+def parse_order_quantity(raw: str) -> int:
+    """int(raw) (chain ValueError via `from e`); then validate qty > 0 (raise directly, no chain)."""
+    raise NotImplementedError
+
+
+def apply_bulk_discount(quantity: int, discount_pct_raw: str) -> float:
+    """float(discount_pct_raw) (chain ValueError via `from e`); validate 0..100 (raise ... from None if not)."""
+    raise NotImplementedError
+
+
+def fulfill_order(quantity: int, stock: int) -> int:
+    """stock - quantity, or raise OrderProcessingError if quantity > stock."""
+    raise NotImplementedError
+''',
+        "reference": '''\
+class OrderError(Exception):
+    pass
+
+
+class OrderValidationError(OrderError):
+    pass
+
+
+class OrderProcessingError(OrderError):
+    pass
+
+
+def parse_order_quantity(raw: str) -> int:
+    try:
+        qty = int(raw)
+    except ValueError as e:
+        raise OrderValidationError(f"invalid quantity: {raw!r}") from e
+    if qty <= 0:
+        raise OrderValidationError(f"quantity must be positive: {qty}")
+    return qty
+
+
+def apply_bulk_discount(quantity: int, discount_pct_raw: str) -> float:
+    try:
+        pct = float(discount_pct_raw)
+    except ValueError as e:
+        raise OrderProcessingError(f"invalid discount: {discount_pct_raw!r}") from e
+    if not (0 <= pct <= 100):
+        raise OrderProcessingError(f"discount out of range: {pct}") from None
+    return quantity * (1 - pct / 100)
+
+
+def fulfill_order(quantity: int, stock: int) -> int:
+    if quantity > stock:
+        raise OrderProcessingError(f"insufficient stock: need {quantity}, have {stock}")
+    return stock - quantity
+''',
+        "test": '''\
+import pytest
+from exercises.stage05.mid01.solution import (
+    OrderError,
+    OrderValidationError,
+    OrderProcessingError,
+    parse_order_quantity,
+    apply_bulk_discount,
+    fulfill_order,
+)
+
+
+def test_hierarchy():
+    """OrderValidationError and OrderProcessingError must both be OrderError, which must be an Exception."""
+    assert issubclass(OrderValidationError, OrderError)
+    assert issubclass(OrderProcessingError, OrderError)
+    assert issubclass(OrderError, Exception)
+
+
+def test_parse_order_quantity_valid():
+    """parse_order_quantity("5") == 5."""
+    assert parse_order_quantity("5") == 5
+
+
+def test_parse_order_quantity_chains_value_error():
+    """A non-numeric quantity chains the underlying ValueError via `from e`."""
+    with pytest.raises(OrderValidationError) as exc_info:
+        parse_order_quantity("abc")
+    assert isinstance(exc_info.value.__cause__, ValueError)
+
+
+def test_parse_order_quantity_non_positive_does_not_chain():
+    """A non-positive quantity is a fresh validation failure -- no `from`, so __cause__ is None."""
+    with pytest.raises(OrderValidationError) as exc_info:
+        parse_order_quantity("-3")
+    assert exc_info.value.__cause__ is None
+
+
+def test_apply_bulk_discount_valid():
+    """apply_bulk_discount(10, "20") == 10 * (1 - 0.2)."""
+    assert apply_bulk_discount(10, "20") == pytest.approx(8.0)
+
+
+def test_apply_bulk_discount_chains_value_error():
+    """A non-numeric discount chains the underlying ValueError via `from e`."""
+    with pytest.raises(OrderProcessingError) as exc_info:
+        apply_bulk_discount(10, "abc")
+    assert isinstance(exc_info.value.__cause__, ValueError)
+
+
+def test_apply_bulk_discount_out_of_range_suppresses_chaining():
+    """An out-of-range discount uses `from None` -- __cause__ must be None."""
+    with pytest.raises(OrderProcessingError) as exc_info:
+        apply_bulk_discount(10, "150")
+    assert exc_info.value.__cause__ is None
+
+
+def test_fulfill_order():
+    """fulfill_order returns stock - quantity, or raises OrderProcessingError if quantity exceeds stock."""
+    assert fulfill_order(3, 10) == 7
+    with pytest.raises(OrderProcessingError):
+        fulfill_order(20, 10)
+''',
+    },
+    {
+        "name": "mid02",
+        "title": "Config and Log Parsers",
+        "summary": "re.compile(), regex named groups",
+        "readme": (
+            "Three module-level **compiled** patterns (`re.compile(...)`), "
+            "each with **named groups** (`(?P<name>...)`), each paired with "
+            "a parser that returns `match.groupdict()`:\n\n"
+            "```python\n"
+            'LINE_PATTERN = re.compile(r"(?P<key>\\w+)=(?P<value>.+)")\n'
+            'DATE_PATTERN = re.compile(r"(?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2})")\n'
+            'LOG_PATTERN = re.compile(r"(?P<level>\\w+): (?P<message>.+)")\n'
+            "```\n\n"
+            "Compiling once at module level (instead of calling "
+            "`re.match`/`re.search` with a raw pattern string every time) "
+            "is the idiomatic move for a pattern you'll reuse across many "
+            "calls.\n\n"
+            "Implement:\n\n"
+            "- `parse_config_line(line: str) -> dict` -- "
+            "`LINE_PATTERN.match(line)`; if it's `None`, `raise "
+            "ValueError(...)`; otherwise return `match.groupdict()` "
+            "(`{\"key\": ..., \"value\": ...}`).\n"
+            "- `find_date(text: str) -> dict` -- `DATE_PATTERN.search(text)` "
+            "(search anywhere in `text`, not just at the start); `raise "
+            "ValueError(...)` if none found; otherwise "
+            "`match.groupdict()` (`{\"year\": ..., \"month\": ..., "
+            "\"day\": ...}`).\n"
+            "- `parse_log_entry(line: str) -> dict` -- `LOG_PATTERN.match(line)`; "
+            "`raise ValueError(...)` if it doesn't match; otherwise "
+            "`match.groupdict()` (`{\"level\": ..., \"message\": ...}`).\n\n"
             "Named groups turn `match.group(1)`, `match.group(2)`, ... into "
             "self-documenting keys in `match.groupdict()` -- much easier to "
             "read (and to keep correct after editing the pattern) than "
             "counting parentheses.\n\n"
-            "See the Study Reference presentation, Topic 5, for the theory."
+            "See the Study Reference presentation, Topic 5 (Mid tier), for "
+            "the theory."
         ),
         "stub": '''\
 import re
 
+LINE_PATTERN = re.compile(r"(?P<key>\\w+)=(?P<value>.+)")
+DATE_PATTERN = re.compile(r"(?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2})")
+LOG_PATTERN = re.compile(r"(?P<level>\\w+): (?P<message>.+)")
 
-def parse_log_line(line: str) -> dict:
-    """{"level": ..., "message": ...} via re.match + named groups; ValueError if no match."""
+
+def parse_config_line(line: str) -> dict:
+    """LINE_PATTERN.match(line).groupdict(); ValueError if no match."""
     raise NotImplementedError
 
 
-def parse_date(text: str) -> dict:
-    """{"year": ..., "month": ..., "day": ...} via re.search + named groups; ValueError if none found."""
+def find_date(text: str) -> dict:
+    """DATE_PATTERN.search(text).groupdict(); ValueError if none found."""
     raise NotImplementedError
 
 
-def parse_key_value(text: str) -> dict:
-    """{"key": ..., "value": ...} via re.match + named groups; ValueError if no match."""
+def parse_log_entry(line: str) -> dict:
+    """LOG_PATTERN.match(line).groupdict(); ValueError if no match."""
     raise NotImplementedError
 ''',
         "reference": '''\
 import re
 
+LINE_PATTERN = re.compile(r"(?P<key>\\w+)=(?P<value>.+)")
+DATE_PATTERN = re.compile(r"(?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2})")
+LOG_PATTERN = re.compile(r"(?P<level>\\w+): (?P<message>.+)")
 
-def parse_log_line(line: str) -> dict:
-    match = re.match(r"(?P<level>\\w+): (?P<message>.+)", line)
+
+def parse_config_line(line: str) -> dict:
+    match = LINE_PATTERN.match(line)
     if match is None:
-        raise ValueError(f"unparseable log line: {line!r}")
+        raise ValueError(f"unparseable config line: {line!r}")
     return match.groupdict()
 
 
-def parse_date(text: str) -> dict:
-    match = re.search(r"(?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2})", text)
+def find_date(text: str) -> dict:
+    match = DATE_PATTERN.search(text)
     if match is None:
         raise ValueError(f"no date found in: {text!r}")
     return match.groupdict()
 
 
-def parse_key_value(text: str) -> dict:
-    match = re.match(r"(?P<key>\\w+)=(?P<value>.+)", text)
+def parse_log_entry(line: str) -> dict:
+    match = LOG_PATTERN.match(line)
     if match is None:
-        raise ValueError(f"unparseable key=value: {text!r}")
+        raise ValueError(f"unparseable log entry: {line!r}")
     return match.groupdict()
 ''',
         "test": '''\
 import pytest
-from exercises.stage05.exercise05.solution import parse_log_line, parse_date, parse_key_value
+from exercises.stage05.mid02.solution import parse_config_line, find_date, parse_log_entry
 
 
-def test_parse_log_line():
-    assert parse_log_line("ERROR: disk full") == {"level": "ERROR", "message": "disk full"}
+def test_parse_config_line_uses_compiled_pattern_and_named_groups():
+    """parse_config_line matches LINE_PATTERN (a compiled, named-group pattern) and returns groupdict()."""
+    assert parse_config_line("host=localhost") == {"key": "host", "value": "localhost"}
 
 
-def test_parse_log_line_invalid_raises():
+def test_parse_config_line_invalid_raises():
+    """No match against LINE_PATTERN must raise ValueError."""
     with pytest.raises(ValueError):
-        parse_log_line("not a log line")
+        parse_config_line("not-key-value")
 
 
-def test_parse_date():
-    result = parse_date("event happened on 2024-03-15 in the evening")
+def test_find_date_searches_anywhere_in_text():
+    """find_date uses DATE_PATTERN.search (not .match), so it finds a date anywhere in the text."""
+    result = find_date("event happened on 2024-03-15 in the evening")
     assert result == {"year": "2024", "month": "03", "day": "15"}
 
 
-def test_parse_date_none_found_raises():
+def test_find_date_none_found_raises():
+    """No date found must raise ValueError."""
     with pytest.raises(ValueError):
-        parse_date("no date here")
+        find_date("no date here")
 
 
-def test_parse_key_value():
-    assert parse_key_value("host=localhost") == {"key": "host", "value": "localhost"}
+def test_parse_log_entry_uses_compiled_pattern_and_named_groups():
+    """parse_log_entry matches LOG_PATTERN and returns its groupdict()."""
+    assert parse_log_entry("ERROR: disk full") == {"level": "ERROR", "message": "disk full"}
 
 
-def test_parse_key_value_invalid_raises():
+def test_parse_log_entry_invalid_raises():
+    """No match against LOG_PATTERN must raise ValueError."""
     with pytest.raises(ValueError):
-        parse_key_value("not-key-value")
+        parse_log_entry("not a log line")
 ''',
     },
     {
-        "name": "exercise06",
-        "title": "Context Managers",
-        "summary": "__enter__/__exit__ x3, @contextlib.contextmanager x3",
+        "name": "advanced01",
+        "title": "Class-Based Context Managers",
+        "summary": "__enter__/__exit__",
         "readme": (
-            "Implement three class-based context managers and three "
-            "generator-based ones:\n\n"
-            "- `Timer` -- `__enter__` records `self._start = time.time()` and "
-            "returns `self`; `__exit__` sets `self.elapsed = time.time() - "
-            "self._start` and returns `False` (never suppress).\n"
+            "Implement three class-based context managers:\n\n"
+            "- `Timer` -- `__enter__` records `self._start = time.time()` "
+            "and returns `self`; `__exit__` sets `self.elapsed = "
+            "time.time() - self._start` and returns `False` (never "
+            "suppress an exception).\n"
             "- `SuppressErrors` -- `__init__(self, exc_type)` stores it; "
-            "`__enter__` returns `None`; `__exit__(self, exc_type, exc_val, "
-            "exc_tb)` returns `True` (suppress) only if an exception occurred "
-            "**and** it's an instance of the stored type, else `False`.\n"
+            "`__enter__` returns `None`; `__exit__(self, exc_type, "
+            "exc_val, exc_tb)` returns `True` (suppress) only if an "
+            "exception occurred **and** it's a subclass of the stored "
+            "type, else `False` (let it propagate).\n"
             "- `FileLineCounter` -- `__init__(self, path)` stores it; "
             "`__enter__` opens the file and returns the file object; "
-            "`__exit__` closes it and returns `False`. This is what `with "
-            "open(...) as f:` does under the hood.\n\n"
-            "- `temporary_value(obj, attr, value)` (`@contextlib.contextmanager`) "
-            "-- save `getattr(obj, attr)`, `setattr(obj, attr, value)`, "
-            "`yield`, then in a `finally:` restore the original value -- even "
-            "if the with-block raised.\n"
-            "- `suppress_and_log(log: list, *exc_types)` -- `try: yield` "
-            "`except exc_types as e: log.append(str(e))` (swallows a matching "
-            "exception, recording it instead of propagating).\n"
-            "- `timing_block(results: list)` -- record `time.time()` before "
-            "`yield`; in a `finally:`, `results.append(time.time() - start)`.\n\n"
-            "See the Study Reference presentation, Topic 5, for the theory."
+            "`__exit__` closes it and returns `False`. This is roughly "
+            "what `with open(...) as f:` does under the hood.\n\n"
+            "A class-based context manager's `__exit__` receives "
+            "`(exc_type, exc_val, exc_tb)` describing any exception that "
+            "happened inside the `with` block (all `None` if nothing went "
+            "wrong) -- returning a truthy value from `__exit__` is what "
+            "swallows that exception instead of letting it propagate.\n\n"
+            "See the Study Reference presentation, Topic 5 (Advanced "
+            "tier), for the theory."
         ),
         "stub": '''\
-import contextlib
 import time
 
 
@@ -681,7 +641,7 @@ class SuppressErrors:
         raise NotImplementedError
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """True (suppress) if exc_type matches self.exc_type, else False."""
+        """True (suppress) if exc_type is a subclass of self.exc_type, else False."""
         raise NotImplementedError
 
 
@@ -696,27 +656,8 @@ class FileLineCounter:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Close the file; return False."""
         raise NotImplementedError
-
-
-@contextlib.contextmanager
-def temporary_value(obj, attr, value):
-    """Temporarily set obj.attr to value, restoring the original in a finally."""
-    raise NotImplementedError
-
-
-@contextlib.contextmanager
-def suppress_and_log(log: list, *exc_types):
-    """Swallow a matching exception, appending str(e) to log instead of propagating."""
-    raise NotImplementedError
-
-
-@contextlib.contextmanager
-def timing_block(results: list):
-    """Append the elapsed seconds of the with-block to results, via finally."""
-    raise NotImplementedError
 ''',
         "reference": '''\
-import contextlib
 import time
 
 
@@ -752,6 +693,95 @@ class FileLineCounter:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._f.close()
         return False
+''',
+        "test": '''\
+import pytest
+from exercises.stage05.advanced01.solution import Timer, SuppressErrors, FileLineCounter
+
+
+def test_timer_records_elapsed():
+    """Timer.__enter__ returns self and records _start; __exit__ sets .elapsed."""
+    with Timer() as t:
+        pass
+    assert hasattr(t, "elapsed")
+    assert t.elapsed >= 0
+
+
+def test_suppress_errors_suppresses_matching_type():
+    """SuppressErrors.__exit__ returns True for a matching exception type, so it must not propagate."""
+    with SuppressErrors(ValueError):
+        raise ValueError("boom")
+
+
+def test_suppress_errors_lets_other_types_propagate():
+    """SuppressErrors.__exit__ returns False for a non-matching type, so it must propagate."""
+    with pytest.raises(TypeError):
+        with SuppressErrors(ValueError):
+            raise TypeError("nope")
+
+
+def test_file_line_counter(tmp_path):
+    """FileLineCounter.__enter__ opens and returns the file object; __exit__ closes it."""
+    path = tmp_path / "data.txt"
+    path.write_text("a\\nb\\nc\\n")
+    with FileLineCounter(str(path)) as f:
+        lines = f.read().splitlines()
+    assert lines == ["a", "b", "c"]
+''',
+    },
+    {
+        "name": "advanced02",
+        "title": "Generator-Based Context Managers",
+        "summary": "@contextlib.contextmanager",
+        "readme": (
+            "Implement three `@contextlib.contextmanager`-decorated "
+            "generator functions -- the lighter-weight alternative to "
+            "writing a full `__enter__`/`__exit__` class:\n\n"
+            "- `temporary_value(obj, attr, value)` -- save "
+            "`getattr(obj, attr)`, `setattr(obj, attr, value)`, `yield`, "
+            "then in a `finally:` restore the original value -- even if "
+            "the `with`-block raised.\n"
+            "- `suppress_and_log(log: list, *exc_types)` -- `try: yield` "
+            "`except exc_types as e: log.append(str(e))` (swallows a "
+            "matching exception, recording it instead of letting it "
+            "propagate).\n"
+            "- `timing_block(results: list)` -- record `time.time()` "
+            "before `yield`; in a `finally:`, "
+            "`results.append(time.time() - start)`.\n\n"
+            "Everything before the `yield` runs as `__enter__`; everything "
+            "after (particularly inside a `finally:`) runs as `__exit__` "
+            "-- a `try`/`finally` wrapped around a single `yield` is how "
+            "`@contextlib.contextmanager` turns an ordinary generator "
+            "function into a context manager, without writing a class at "
+            "all.\n\n"
+            "See the Study Reference presentation, Topic 5 (Advanced "
+            "tier), for the theory."
+        ),
+        "stub": '''\
+import contextlib
+import time
+
+
+@contextlib.contextmanager
+def temporary_value(obj, attr, value):
+    """Temporarily set obj.attr to value, restoring the original in a finally."""
+    raise NotImplementedError
+
+
+@contextlib.contextmanager
+def suppress_and_log(log: list, *exc_types):
+    """Swallow a matching exception, appending str(e) to log instead of propagating."""
+    raise NotImplementedError
+
+
+@contextlib.contextmanager
+def timing_block(results: list):
+    """Append the elapsed seconds of the with-block to results, via finally."""
+    raise NotImplementedError
+''',
+        "reference": '''\
+import contextlib
+import time
 
 
 @contextlib.contextmanager
@@ -782,40 +812,7 @@ def timing_block(results: list):
 ''',
         "test": '''\
 import pytest
-from exercises.stage05.exercise06.solution import (
-    Timer,
-    SuppressErrors,
-    FileLineCounter,
-    temporary_value,
-    suppress_and_log,
-    timing_block,
-)
-
-
-def test_timer_records_elapsed():
-    with Timer() as t:
-        pass
-    assert hasattr(t, "elapsed")
-    assert t.elapsed >= 0
-
-
-def test_suppress_errors_suppresses_matching_type():
-    with SuppressErrors(ValueError):
-        raise ValueError("boom")
-
-
-def test_suppress_errors_lets_other_types_propagate():
-    with pytest.raises(TypeError):
-        with SuppressErrors(ValueError):
-            raise TypeError("nope")
-
-
-def test_file_line_counter(tmp_path):
-    path = tmp_path / "data.txt"
-    path.write_text("a\\nb\\nc\\n")
-    with FileLineCounter(str(path)) as f:
-        lines = f.read().splitlines()
-    assert lines == ["a", "b", "c"]
+from exercises.stage05.advanced02.solution import temporary_value, suppress_and_log, timing_block
 
 
 class _Config:
@@ -823,6 +820,7 @@ class _Config:
 
 
 def test_temporary_value_restores_after_block():
+    """temporary_value sets obj.attr for the duration of the with-block, then restores the original."""
     cfg = _Config()
     with temporary_value(cfg, "debug", True):
         assert cfg.debug is True
@@ -830,6 +828,7 @@ def test_temporary_value_restores_after_block():
 
 
 def test_temporary_value_restores_even_on_exception():
+    """The finally inside temporary_value must restore the original value even when the with-block raises."""
     # ValueError, not RuntimeError: NotImplementedError (what an unfinished
     # stub raises) is itself a RuntimeError subclass, so a RuntimeError here
     # would let pytest.raises(RuntimeError) accidentally match an
@@ -842,6 +841,7 @@ def test_temporary_value_restores_even_on_exception():
 
 
 def test_suppress_and_log():
+    """suppress_and_log catches a matching exception and records str(e) instead of propagating."""
     log = []
     with suppress_and_log(log, ValueError):
         raise ValueError("bad input")
@@ -849,6 +849,7 @@ def test_suppress_and_log():
 
 
 def test_timing_block():
+    """timing_block appends one elapsed-seconds entry via its finally block."""
     results = []
     with timing_block(results):
         pass
