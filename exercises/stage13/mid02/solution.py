@@ -1,13 +1,13 @@
 """
-Local API Endpoints -- Dependency Injection
+Local API Endpoints -- Dependency Injection and Automatic Docs
 Implement the function(s)/class(es) below.
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module -- the test suite in
-tests/test_stage13_exercise03.py imports directly from here. Need a helper
+tests/test_stage13_mid02.py imports directly from here. Need a helper
 function or class of your own? Add another .py file next to this one inside
-exercises/stage13/exercise03/ and import it as a submodule (e.g.
-`from exercises.stage13.exercise03 import helpers`) -- solution.py just has to
+exercises/stage13/mid02/ and import it as a submodule (e.g.
+`from exercises.stage13.mid02 import helpers`) -- solution.py just has to
 stay the entry point these tests import from.
 """
 
@@ -47,4 +47,14 @@ def status(db: dict = Depends(get_db)):
 @app.get("/protected")
 def protected(authorized: bool = Depends(verify_token)):
     """{"data": "secret data"} if authorized, else {"error": "unauthorized"}."""
+    raise NotImplementedError
+
+
+def get_openapi_schema(app) -> dict:
+    """app.openapi() -- the schema that powers the /docs page."""
+    raise NotImplementedError
+
+
+def has_docs_route(app) -> bool:
+    """"/docs" in [route.path for route in app.routes]."""
     raise NotImplementedError

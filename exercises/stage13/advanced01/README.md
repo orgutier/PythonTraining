@@ -8,4 +8,4 @@ Implement three routes as `async def` instead of plain `def`:
 
 None of these actually `await` anything here, so they'd behave identically as plain `def` routes -- the point of this exercise is just the syntax and where it matters: FastAPI runs an `async def` route directly on its event loop, while a plain `def` route is run in a background thread pool so it can't block everything else. `async def` only pays off once the body actually does `await` an async operation (a database call, another HTTP request, ...).
 
-See the Study Reference presentation, Topic 13, for the theory.
+See the Study Reference presentation, Topic 13 (Advanced tier), for the theory.

@@ -30,3 +30,11 @@ def protected(authorized: bool = Depends(verify_token)):
     if authorized:
         return {"data": "secret data"}
     return {"error": "unauthorized"}
+
+
+def get_openapi_schema(app) -> dict:
+    return app.openapi()
+
+
+def has_docs_route(app) -> bool:
+    return "/docs" in [route.path for route in app.routes]

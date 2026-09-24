@@ -8,4 +8,4 @@ Implement three `pydantic.BaseModel` request bodies and their routes:
 
 A `BaseModel` subclass is both documentation and validation: FastAPI parses the JSON body, checks every field against its type hint, and rejects the request (with a detailed error) before your function body even runs if something doesn't match -- there's no manual `if "name" not in data` checking to write.
 
-See the Study Reference presentation, Topic 13, for the theory.
+See the Study Reference presentation, Topic 13 (Mid tier), for the theory.
