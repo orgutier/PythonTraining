@@ -75,6 +75,7 @@ import sys
 
 
 def test_hello_world_variables_and_output(capsys):
+    """greeting == "Hello, World!"; author_name is a non-empty str; two print() lines match exactly (concatenation, no f-strings)."""
     sys.modules.pop("exercises.stage01.hello_world.solution", None)
     import exercises.stage01.hello_world.solution as solution
 
@@ -163,6 +164,7 @@ import exercises.stage01.basic01.solution as solution
 
 
 def test_casts_to_correct_types():
+    """distance_km/fuel_efficiency_l_per_100km/fuel_price_per_liter are float() casts; passengers is an int() cast (not a bool)."""
     assert isinstance(solution.distance_km, float)
     assert isinstance(solution.fuel_efficiency_l_per_100km, float)
     assert isinstance(solution.fuel_price_per_liter, float)
@@ -171,18 +173,22 @@ def test_casts_to_correct_types():
 
 
 def test_is_price_a_float_flag():
+    """is_price_a_float must be isinstance(fuel_price_per_liter, float) -- not just truthy, the exact isinstance() check."""
     assert solution.is_price_a_float is True
 
 
 def test_total_fuel_liters():
+    """total_fuel_liters == distance_km / 100 * fuel_efficiency_l_per_100km."""
     assert solution.total_fuel_liters == pytest.approx(50.49)
 
 
 def test_total_cost():
+    """total_cost == total_fuel_liters * fuel_price_per_liter."""
     assert solution.total_cost == pytest.approx(77.2497)
 
 
 def test_cost_per_passenger():
+    """cost_per_passenger == total_cost / passengers."""
     assert solution.cost_per_passenger == pytest.approx(25.7499)
 ''',
     },
@@ -251,21 +257,25 @@ import exercises.stage01.basic02.solution as solution
 
 
 def test_total_seconds_cast():
+    """total_seconds == int(total_seconds_text)."""
     assert solution.total_seconds == 9384
     assert isinstance(solution.total_seconds, int)
 
 
 def test_decomposition():
+    """hours/minutes/seconds chain // and % on total_seconds (3600, then 60)."""
     assert solution.hours == 2
     assert solution.minutes == 36
     assert solution.seconds == 24
 
 
 def test_decomposition_reconstructs_total():
+    """hours*3600 + minutes*60 + seconds must reconstruct total_seconds exactly."""
     assert solution.hours * 3600 + solution.minutes * 60 + solution.seconds == 9384
 
 
 def test_is_daylight_saving_avoids_bool_string_trap():
+    """is_daylight_saving must be (text == "True"), NOT bool(text) -- bool("False") is True, that's the trap."""
     assert solution.is_daylight_saving is False
 ''',
     },
@@ -351,28 +361,34 @@ import exercises.stage01.mid01.solution as solution
 
 
 def test_casts_to_correct_types():
+    """price_a/price_b are float() casts, quantity is an int() cast."""
     assert isinstance(solution.price_a, float)
     assert isinstance(solution.price_b, float)
     assert isinstance(solution.quantity, int)
 
 
 def test_walrus_computed_savings_is_exposed_as_module_variable():
+    """The walrus assignment inside savings_message's f-string must expose `savings` as its own module-level name too."""
     assert solution.savings == pytest.approx(3.98)
 
 
 def test_savings_message_contains_the_formatted_value():
+    """savings_message is an f-string containing the walrus-computed, :.2f-formatted savings value."""
     assert "3.98" in solution.savings_message
 
 
 def test_both_under_20_chained_comparison():
+    """both_under_20 must be a single chained comparison (0 <= price < 20) for each price, joined with `and`."""
     assert solution.both_under_20 is True
 
 
 def test_total_cost_via_augmented_assignment():
+    """total_cost starts at 0.0 and is built up with two `+=` statements, not a single expression."""
     assert solution.total_cost == pytest.approx(155.94)
 
 
 def test_weighted_score_respects_operator_precedence():
+    """weighted_score == 2 + 3 * price_a ** 2, written exactly in that form (no extra parentheses)."""
     assert solution.weighted_score == pytest.approx(1200.8003)
 ''',
     },
@@ -462,37 +478,45 @@ import exercises.stage01.mid02.solution as solution
 
 
 def test_casts_to_correct_types():
+    """race_distance_km is a float() cast; elapsed_minutes/target_minutes are int() casts."""
     assert isinstance(solution.race_distance_km, float)
     assert isinstance(solution.elapsed_minutes, int)
     assert isinstance(solution.target_minutes, int)
 
 
 def test_pace_min_per_km():
+    """pace_min_per_km == elapsed_minutes / race_distance_km."""
     assert solution.pace_min_per_km == pytest.approx(6.04337)
 
 
 def test_walrus_computed_minutes_over_is_exposed_as_module_variable():
+    """The walrus assignment inside pace_report's f-string must expose `minutes_over` as its own module-level name too."""
     assert solution.minutes_over == 15
 
 
 def test_pace_report_contains_minutes_over_and_formatted_pace():
+    """pace_report is an f-string containing both the walrus-computed minutes_over and the :.2f-formatted pace."""
     assert "15" in solution.pace_report
     assert "6.04" in solution.pace_report
 
 
 def test_minutes_over_per_km_reuses_walrus_value():
+    """minutes_over_per_km == minutes_over / race_distance_km -- reusing the walrus value, not recomputing elapsed_minutes - target_minutes."""
     assert solution.minutes_over_per_km == pytest.approx(0.35549, abs=1e-4)
 
 
 def test_on_pace_chained_comparison():
+    """on_pace must be one chained comparison: 0 < pace_min_per_km <= 6.5."""
     assert solution.on_pace is True
 
 
 def test_total_penalty_seconds_via_augmented_assignment():
+    """total_penalty_seconds starts at 0 and is built up with two `+=` statements (a flat 30, then minutes_over * 2)."""
     assert solution.total_penalty_seconds == 60
 
 
 def test_fatigue_index_respects_operator_precedence():
+    """fatigue_index == 2 + 3 * pace_min_per_km ** 2, written exactly in that form (no extra parentheses)."""
     assert solution.fatigue_index == pytest.approx(111.56697)
 ''',
     },
@@ -577,24 +601,29 @@ import exercises.stage01.advanced01.solution as solution
 
 
 def test_casts_and_float_total():
+    """price_each_float is a float() cast, quantity is an int() cast; float_total is plain float arithmetic."""
     assert isinstance(solution.price_each_float, float)
     assert isinstance(solution.quantity, int)
     assert solution.float_total == solution.price_each_float * 7
 
 
 def test_exact_total_is_precise_decimal():
+    """exact_total must be Decimal(price_each_text) * Decimal(quantity_text) -- built from the STRINGS, not the float."""
     assert solution.exact_total == Decimal("139.93")
 
 
 def test_totals_are_not_exactly_equal_due_to_float_drift():
+    """totals_are_exactly_equal == (float(exact_total) == float_total) -- this is False; that's the whole point."""
     assert solution.totals_are_exactly_equal is False
 
 
 def test_totals_are_close():
+    """totals_are_close == math.isclose(float(exact_total), float_total) -- the correct way to compare these."""
     assert solution.totals_are_close is True
 
 
 def test_point_one_plus_point_two_textbook_case():
+    """The classic case: 0.1 + 0.2 != 0.3 exactly, but math.isclose() says they're close."""
     assert solution.is_exactly_point_three is False
     assert solution.is_close_to_point_three is True
     assert math.isclose(solution.point_one_plus_point_two, 0.3)
@@ -692,24 +721,29 @@ import exercises.stage01.advanced02.solution as solution
 
 
 def test_huge_power_has_arbitrary_precision():
+    """huge_power == base ** exponent, with no overflow; huge_power_digit_count == len(str(huge_power))."""
     assert solution.huge_power == 97 ** 42
     assert solution.huge_power_digit_count > 19  # bigger than any 64-bit int could hold
 
 
 def test_small_int_caching():
+    """small_ints_share_identity == (small_int_a is small_int_b) -- both literal 100s; CPython caches -5..256."""
     assert solution.small_ints_share_identity is True
 
 
 def test_large_ints_not_guaranteed_cached():
+    """large_int_from_conversion must be int("1000000") at RUNTIME, not a second literal -- large ints aren't guaranteed cached."""
     assert solution.large_int_from_literal == solution.large_int_from_conversion
     assert solution.large_ints_share_identity is False
 
 
 def test_string_literal_interning():
+    """string_literals_share_identity == (string_literal_a is string_literal_b) -- both literal "python_stage01"; simple literals are interned."""
     assert solution.string_literals_share_identity is True
 
 
 def test_runtime_built_string_not_interned():
+    """string_built_at_runtime must be "".join([...]) built dynamically -- equal to string_literal_a by value, but not the same object."""
     assert solution.string_literal_a == solution.string_built_at_runtime
     assert solution.runtime_string_shares_identity is False
 ''',

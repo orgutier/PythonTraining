@@ -70,6 +70,8 @@ PythonTraining/
 ├── conftest.py            Makes `from exercises.stageNN.<name>.solution
 │                          import ...` work from pytest (plain implicit
 │                          namespace packages, no __init__.py anywhere).
+│                          Also attaches a "requirement" section to every
+│                          failure/error -- see "Reading a failure" below.
 ├── requirements.txt
 └── generate.py            Re-generates exercises/, reference_solutions/,
                            and tests/ from scratch if you ever need to reset
@@ -153,6 +155,48 @@ Pick a stage from the dropdown, click "Run Tests", read the colored
 pass/fail output. No command-line knowledge required. The GUI's dropdown
 is stages-only -- run challenge tests from the CLI (`test challengeNN`) or
 let a `test --all` pick them up.
+
+### Reading a failure: what's actually missing
+
+Every failure or error -- whether it's a normal assertion failure, or a
+script-style exercise's whole module failing to *import* because of its
+`raise NotImplementedError` (see "Stage 1's tier-named exercise
+convention" above) -- gets a **"requirement" section** appended right
+below it, care of `conftest.py`:
+
+```
+FAILED tests/test_stage01_basic01.py::test_total_cost
+
+    def test_total_cost():
+        """total_cost == total_fuel_liters * fuel_price_per_liter."""
+>       assert solution.total_cost == pytest.approx(77.2497)
+E       assert 1528.47 == 77.2497 ± 7.7e-05
+
+--------------------------------- requirement ----------------------------------
+Checks: total_cost == total_fuel_liters * fuel_price_per_liter.
+Full requirement: exercises/stage01/basic01/README.md (exists)
+```
+
+Two independent things happen here, and neither needs any per-exercise
+setup:
+
+- **`Checks: ...`** -- shown whenever the specific test function that
+  failed has a docstring. Every one of Stage 1's new tier-named exercises
+  has one, naming exactly which line of the README that one test is
+  grading (see generator/stage01.py). Older exercise/challenge/exam
+  tests mostly don't have these yet -- add one as you touch a test and
+  it starts showing up immediately, no other wiring required.
+- **`Full requirement: .../README.md`** -- shown on every failure,
+  unconditionally, by parsing the *test file's own name* (`conftest.py`'s
+  `_readme_path_for()`): `test_stageNN_<name>.py` points at
+  `exercises/stageNN/<name>/README.md`, `test_challengeNN.py` at
+  `challenges/challengeNN/README.md`, `test_examNN.py` at
+  `exams/examNN/README.md`. This always works, even for a test with no
+  docstring, and even for a whole file that never got far enough to run
+  a single test (a script-style exercise's import-time
+  `NotImplementedError` is a pytest *collection* error, not a per-test
+  failure -- `conftest.py` hooks both `pytest_runtest_makereport` and
+  `pytest_collectreport` so this shows up either way).
 
 ## Git hook integration
 

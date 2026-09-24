@@ -7,6 +7,7 @@ import sys
 
 
 def test_hello_world_variables_and_output(capsys):
+    """greeting == "Hello, World!"; author_name is a non-empty str; two print() lines match exactly (concatenation, no f-strings)."""
     sys.modules.pop("exercises.stage01.hello_world.solution", None)
     import exercises.stage01.hello_world.solution as solution
 

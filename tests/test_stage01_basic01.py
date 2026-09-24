@@ -9,6 +9,7 @@ import exercises.stage01.basic01.solution as solution
 
 
 def test_casts_to_correct_types():
+    """distance_km/fuel_efficiency_l_per_100km/fuel_price_per_liter are float() casts; passengers is an int() cast (not a bool)."""
     assert isinstance(solution.distance_km, float)
     assert isinstance(solution.fuel_efficiency_l_per_100km, float)
     assert isinstance(solution.fuel_price_per_liter, float)
@@ -17,16 +18,20 @@ def test_casts_to_correct_types():
 
 
 def test_is_price_a_float_flag():
+    """is_price_a_float must be isinstance(fuel_price_per_liter, float) -- not just truthy, the exact isinstance() check."""
     assert solution.is_price_a_float is True
 
 
 def test_total_fuel_liters():
+    """total_fuel_liters == distance_km / 100 * fuel_efficiency_l_per_100km."""
     assert solution.total_fuel_liters == pytest.approx(50.49)
 
 
 def test_total_cost():
+    """total_cost == total_fuel_liters * fuel_price_per_liter."""
     assert solution.total_cost == pytest.approx(77.2497)
 
 
 def test_cost_per_passenger():
+    """cost_per_passenger == total_cost / passengers."""
     assert solution.cost_per_passenger == pytest.approx(25.7499)

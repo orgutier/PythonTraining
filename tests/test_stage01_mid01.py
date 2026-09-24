@@ -9,26 +9,32 @@ import exercises.stage01.mid01.solution as solution
 
 
 def test_casts_to_correct_types():
+    """price_a/price_b are float() casts, quantity is an int() cast."""
     assert isinstance(solution.price_a, float)
     assert isinstance(solution.price_b, float)
     assert isinstance(solution.quantity, int)
 
 
 def test_walrus_computed_savings_is_exposed_as_module_variable():
+    """The walrus assignment inside savings_message's f-string must expose `savings` as its own module-level name too."""
     assert solution.savings == pytest.approx(3.98)
 
 
 def test_savings_message_contains_the_formatted_value():
+    """savings_message is an f-string containing the walrus-computed, :.2f-formatted savings value."""
     assert "3.98" in solution.savings_message
 
 
 def test_both_under_20_chained_comparison():
+    """both_under_20 must be a single chained comparison (0 <= price < 20) for each price, joined with `and`."""
     assert solution.both_under_20 is True
 
 
 def test_total_cost_via_augmented_assignment():
+    """total_cost starts at 0.0 and is built up with two `+=` statements, not a single expression."""
     assert solution.total_cost == pytest.approx(155.94)
 
 
 def test_weighted_score_respects_operator_precedence():
+    """weighted_score == 2 + 3 * price_a ** 2, written exactly in that form (no extra parentheses)."""
     assert solution.weighted_score == pytest.approx(1200.8003)
