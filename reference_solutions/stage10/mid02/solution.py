@@ -13,9 +13,9 @@ def total_sales_by_region(df: pd.DataFrame) -> pd.Series:
     return df.groupby("region")["sales"].sum()
 
 
-def avg_sales_by_region_and_product(df: pd.DataFrame) -> pd.Series:
-    return df.groupby(["region", "product"])["sales"].mean()
+def merge_customer_info(orders_df: pd.DataFrame, customers_df: pd.DataFrame) -> pd.DataFrame:
+    return orders_df.merge(customers_df, on="customer_id")
 
 
-def orders_per_region_sorted(df: pd.DataFrame) -> pd.Series:
-    return df.groupby("region").size().sort_values(ascending=False)
+def inner_join_products(orders_df: pd.DataFrame, products_df: pd.DataFrame) -> pd.DataFrame:
+    return orders_df.merge(products_df, on="product_id", how="inner")

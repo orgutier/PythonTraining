@@ -1,4 +1,3 @@
-import io
 import pandas as pd
 
 
@@ -12,9 +11,3 @@ def preview_rows(df: pd.DataFrame, n: int) -> pd.DataFrame:
 
 def summarize(df: pd.DataFrame) -> pd.DataFrame:
     return df.describe()
-
-
-def capture_info(df: pd.DataFrame) -> str:
-    buf = io.StringIO()
-    df.info(buf=buf)
-    return buf.getvalue()

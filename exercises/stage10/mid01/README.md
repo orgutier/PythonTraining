@@ -8,4 +8,4 @@ Implement three filters on a sales DataFrame (columns `region`, `product`, `sale
 
 `df[boolean_series]` -- indexing a DataFrame with a same-length `Series` of `True`/`False` -- keeps only the rows where it's `True`. This is **boolean indexing**, the pandas equivalent of a list comprehension's `if` filter.
 
-See the Study Reference presentation, Topic 10, for the theory.
+See the Study Reference presentation, Topic 10 (Mid tier), for the theory.

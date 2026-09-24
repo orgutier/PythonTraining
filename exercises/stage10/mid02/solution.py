@@ -1,13 +1,13 @@
 """
-Pandas -- Sorting and Grouping
+Pandas -- Sorting, Grouping, and Merging
 Implement the function(s)/class(es) below.
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module -- the test suite in
-tests/test_stage10_exercise03.py imports directly from here. Need a helper
+tests/test_stage10_mid02.py imports directly from here. Need a helper
 function or class of your own? Add another .py file next to this one inside
-exercises/stage10/exercise03/ and import it as a submodule (e.g.
-`from exercises.stage10.exercise03 import helpers`) -- solution.py just has to
+exercises/stage10/mid02/ and import it as a submodule (e.g.
+`from exercises.stage10.mid02 import helpers`) -- solution.py just has to
 stay the entry point these tests import from.
 """
 
@@ -30,11 +30,11 @@ def total_sales_by_region(df: pd.DataFrame) -> pd.Series:
     raise NotImplementedError
 
 
-def avg_sales_by_region_and_product(df: pd.DataFrame) -> pd.Series:
-    """df.groupby(["region", "product"])["sales"].mean() -- a MultiIndex result."""
+def merge_customer_info(orders_df: pd.DataFrame, customers_df: pd.DataFrame) -> pd.DataFrame:
+    """orders_df.merge(customers_df, on="customer_id")."""
     raise NotImplementedError
 
 
-def orders_per_region_sorted(df: pd.DataFrame) -> pd.Series:
-    """df.groupby("region").size().sort_values(ascending=False)."""
+def inner_join_products(orders_df: pd.DataFrame, products_df: pd.DataFrame) -> pd.DataFrame:
+    """orders_df.merge(products_df, on="product_id", how="inner")."""
     raise NotImplementedError
