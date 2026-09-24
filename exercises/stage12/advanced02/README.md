@@ -8,4 +8,4 @@ Implement three functions using `concurrent.futures.ThreadPoolExecutor` -- a hig
 
 `executor.map` is the thread-pool equivalent of the builtin `map()` -- same call-once-per-item, results-in-order contract, just spread across worker threads instead of running serially.
 
-See the Study Reference presentation, Topic 12, for the theory.
+See the Study Reference presentation, Topic 12 (Advanced tier), for the theory.

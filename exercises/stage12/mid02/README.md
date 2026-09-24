@@ -1,4 +1,4 @@
-# Locks and Race Conditions
+# Locks Guarding Shared State
 
 Implement three things protected by a `threading.Lock`:
 
@@ -7,4 +7,4 @@ Implement three things protected by a `threading.Lock`:
 - `transfer_funds(accounts: dict, lock: threading.Lock, from_key, to_key, amount) -> None` -- `with lock: accounts[from_key] -= amount; accounts[to_key] += amount` -- the classic bank-transfer example: without the lock, a concurrent transfer could interleave between the two lines and leave the books unbalanced.
 - `parallel_increment(counter, times: int, num_threads: int) -> None` -- split `times` calls to `counter.increment()` evenly across `num_threads` threads, start them all, then join them all. Used by the tests to prove `SafeCounter` ends up with the *exact* right total even under real concurrency.
 
-See the Study Reference presentation, Topic 12, for the theory.
+See the Study Reference presentation, Topic 12 (Mid tier), for the theory.

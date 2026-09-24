@@ -11,9 +11,3 @@ def fetch_status_code(url: str) -> int:
 
 def post_data(url: str, payload: dict) -> dict:
     return requests.post(url, json=payload).json()
-
-
-def fetch_with_raise(url: str) -> dict:
-    r = requests.get(url)
-    r.raise_for_status()
-    return r.json()
