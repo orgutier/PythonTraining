@@ -7,6 +7,10 @@ class Employee:
         self.salary = salary
         Employee.employee_count += 1
 
+    @property
+    def annual_bonus(self) -> float:
+        return round(self.salary * 0.1, 2)
+
     @classmethod
     def get_employee_count(cls) -> int:
         return cls.employee_count

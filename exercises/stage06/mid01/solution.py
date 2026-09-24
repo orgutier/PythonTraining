@@ -1,13 +1,13 @@
 """
-OOP I -- Slots and Memory
+OOP I -- Slotted Geometry
 Implement the function(s)/class(es) below.
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module -- the test suite in
-tests/test_stage06_exercise04.py imports directly from here. Need a helper
+tests/test_stage06_mid01.py imports directly from here. Need a helper
 function or class of your own? Add another .py file next to this one inside
-exercises/stage06/exercise04/ and import it as a submodule (e.g.
-`from exercises.stage06.exercise04 import helpers`) -- solution.py just has to
+exercises/stage06/mid01/ and import it as a submodule (e.g.
+`from exercises.stage06.mid01 import helpers`) -- solution.py just has to
 stay the entry point these tests import from.
 """
 
@@ -27,15 +27,4 @@ class Vector3DSlots:
 
     def magnitude(self) -> float:
         """(x**2 + y**2 + z**2) ** 0.5."""
-        raise NotImplementedError
-
-
-class TemperatureSlots:
-    __slots__ = ("celsius",)
-
-    def __init__(self, celsius):
-        raise NotImplementedError
-
-    def fahrenheit(self) -> float:
-        """celsius * 9 / 5 + 32."""
         raise NotImplementedError
