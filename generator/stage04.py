@@ -1,639 +1,747 @@
 """
 Stage 4 -- Data Structures.
 
-Coverage plan (each item exercised by the trainee's own code >=3 times):
-  keywords: list, tuple, dict, set, append(), sort()/sorted(), len(),
-            zip(), enumerate(), list comprehension, dict comprehension
-  dunders:  __hash__, __eq__
-  modules:  collections, dataclasses
-  methods:  collections.defaultdict(), collections.Counter(),
-            collections.deque(), dataclasses.dataclass
-  concepts: hashability, namedtuple / dataclass records,
-            set operations (union/intersection/difference)
+Rolled onto the tier-named exercise convention: a minimum of two exercises
+per Basic/Mid/Advanced tier. All exercises here are function-based -- this
+stage is about manipulating data with functions, so wrapping the work in
+`def`s (and a couple of small classes for the dataclass/hashability
+material) is exactly the point.
+
+Coverage plan (every item below is exercised by the trainee's own code,
+generally 2+ times across these 6 exercises):
+
+  Basic:    list, tuple, dict, set, append(), sort()/sorted(), len(), zip(),
+            enumerate(), list comprehension, dict comprehension
+  Mid:      dataclasses.dataclass, __eq__, collections module, dataclasses
+            module, namedtuple/dataclass records, set operations
+            (union/intersection/difference)
+  Advanced: collections.defaultdict(), collections.Counter(),
+            collections.deque(), __hash__, hashability
 """
 
 STAGE = "stage04"
 TOPIC = "Data Structures"
 OVERVIEW = (
-    "Six exercises covering every builtin container, comprehension style, "
-    "and collections/dataclasses tool from Topic 4 at least three times "
-    "each, finishing with hand-written __eq__/__hash__ so hashability stops "
-    "being an abstract warning and becomes something you had to get right."
+    "Six exercises, two per tier. Every one is a small, realistic scenario "
+    "combining several of that tier's specific tools at once -- from "
+    "building a race-results ledger with tuples/zip/sort, through "
+    "dataclass/namedtuple equality and set algebra, to the deque/defaultdict/"
+    "Counter toolbox and, finally, exactly why __hash__ matters."
 )
 
 EXERCISES = [
     {
-        "name": "exercise01",
-        "title": "List and Tuple Basics",
+        "name": "basic01",
+        "title": "Race Results Ledger",
         "summary": "list, tuple, append(), sort()/sorted(), zip(), enumerate(), len()",
         "readme": (
+            "A local 5K's raw results arrive as two parallel lists. Given, "
+            "don't modify:\n\n"
+            "```python\n"
+            'raw_names = ["Ava", "Ben", "Cy", "Dee", "Emi"]\n'
+            "raw_times = [54.2, 49.8, 61.0, 49.8, 57.3]  # seconds\n"
+            "```\n\n"
             "Implement:\n\n"
-            "- `build_shopping_list(items: list[str]) -> list[str]` -- start "
-            "with `[]` and `.append()` each item from `items` onto it in a "
-            "`for` loop (don't just return `items`/`list(items)`).\n"
-            "- `unique_sorted(numbers: list[int]) -> list[int]` -- "
-            "`sorted(set(numbers))`.\n"
-            "- `sort_in_place(items: list) -> None` -- `items.sort()` (the "
-            "**method**, which mutates in place and returns `None` -- different "
-            "from the `sorted()` builtin used above, which returns a new list).\n"
-            "- `as_tuple_pairs(names: list[str], ages: list[int]) -> list[tuple]` "
-            "-- `list(zip(names, ages))`.\n"
-            "- `zip_and_sum(list1: list[int], list2: list[int]) -> list[int]` -- "
-            "`[a + b for a, b in zip(list1, list2)]`.\n"
-            "- `label_each(items: list[str]) -> list[str]` -- "
-            "`[f\"{i}:{v}\" for i, v in enumerate(items)]`.\n"
-            "- `count_items(items: list) -> int` -- `len(items)`.\n\n"
-            "See the Study Reference presentation, Topic 4, for the theory."
+            "- `build_results(names: list[str], times: list[float]) -> list[tuple]` "
+            "-- start with `results = []`, then use a `for` loop over "
+            "`zip(names, times)` that `.append()`s each `(name, time)` "
+            "**tuple** onto `results` one at a time (don't just return "
+            "`list(zip(...))` directly -- the point here is the explicit "
+            "loop + `.append()`, not the shortcut).\n"
+            "- `rank_by_time(results: list[tuple]) -> list[tuple]` -- "
+            "`sorted(results, key=lambda r: r[1])` (fastest time first; "
+            "`sorted()` returns a **new** list, it never touches `results`).\n"
+            "- `fastest_n(ranked_results: list[tuple], n: int) -> list[tuple]` "
+            "-- `ranked_results[:n]`.\n"
+            "- `podium_labels(fastest: list[tuple]) -> list[str]` -- "
+            '`[f"{i+1}. {name} ({time}s)" for i, (name, time) in '
+            "enumerate(fastest)]` (a list comprehension over "
+            "`enumerate()`, unpacking each tuple as it goes).\n"
+            "- `racer_count(names: list[str]) -> int` -- `len(names)`.\n\n"
+            "See the Study Reference presentation, Topic 4 (Basic tier), "
+            "for the theory."
         ),
         "stub": '''\
-def build_shopping_list(items: list[str]) -> list[str]:
-    """Build a new list by .append()-ing each item in a loop."""
+def build_results(names: list[str], times: list[float]) -> list[tuple]:
+    """[] then a for-loop over zip(names, times) .append()-ing each (name, time) tuple."""
     raise NotImplementedError
 
 
-def unique_sorted(numbers: list[int]) -> list[int]:
-    """sorted(set(numbers))."""
+def rank_by_time(results: list[tuple]) -> list[tuple]:
+    """sorted(results, key=lambda r: r[1]) -- fastest first, returns a NEW list."""
     raise NotImplementedError
 
 
-def sort_in_place(items: list) -> None:
-    """items.sort() -- mutate in place, return None."""
+def fastest_n(ranked_results: list[tuple], n: int) -> list[tuple]:
+    """ranked_results[:n]."""
     raise NotImplementedError
 
 
-def as_tuple_pairs(names: list[str], ages: list[int]) -> list[tuple]:
-    """list(zip(names, ages))."""
+def podium_labels(fastest: list[tuple]) -> list[str]:
+    """[f"{i+1}. {name} ({time}s)" for i, (name, time) in enumerate(fastest)]."""
     raise NotImplementedError
 
 
-def zip_and_sum(list1: list[int], list2: list[int]) -> list[int]:
-    """[a + b for a, b in zip(list1, list2)]."""
-    raise NotImplementedError
-
-
-def label_each(items: list[str]) -> list[str]:
-    """[f"{i}:{v}" for i, v in enumerate(items)]."""
-    raise NotImplementedError
-
-
-def count_items(items: list) -> int:
-    """len(items)."""
+def racer_count(names: list[str]) -> int:
+    """len(names)."""
     raise NotImplementedError
 ''',
         "reference": '''\
-def build_shopping_list(items: list[str]) -> list[str]:
-    result = []
-    for item in items:
-        result.append(item)
-    return result
+def build_results(names: list[str], times: list[float]) -> list[tuple]:
+    results = []
+    for name, time in zip(names, times):
+        results.append((name, time))
+    return results
 
 
-def unique_sorted(numbers: list[int]) -> list[int]:
-    return sorted(set(numbers))
+def rank_by_time(results: list[tuple]) -> list[tuple]:
+    return sorted(results, key=lambda r: r[1])
 
 
-def sort_in_place(items: list) -> None:
-    items.sort()
+def fastest_n(ranked_results: list[tuple], n: int) -> list[tuple]:
+    return ranked_results[:n]
 
 
-def as_tuple_pairs(names: list[str], ages: list[int]) -> list[tuple]:
-    return list(zip(names, ages))
+def podium_labels(fastest: list[tuple]) -> list[str]:
+    return [f"{i+1}. {name} ({time}s)" for i, (name, time) in enumerate(fastest)]
 
 
-def zip_and_sum(list1: list[int], list2: list[int]) -> list[int]:
-    return [a + b for a, b in zip(list1, list2)]
-
-
-def label_each(items: list[str]) -> list[str]:
-    return [f"{i}:{v}" for i, v in enumerate(items)]
-
-
-def count_items(items: list) -> int:
-    return len(items)
+def racer_count(names: list[str]) -> int:
+    return len(names)
 ''',
         "test": '''\
-from exercises.stage04.exercise01.solution import (
-    build_shopping_list,
-    unique_sorted,
-    sort_in_place,
-    as_tuple_pairs,
-    zip_and_sum,
-    label_each,
-    count_items,
+from exercises.stage04.basic01.solution import (
+    build_results,
+    rank_by_time,
+    fastest_n,
+    podium_labels,
+    racer_count,
+)
+
+NAMES = ["Ava", "Ben", "Cy", "Dee", "Emi"]
+TIMES = [54.2, 49.8, 61.0, 49.8, 57.3]
+
+
+def test_build_results_via_append_and_zip():
+    """build_results must loop over zip(names, times), .append()-ing (name, time) tuples -- not just wrap zip() in list()."""
+    results = build_results(NAMES, TIMES)
+    assert results == [("Ava", 54.2), ("Ben", 49.8), ("Cy", 61.0), ("Dee", 49.8), ("Emi", 57.3)]
+    assert isinstance(results[0], tuple)
+
+
+def test_rank_by_time_does_not_mutate_input():
+    """rank_by_time uses sorted(), which returns a new list and leaves the original untouched."""
+    results = build_results(NAMES, TIMES)
+    ranked = rank_by_time(results)
+    assert ranked[0] == ("Ben", 49.8)
+    assert results[0] == ("Ava", 54.2)
+
+
+def test_fastest_n_slices_ranked_results():
+    """fastest_n(ranked_results, n) == ranked_results[:n]."""
+    ranked = rank_by_time(build_results(NAMES, TIMES))
+    assert fastest_n(ranked, 3) == [("Ben", 49.8), ("Dee", 49.8), ("Ava", 54.2)]
+
+
+def test_podium_labels_uses_enumerate_in_a_comprehension():
+    """podium_labels builds one f-string label per entry via enumerate() inside a list comprehension."""
+    fastest = fastest_n(rank_by_time(build_results(NAMES, TIMES)), 3)
+    assert podium_labels(fastest) == ["1. Ben (49.8s)", "2. Dee (49.8s)", "3. Ava (54.2s)"]
+
+
+def test_racer_count():
+    """racer_count == len(names)."""
+    assert racer_count(NAMES) == 5
+''',
+    },
+    {
+        "name": "basic02",
+        "title": "Inventory Category Summary",
+        "summary": "dict, set, dict comprehension, list comprehension, zip(), len()",
+        "readme": (
+            "A store's product catalog arrives as two parallel lists. "
+            "Given, don't modify:\n\n"
+            "```python\n"
+            'product_names = ["Widget", "Gadget", "Gizmo", "Widget", "Sprocket"]\n'
+            'product_categories = ["tools", "electronics", "electronics", "tools", "tools"]\n'
+            "```\n\n"
+            "Implement:\n\n"
+            "- `category_by_product(names: list[str], categories: list[str]) -> dict` "
+            "-- `{name: cat for name, cat in zip(names, categories)}` (a "
+            "**dict comprehension**). Since `\"Widget\"` appears twice in the "
+            "data, the resulting dict has only one `\"Widget\"` key -- later "
+            "entries silently overwrite earlier ones with the same key, which "
+            "is exactly what a real dict does.\n"
+            "- `unique_categories(categories: list[str]) -> set` -- "
+            "`set(categories)`.\n"
+            "- `products_in_category(names: list[str], categories: list[str], "
+            "target: str) -> list[str]` -- "
+            "`[name for name, cat in zip(names, categories) if cat == target]` "
+            "(a **list comprehension** with an `if` filter). Compare its "
+            "result for `\"tools\"` against `category_by_product`'s: the list "
+            "comprehension keeps **every** match (so `\"Widget\"` appears "
+            "twice), while the dict comprehension above collapsed the "
+            "duplicate -- same source data, two different container "
+            "semantics.\n"
+            "- `category_counts(categories: list[str]) -> dict` -- "
+            "`{cat: categories.count(cat) for cat in set(categories)}` "
+            "(another dict comprehension, this time over a `set` to avoid "
+            "counting each category more than once).\n"
+            "- `product_count(names: list[str]) -> int` -- `len(names)`.\n\n"
+            "See the Study Reference presentation, Topic 4 (Basic tier), "
+            "for the theory."
+        ),
+        "stub": '''\
+def category_by_product(names: list[str], categories: list[str]) -> dict:
+    """{name: cat for name, cat in zip(names, categories)} -- a dict comprehension."""
+    raise NotImplementedError
+
+
+def unique_categories(categories: list[str]) -> set:
+    """set(categories)."""
+    raise NotImplementedError
+
+
+def products_in_category(names: list[str], categories: list[str], target: str) -> list[str]:
+    """[name for name, cat in zip(names, categories) if cat == target] -- a filtered list comprehension."""
+    raise NotImplementedError
+
+
+def category_counts(categories: list[str]) -> dict:
+    """{cat: categories.count(cat) for cat in set(categories)}."""
+    raise NotImplementedError
+
+
+def product_count(names: list[str]) -> int:
+    """len(names)."""
+    raise NotImplementedError
+''',
+        "reference": '''\
+def category_by_product(names: list[str], categories: list[str]) -> dict:
+    return {name: cat for name, cat in zip(names, categories)}
+
+
+def unique_categories(categories: list[str]) -> set:
+    return set(categories)
+
+
+def products_in_category(names: list[str], categories: list[str], target: str) -> list[str]:
+    return [name for name, cat in zip(names, categories) if cat == target]
+
+
+def category_counts(categories: list[str]) -> dict:
+    return {cat: categories.count(cat) for cat in set(categories)}
+
+
+def product_count(names: list[str]) -> int:
+    return len(names)
+''',
+        "test": '''\
+from exercises.stage04.basic02.solution import (
+    category_by_product,
+    unique_categories,
+    products_in_category,
+    category_counts,
+    product_count,
+)
+
+NAMES = ["Widget", "Gadget", "Gizmo", "Widget", "Sprocket"]
+CATEGORIES = ["tools", "electronics", "electronics", "tools", "tools"]
+
+
+def test_category_by_product_dict_comprehension_collapses_duplicate_key():
+    """category_by_product is a dict comprehension -- the second "Widget" entry silently overwrites the first."""
+    result = category_by_product(NAMES, CATEGORIES)
+    assert result == {"Widget": "tools", "Gadget": "electronics", "Gizmo": "electronics", "Sprocket": "tools"}
+    assert len(result) == 4
+
+
+def test_unique_categories():
+    """unique_categories == set(categories)."""
+    assert unique_categories(CATEGORIES) == {"tools", "electronics"}
+
+
+def test_products_in_category_list_comprehension_keeps_all_matches():
+    """products_in_category is a filtered list comprehension -- unlike the dict version, both "Widget" entries survive."""
+    result = products_in_category(NAMES, CATEGORIES, "tools")
+    assert result == ["Widget", "Widget", "Sprocket"]
+
+
+def test_category_counts():
+    """category_counts is a dict comprehension over set(categories), counting each category via .count()."""
+    assert category_counts(CATEGORIES) == {"tools": 3, "electronics": 2}
+
+
+def test_product_count():
+    """product_count == len(names)."""
+    assert product_count(NAMES) == 5
+''',
+    },
+    {
+        "name": "mid01",
+        "title": "Player Records: Dataclass vs. namedtuple",
+        "summary": "dataclasses.dataclass, __eq__, collections module (namedtuple), dataclasses module, records",
+        "readme": (
+            "Two ways to model the same lightweight record: a mutable "
+            "`@dataclasses.dataclass` and an immutable `collections.namedtuple`. "
+            "Both are already defined for you:\n\n"
+            "```python\n"
+            "@dataclasses.dataclass\n"
+            "class Player:\n"
+            "    name: str\n"
+            "    position: str\n\n"
+            'PlayerRecord = collections.namedtuple("PlayerRecord", ["name", "position"])\n'
+            "```\n\n"
+            "Implement:\n\n"
+            "- `convert_to_record(player: Player) -> PlayerRecord` -- "
+            "`PlayerRecord(player.name, player.position)`.\n"
+            "- `players_are_equal(a: Player, b: Player) -> bool` -- "
+            "`a == b`. `@dataclasses.dataclass` auto-generates `__eq__` from "
+            "the fields, so two **different** `Player` objects with the same "
+            "`name`/`position` compare equal, even though `a is b` is "
+            "`False`.\n"
+            "- `records_are_equal(a: PlayerRecord, b: PlayerRecord) -> bool` "
+            "-- `a == b`. `namedtuple` gets field-based equality for free "
+            "too, inherited from being a plain `tuple` subclass -- no "
+            "`@dataclass` decorator needed here at all.\n\n"
+            "The point of putting these side by side: both "
+            "`@dataclasses.dataclass` and `collections.namedtuple` are ways "
+            "to define a record type without hand-writing `__init__`/"
+            "`__repr__`/`__eq__` yourself, from two different standard-"
+            "library modules (`dataclasses` and `collections`).\n\n"
+            "See the Study Reference presentation, Topic 4 (Mid tier), for "
+            "the theory."
+        ),
+        "stub": '''\
+import collections
+import dataclasses
+
+
+@dataclasses.dataclass
+class Player:
+    name: str
+    position: str
+
+
+PlayerRecord = collections.namedtuple("PlayerRecord", ["name", "position"])
+
+
+def convert_to_record(player: Player) -> PlayerRecord:
+    """PlayerRecord(player.name, player.position)."""
+    raise NotImplementedError
+
+
+def players_are_equal(a: Player, b: Player) -> bool:
+    """a == b -- relies on @dataclasses.dataclass's auto-generated __eq__ (field-based, not identity)."""
+    raise NotImplementedError
+
+
+def records_are_equal(a: PlayerRecord, b: PlayerRecord) -> bool:
+    """a == b -- namedtuple's field-based equality, inherited from tuple."""
+    raise NotImplementedError
+''',
+        "reference": '''\
+import collections
+import dataclasses
+
+
+@dataclasses.dataclass
+class Player:
+    name: str
+    position: str
+
+
+PlayerRecord = collections.namedtuple("PlayerRecord", ["name", "position"])
+
+
+def convert_to_record(player: Player) -> PlayerRecord:
+    return PlayerRecord(player.name, player.position)
+
+
+def players_are_equal(a: Player, b: Player) -> bool:
+    return a == b
+
+
+def records_are_equal(a: PlayerRecord, b: PlayerRecord) -> bool:
+    return a == b
+''',
+        "test": '''\
+from exercises.stage04.mid01.solution import (
+    Player,
+    PlayerRecord,
+    convert_to_record,
+    players_are_equal,
+    records_are_equal,
 )
 
 
-def test_build_shopping_list():
-    assert build_shopping_list(["milk", "eggs"]) == ["milk", "eggs"]
+def test_convert_to_record():
+    """convert_to_record(player) == PlayerRecord(player.name, player.position)."""
+    record = convert_to_record(Player("Ava", "guard"))
+    assert record == PlayerRecord("Ava", "guard")
 
 
-def test_unique_sorted():
-    assert unique_sorted([3, 1, 2, 1, 3]) == [1, 2, 3]
+def test_players_are_equal_uses_dataclass_generated_eq_not_identity():
+    """@dataclasses.dataclass generates __eq__ from fields -- two distinct objects with equal fields compare equal."""
+    a = Player("Ava", "guard")
+    b = Player("Ava", "guard")
+    assert a is not b
+    assert players_are_equal(a, b) is True
 
 
-def test_sort_in_place():
-    items = [3, 1, 2]
-    result = sort_in_place(items)
-    assert result is None
-    assert items == [1, 2, 3]
+def test_players_are_equal_false_for_different_fields():
+    """players_are_equal must actually compare fields, not always return True."""
+    assert players_are_equal(Player("Ava", "guard"), Player("Ben", "forward")) is False
 
 
-def test_as_tuple_pairs():
-    assert as_tuple_pairs(["a", "b"], [1, 2]) == [("a", 1), ("b", 2)]
-
-
-def test_zip_and_sum():
-    assert zip_and_sum([1, 2, 3], [10, 20, 30]) == [11, 22, 33]
-
-
-def test_label_each():
-    assert label_each(["a", "b"]) == ["0:a", "1:b"]
-
-
-def test_count_items():
-    assert count_items([1, 2, 3]) == 3
+def test_records_are_equal_uses_namedtuple_field_equality():
+    """namedtuple equality is field-based (inherited from tuple), with no @dataclass decorator involved."""
+    a = PlayerRecord("Ava", "guard")
+    b = PlayerRecord("Ava", "guard")
+    assert records_are_equal(a, b) is True
+    assert records_are_equal(a, PlayerRecord("Ben", "forward")) is False
 ''',
     },
     {
-        "name": "exercise02",
-        "title": "Dict and Set Operations",
-        "summary": "dict comprehension x3, enumerate/zip reinforced, set operations x3",
+        "name": "mid02",
+        "title": "League Membership Analyzer",
+        "summary": "set operations: union, intersection, difference",
         "readme": (
+            "Two conferences' rosters, as sets of player names. Given, "
+            "don't modify:\n\n"
+            "```python\n"
+            'east_team_names = {"Ava", "Ben", "Cy", "Dee"}\n'
+            'west_team_names = {"Cy", "Dee", "Emi", "Finn"}\n'
+            "```\n\n"
             "Implement:\n\n"
-            "- `word_lengths(words: list[str]) -> dict` -- "
-            "`{w: len(w) for w in words}`.\n"
-            "- `index_lookup(items: list[str]) -> dict` -- "
-            "`{item: i for i, item in enumerate(items)}`.\n"
-            "- `numbered_pairs(items: list[str]) -> list[tuple]` -- "
-            "`list(enumerate(items))`.\n"
-            "- `pair_and_dict(keys: list[str], values: list) -> dict` -- "
-            "`dict(zip(keys, values))`.\n"
-            "- `common_elements(a: set, b: set) -> set` -- `a & b` "
-            "(intersection).\n"
-            "- `unique_to_first(a: set, b: set) -> set` -- `a - b` "
-            "(difference).\n"
-            "- `all_elements(a: set, b: set) -> set` -- `a | b` (union).\n\n"
-            "See the Study Reference presentation, Topic 4, for the theory."
+            "- `both_conferences(east: set, west: set) -> set` -- `east & "
+            "west` (**intersection**: players rostered on both sides -- a "
+            "trade mid-season, or a data error worth flagging).\n"
+            "- `all_players(east: set, west: set) -> set` -- `east | west` "
+            "(**union**: every player across both rosters).\n"
+            "- `east_only(east: set, west: set) -> set` -- `east - west` "
+            "(**difference**: on the East roster and nowhere else).\n"
+            "- `west_only(east: set, west: set) -> set` -- `west - east` "
+            "(the same **difference** operator, the other direction -- note "
+            "it is not symmetric: `east - west != west - east` in general).\n"
+            "- `symmetric_difference_manual(east: set, west: set) -> set` -- "
+            "build it by hand from the three operators above: "
+            "`(east - west) | (west - east)` (players on exactly one "
+            "roster, not both). This should come out identical to Python's "
+            "built-in `east ^ west` -- the exercise is proving that to "
+            "yourself by composing union+difference, not reaching for `^` "
+            "directly.\n\n"
+            "See the Study Reference presentation, Topic 4 (Mid tier), for "
+            "the theory."
         ),
         "stub": '''\
-def word_lengths(words: list[str]) -> dict:
-    """{w: len(w) for w in words}."""
+def both_conferences(east: set, west: set) -> set:
+    """east & west -- intersection."""
     raise NotImplementedError
 
 
-def index_lookup(items: list[str]) -> dict:
-    """{item: i for i, item in enumerate(items)}."""
+def all_players(east: set, west: set) -> set:
+    """east | west -- union."""
     raise NotImplementedError
 
 
-def numbered_pairs(items: list[str]) -> list[tuple]:
-    """list(enumerate(items))."""
+def east_only(east: set, west: set) -> set:
+    """east - west -- difference."""
     raise NotImplementedError
 
 
-def pair_and_dict(keys: list[str], values: list) -> dict:
-    """dict(zip(keys, values))."""
+def west_only(east: set, west: set) -> set:
+    """west - east -- difference, other direction."""
     raise NotImplementedError
 
 
-def common_elements(a: set, b: set) -> set:
-    """a & b -- intersection."""
-    raise NotImplementedError
-
-
-def unique_to_first(a: set, b: set) -> set:
-    """a - b -- difference."""
-    raise NotImplementedError
-
-
-def all_elements(a: set, b: set) -> set:
-    """a | b -- union."""
+def symmetric_difference_manual(east: set, west: set) -> set:
+    """(east - west) | (west - east) -- built from difference + union, not the `^` operator."""
     raise NotImplementedError
 ''',
         "reference": '''\
-def word_lengths(words: list[str]) -> dict:
-    return {w: len(w) for w in words}
+def both_conferences(east: set, west: set) -> set:
+    return east & west
 
 
-def index_lookup(items: list[str]) -> dict:
-    return {item: i for i, item in enumerate(items)}
+def all_players(east: set, west: set) -> set:
+    return east | west
 
 
-def numbered_pairs(items: list[str]) -> list[tuple]:
-    return list(enumerate(items))
+def east_only(east: set, west: set) -> set:
+    return east - west
 
 
-def pair_and_dict(keys: list[str], values: list) -> dict:
-    return dict(zip(keys, values))
+def west_only(east: set, west: set) -> set:
+    return west - east
 
 
-def common_elements(a: set, b: set) -> set:
-    return a & b
-
-
-def unique_to_first(a: set, b: set) -> set:
-    return a - b
-
-
-def all_elements(a: set, b: set) -> set:
-    return a | b
+def symmetric_difference_manual(east: set, west: set) -> set:
+    return (east - west) | (west - east)
 ''',
         "test": '''\
-from exercises.stage04.exercise02.solution import (
-    word_lengths,
-    index_lookup,
-    numbered_pairs,
-    pair_and_dict,
-    common_elements,
-    unique_to_first,
-    all_elements,
+from exercises.stage04.mid02.solution import (
+    both_conferences,
+    all_players,
+    east_only,
+    west_only,
+    symmetric_difference_manual,
 )
 
-
-def test_word_lengths():
-    assert word_lengths(["a", "bb"]) == {"a": 1, "bb": 2}
-
-
-def test_index_lookup():
-    assert index_lookup(["a", "b"]) == {"a": 0, "b": 1}
+EAST = {"Ava", "Ben", "Cy", "Dee"}
+WEST = {"Cy", "Dee", "Emi", "Finn"}
 
 
-def test_numbered_pairs():
-    assert numbered_pairs(["a", "b"]) == [(0, "a"), (1, "b")]
+def test_both_conferences_intersection():
+    """both_conferences == east & west."""
+    assert both_conferences(EAST, WEST) == {"Cy", "Dee"}
 
 
-def test_pair_and_dict():
-    assert pair_and_dict(["x", "y"], [1, 2]) == {"x": 1, "y": 2}
+def test_all_players_union():
+    """all_players == east | west."""
+    assert all_players(EAST, WEST) == {"Ava", "Ben", "Cy", "Dee", "Emi", "Finn"}
 
 
-def test_common_elements():
-    assert common_elements({1, 2, 3}, {2, 3, 4}) == {2, 3}
+def test_east_only_difference():
+    """east_only == east - west."""
+    assert east_only(EAST, WEST) == {"Ava", "Ben"}
 
 
-def test_unique_to_first():
-    assert unique_to_first({1, 2, 3}, {2, 3, 4}) == {1}
+def test_west_only_difference_is_not_symmetric_with_east_only():
+    """west_only == west - east, which differs from east - west -- difference is directional."""
+    assert west_only(EAST, WEST) == {"Emi", "Finn"}
+    assert west_only(EAST, WEST) != east_only(EAST, WEST)
 
 
-def test_all_elements():
-    assert all_elements({1, 2}, {2, 3}) == {1, 2, 3}
+def test_symmetric_difference_manual_matches_builtin_xor():
+    """symmetric_difference_manual, built from (east - west) | (west - east), must equal Python's east ^ west."""
+    result = symmetric_difference_manual(EAST, WEST)
+    assert result == {"Ava", "Ben", "Emi", "Finn"}
+    assert result == (EAST ^ WEST)
 ''',
     },
     {
-        "name": "exercise03",
-        "title": "Comprehensions",
-        "summary": "list comprehension x3 (incl. filtering and nesting)",
+        "name": "advanced01",
+        "title": "Log Aggregator",
+        "summary": "collections.defaultdict(), collections.Counter() x2, collections.deque() x2",
         "readme": (
+            "Raw log lines from a service, each shaped `\"LEVEL:tag\"`. "
+            "Given, don't modify:\n\n"
+            "```python\n"
+            "log_entries = [\n"
+            '    "ERROR:disk", "INFO:boot", "ERROR:disk", "WARN:mem",\n'
+            '    "ERROR:net", "INFO:boot", "ERROR:disk",\n'
+            "]\n"
+            "```\n\n"
             "Implement:\n\n"
-            "- `squares(n: int) -> list[int]` -- `[x ** 2 for x in range(n)]`.\n"
-            "- `evens_squared_dict(n: int) -> dict` -- "
-            "`{x: x ** 2 for x in range(n) if x % 2 == 0}` (a dict comprehension "
-            "with an `if` filter).\n"
-            "- `flatten(matrix: list[list[int]]) -> list[int]` -- a **nested** "
-            "list comprehension: `[x for row in matrix for x in row]` (flattens "
-            "a list of lists into one list, left-to-right, top-to-bottom).\n\n"
-            "See the Study Reference presentation, Topic 4, for the theory."
-        ),
-        "stub": '''\
-def squares(n: int) -> list[int]:
-    """[x ** 2 for x in range(n)]."""
-    raise NotImplementedError
-
-
-def evens_squared_dict(n: int) -> dict:
-    """{x: x ** 2 for x in range(n) if x % 2 == 0}."""
-    raise NotImplementedError
-
-
-def flatten(matrix: list[list[int]]) -> list[int]:
-    """Nested comprehension: [x for row in matrix for x in row]."""
-    raise NotImplementedError
-''',
-        "reference": '''\
-def squares(n: int) -> list[int]:
-    return [x ** 2 for x in range(n)]
-
-
-def evens_squared_dict(n: int) -> dict:
-    return {x: x ** 2 for x in range(n) if x % 2 == 0}
-
-
-def flatten(matrix: list[list[int]]) -> list[int]:
-    return [x for row in matrix for x in row]
-''',
-        "test": '''\
-from exercises.stage04.exercise03.solution import squares, evens_squared_dict, flatten
-
-
-def test_squares():
-    assert squares(5) == [0, 1, 4, 9, 16]
-
-
-def test_evens_squared_dict():
-    assert evens_squared_dict(6) == {0: 0, 2: 4, 4: 16}
-
-
-def test_flatten():
-    assert flatten([[1, 2], [3, 4], [5]]) == [1, 2, 3, 4, 5]
-''',
-    },
-    {
-        "name": "exercise04",
-        "title": "Collections Toolbox",
-        "summary": "collections.defaultdict() x1, Counter() x2, deque() x2",
-        "readme": (
-            "Implement:\n\n"
-            "- `group_by_first_letter(words: list[str]) -> dict` -- use "
-            "`collections.defaultdict(list)` to bucket each word under its "
-            "first letter (`.append()` each word to its bucket); return "
-            "`dict(sorted(groups.items()))` so the result is a plain dict "
-            "with sorted keys.\n"
-            "- `count_occurrences(items: list) -> dict` -- "
-            "`dict(collections.Counter(items))`.\n"
-            "- `most_common_n(items: list, n: int) -> list[tuple]` -- "
-            "`collections.Counter(items).most_common(n)`.\n"
-            "- `sliding_window_last_n(numbers: list[int], maxlen: int) -> list[int]` "
-            "-- push every number, one at a time, onto a `collections.deque(maxlen=maxlen)` "
-            "(via `.append()`); once it's full, older items fall off the left "
-            "automatically. Return `list(the_deque)` at the end.\n"
-            "- `rotate_queue(items: list, k: int) -> list` -- build a "
-            "`collections.deque(items)`, call `.rotate(k)`, return `list(the_deque)`.\n\n"
-            "See the Study Reference presentation, Topic 4, for the theory."
+            "- `entries_by_level(entries: list[str]) -> dict` -- bucket "
+            "whole entries by their `LEVEL` prefix (`entry.split(\":\")[0]`) "
+            "using a `collections.defaultdict(list)` (`.append()` each entry "
+            "onto `groups[level]`); return `dict(sorted(groups.items()))` "
+            "so the result is a plain dict with sorted keys.\n"
+            "- `level_counts(entries: list[str]) -> dict` -- extract each "
+            "entry's level, then `dict(collections.Counter(levels))`.\n"
+            "- `most_common_level(entries: list[str]) -> tuple` -- "
+            "`collections.Counter(levels).most_common(1)[0]` (a "
+            "`(level, count)` tuple for the single most frequent level).\n"
+            "- `last_n_entries(entries: list[str], n: int) -> list[str]` -- "
+            "push every entry, one at a time, onto a "
+            "`collections.deque(maxlen=n)` (via `.append()`); once it's "
+            "full, older items automatically fall off the left. Return "
+            "`list(the_deque)`.\n"
+            "- `rotate_entries(entries: list[str], k: int) -> list[str]` -- "
+            "build a `collections.deque(entries)`, call `.rotate(k)`, "
+            "return `list(the_deque)`.\n\n"
+            "See the Study Reference presentation, Topic 4 (Advanced tier), "
+            "for the theory."
         ),
         "stub": '''\
 import collections
 
 
-def group_by_first_letter(words: list[str]) -> dict:
-    """Bucket words by first letter using collections.defaultdict(list)."""
+def entries_by_level(entries: list[str]) -> dict:
+    """Bucket entries by their LEVEL prefix using collections.defaultdict(list); return dict(sorted(...))."""
     raise NotImplementedError
 
 
-def count_occurrences(items: list) -> dict:
-    """dict(collections.Counter(items))."""
+def level_counts(entries: list[str]) -> dict:
+    """dict(collections.Counter(levels)) -- levels extracted from each entry's prefix."""
     raise NotImplementedError
 
 
-def most_common_n(items: list, n: int) -> list:
-    """collections.Counter(items).most_common(n)."""
+def most_common_level(entries: list[str]) -> tuple:
+    """collections.Counter(levels).most_common(1)[0]."""
     raise NotImplementedError
 
 
-def sliding_window_last_n(numbers: list[int], maxlen: int) -> list[int]:
-    """Push each number onto a collections.deque(maxlen=maxlen); return list(it)."""
+def last_n_entries(entries: list[str], n: int) -> list[str]:
+    """Push each entry onto a collections.deque(maxlen=n); return list(it)."""
     raise NotImplementedError
 
 
-def rotate_queue(items: list, k: int) -> list:
-    """collections.deque(items), .rotate(k), then list(it)."""
+def rotate_entries(entries: list[str], k: int) -> list[str]:
+    """collections.deque(entries), .rotate(k), then list(it)."""
     raise NotImplementedError
 ''',
         "reference": '''\
 import collections
 
 
-def group_by_first_letter(words: list[str]) -> dict:
+def entries_by_level(entries: list[str]) -> dict:
     groups = collections.defaultdict(list)
-    for word in words:
-        groups[word[0]].append(word)
+    for entry in entries:
+        level = entry.split(":")[0]
+        groups[level].append(entry)
     return dict(sorted(groups.items()))
 
 
-def count_occurrences(items: list) -> dict:
-    return dict(collections.Counter(items))
+def level_counts(entries: list[str]) -> dict:
+    levels = [entry.split(":")[0] for entry in entries]
+    return dict(collections.Counter(levels))
 
 
-def most_common_n(items: list, n: int) -> list:
-    return collections.Counter(items).most_common(n)
+def most_common_level(entries: list[str]) -> tuple:
+    levels = [entry.split(":")[0] for entry in entries]
+    return collections.Counter(levels).most_common(1)[0]
 
 
-def sliding_window_last_n(numbers: list[int], maxlen: int) -> list[int]:
-    window = collections.deque(maxlen=maxlen)
-    for n in numbers:
-        window.append(n)
+def last_n_entries(entries: list[str], n: int) -> list[str]:
+    window = collections.deque(maxlen=n)
+    for entry in entries:
+        window.append(entry)
     return list(window)
 
 
-def rotate_queue(items: list, k: int) -> list:
-    d = collections.deque(items)
+def rotate_entries(entries: list[str], k: int) -> list[str]:
+    d = collections.deque(entries)
     d.rotate(k)
     return list(d)
 ''',
         "test": '''\
-from exercises.stage04.exercise04.solution import (
-    group_by_first_letter,
-    count_occurrences,
-    most_common_n,
-    sliding_window_last_n,
-    rotate_queue,
+from exercises.stage04.advanced01.solution import (
+    entries_by_level,
+    level_counts,
+    most_common_level,
+    last_n_entries,
+    rotate_entries,
 )
 
-
-def test_group_by_first_letter():
-    result = group_by_first_letter(["apple", "avocado", "banana", "cherry"])
-    assert result == {"a": ["apple", "avocado"], "b": ["banana"], "c": ["cherry"]}
+ENTRIES = ["ERROR:disk", "INFO:boot", "ERROR:disk", "WARN:mem", "ERROR:net", "INFO:boot", "ERROR:disk"]
 
 
-def test_count_occurrences():
-    assert count_occurrences(["a", "b", "a", "c", "a"]) == {"a": 3, "b": 1, "c": 1}
+def test_entries_by_level_uses_defaultdict():
+    """entries_by_level buckets whole entries under their LEVEL prefix via collections.defaultdict(list)."""
+    result = entries_by_level(ENTRIES)
+    assert result == {
+        "ERROR": ["ERROR:disk", "ERROR:disk", "ERROR:net", "ERROR:disk"],
+        "INFO": ["INFO:boot", "INFO:boot"],
+        "WARN": ["WARN:mem"],
+    }
 
 
-def test_most_common_n():
-    assert most_common_n(["a", "b", "a", "c", "a", "b"], 2) == [("a", 3), ("b", 2)]
+def test_level_counts_uses_counter():
+    """level_counts == dict(collections.Counter(levels))."""
+    assert level_counts(ENTRIES) == {"ERROR": 4, "INFO": 2, "WARN": 1}
 
 
-def test_sliding_window_last_n():
-    assert sliding_window_last_n([1, 2, 3, 4, 5], 3) == [3, 4, 5]
+def test_most_common_level_uses_counter_most_common():
+    """most_common_level == collections.Counter(levels).most_common(1)[0]."""
+    assert most_common_level(ENTRIES) == ("ERROR", 4)
 
 
-def test_rotate_queue():
-    assert rotate_queue([1, 2, 3, 4, 5], 2) == [4, 5, 1, 2, 3]
+def test_last_n_entries_uses_bounded_deque():
+    """last_n_entries pushes onto a collections.deque(maxlen=n), keeping only the most recent n."""
+    assert last_n_entries(ENTRIES, 3) == ["ERROR:net", "INFO:boot", "ERROR:disk"]
+
+
+def test_rotate_entries_uses_deque_rotate():
+    """rotate_entries builds a collections.deque(entries) and calls .rotate(k)."""
+    assert rotate_entries(ENTRIES, 2) == [
+        "INFO:boot", "ERROR:disk", "ERROR:disk", "INFO:boot", "ERROR:disk", "WARN:mem", "ERROR:net",
+    ]
 ''',
     },
     {
-        "name": "exercise05",
-        "title": "Dataclasses",
-        "summary": "dataclasses module/@dataclass x3, __eq__/__hash__ via dataclass mechanics",
+        "name": "advanced02",
+        "title": "Hashable Records: Frozen Dataclasses and Manual __hash__",
+        "summary": "__hash__, hashability -- automatic (frozen dataclass) and manual (__eq__ + __hash__ pair)",
         "readme": (
-            "Implement one method on each of three dataclasses (the "
-            "`@dataclasses.dataclass` decorators and fields are already there "
-            "for you -- see how each one changes what `__eq__`/`__hash__` the "
-            "class gets for free):\n\n"
-            "- `Point` (plain `@dataclasses.dataclass`, so `eq=True`, "
-            "`frozen=False` by default) -- implement "
-            "`distance_from_origin(self) -> float` as "
-            "`(self.x ** 2 + self.y ** 2) ** 0.5`. Because `eq=True` and "
-            "`frozen=False`, dataclass sets `Point.__hash__ = None` "
-            "automatically -- `Point` instances get a real `__eq__` but are "
-            "**not hashable** (`hash(Point(1, 2))` raises `TypeError`).\n"
-            "- `FrozenPoint` (`@dataclasses.dataclass(frozen=True)`) -- same "
-            "`distance_from_origin`. Because it's frozen, dataclass generates "
-            "**both** `__eq__` *and* `__hash__` from the fields -- these "
-            "instances work fine in a `set` or as dict keys.\n"
-            "- `TaggedItem` (fields `name: str` and "
-            "`tags: list = dataclasses.field(default_factory=list)`) -- "
-            "implement `add_tag(self, tag: str) -> None` as "
-            "`self.tags.append(tag)`. `default_factory=list` is what stops "
-            "every `TaggedItem` from sharing the *same* mutable list -- the "
-            "mutable-default-argument bug (Topic 3) applied to dataclass "
-            "fields.\n\n"
-            "See the Study Reference presentation, Topic 4, for the theory."
-        ),
-        "stub": '''\
-import dataclasses
-
-
-@dataclasses.dataclass
-class Point:
-    x: int
-    y: int
-
-    def distance_from_origin(self) -> float:
-        """(x**2 + y**2) ** 0.5."""
-        raise NotImplementedError
-
-
-@dataclasses.dataclass(frozen=True)
-class FrozenPoint:
-    x: int
-    y: int
-
-    def distance_from_origin(self) -> float:
-        """(x**2 + y**2) ** 0.5."""
-        raise NotImplementedError
-
-
-@dataclasses.dataclass
-class TaggedItem:
-    name: str
-    tags: list = dataclasses.field(default_factory=list)
-
-    def add_tag(self, tag: str) -> None:
-        """self.tags.append(tag)."""
-        raise NotImplementedError
-''',
-        "reference": '''\
-import dataclasses
-
-
-@dataclasses.dataclass
-class Point:
-    x: int
-    y: int
-
-    def distance_from_origin(self) -> float:
-        return (self.x ** 2 + self.y ** 2) ** 0.5
-
-
-@dataclasses.dataclass(frozen=True)
-class FrozenPoint:
-    x: int
-    y: int
-
-    def distance_from_origin(self) -> float:
-        return (self.x ** 2 + self.y ** 2) ** 0.5
-
-
-@dataclasses.dataclass
-class TaggedItem:
-    name: str
-    tags: list = dataclasses.field(default_factory=list)
-
-    def add_tag(self, tag: str) -> None:
-        self.tags.append(tag)
-''',
-        "test": '''\
-import pytest
-from exercises.stage04.exercise05.solution import Point, FrozenPoint, TaggedItem
-
-
-def test_point_distance_and_eq():
-    assert Point(3, 4).distance_from_origin() == 5.0
-    assert Point(1, 2) == Point(1, 2)
-
-
-def test_point_is_not_hashable():
-    with pytest.raises(TypeError):
-        hash(Point(1, 2))
-
-
-def test_frozen_point_distance_and_eq():
-    assert FrozenPoint(3, 4).distance_from_origin() == 5.0
-    assert FrozenPoint(1, 2) == FrozenPoint(1, 2)
-
-
-def test_frozen_point_is_hashable():
-    points = {FrozenPoint(1, 2), FrozenPoint(1, 2), FrozenPoint(3, 4)}
-    assert len(points) == 2
-
-
-def test_tagged_item_add_tag():
-    item = TaggedItem("shirt")
-    item.add_tag("clothing")
-    assert item.tags == ["clothing"]
-
-
-def test_tagged_item_default_factory_is_independent_per_instance():
-    item1 = TaggedItem("shirt")
-    item2 = TaggedItem("shoe")
-    item1.add_tag("clothing")
-    assert item2.tags == []
-''',
-    },
-    {
-        "name": "exercise06",
-        "title": "Records and Hashability",
-        "summary": "collections.namedtuple, hand-written __eq__/__hash__, hashability",
-        "readme": (
-            "Implement:\n\n"
-            "- `make_coordinate(x: int, y: int)` -- return `Coordinate(x, y)` "
-            "(`Coordinate` is already defined above via "
-            "`collections.namedtuple(\"Coordinate\", [\"x\", \"y\"])` -- a "
-            "lightweight, immutable, hashable record with no class boilerplate).\n"
-            "- `SimpleFraction.__init__(self, numerator: int, denominator: int)` "
-            "-- raise `ZeroDivisionError` if `denominator == 0`; otherwise, if "
-            "`denominator < 0`, flip the sign of both (`numerator, denominator = "
-            "-numerator, -denominator`); then reduce both by their "
-            "`math.gcd(numerator, denominator)` and store the results.\n"
-            "- `SimpleFraction.__eq__(self, other) -> bool` -- `True` if `other` "
-            "is a `SimpleFraction` with the same (already-reduced) `numerator` "
-            "and `denominator`.\n"
+            "Two ways a class can become hashable -- automatically, and by "
+            "hand -- and why it matters. `Point`, `FrozenPoint`, and "
+            "`SimpleFraction`'s `__init__` are already defined for you.\n\n"
+            "- `Point.distance_from_origin(self) -> float` and "
+            "`FrozenPoint.distance_from_origin(self) -> float` -- both "
+            "`(self.x ** 2 + self.y ** 2) ** 0.5`. `Point` is a plain "
+            "`@dataclasses.dataclass` (`eq=True`, `frozen=False` by "
+            "default) -- dataclass therefore sets `Point.__hash__ = None` "
+            "automatically, so `hash(Point(1, 2))` raises `TypeError`: "
+            "**mutable objects that support `==` are unsafe to hash**, "
+            "since mutating one after it's in a set/dict would silently "
+            "corrupt that container. `FrozenPoint` is "
+            "`@dataclasses.dataclass(frozen=True)`, so dataclass generates "
+            "**both** `__eq__` *and* a working `__hash__` from the fields, "
+            "and instances work fine in a `set`.\n"
+            "- `SimpleFraction.__eq__(self, other) -> bool` -- `True` if "
+            "`other` is a `SimpleFraction` with the same (already-reduced, "
+            "by the given `__init__`) `numerator` and `denominator`.\n"
             "- `SimpleFraction.__hash__(self) -> int` -- "
-            "`hash((self.numerator, self.denominator))`. **This is required**: "
-            "Python removes the default `__hash__` from any class that defines "
-            "`__eq__` without also defining `__hash__` -- skip this and "
-            "`SimpleFraction` instances become unhashable, breaking `set()`/"
-            "dict-key use, even though `==` still works fine.\n"
+            "`hash((self.numerator, self.denominator))`. This one you have "
+            "to write **by hand**: `SimpleFraction` isn't a dataclass, so "
+            "nothing generates `__hash__` for it automatically. Python "
+            "actively **removes** the default (identity-based) `__hash__` "
+            "from any plain class that defines `__eq__` without also "
+            "defining `__hash__` -- skip this method and every "
+            "`SimpleFraction` becomes unhashable, even though `==` still "
+            "works.\n"
             "- `dedupe_preserving_order(items: list) -> list` -- "
-            "`list(dict.fromkeys(items))`. `dict.fromkeys` de-duplicates using "
-            "each item's `__hash__`/`__eq__` while a plain dict's "
-            "insertion-ordering keeps first-seen order -- this only works "
-            "because `SimpleFraction`/`Coordinate`/`FrozenPoint` are all "
-            "hashable.\n\n"
-            "See the Study Reference presentation, Topic 4, for the theory."
+            "`list(dict.fromkeys(items))`. `dict.fromkeys` de-duplicates "
+            "using each item's `__hash__`/`__eq__` while keeping first-seen "
+            "order -- this only works at all because `SimpleFraction` and "
+            "`FrozenPoint` are both hashable.\n\n"
+            "See the Study Reference presentation, Topic 4 (Advanced tier), "
+            "for the theory."
         ),
         "stub": '''\
-import collections
+import dataclasses
 import math
 
-Coordinate = collections.namedtuple("Coordinate", ["x", "y"])
+
+@dataclasses.dataclass
+class Point:
+    x: int
+    y: int
+
+    def distance_from_origin(self) -> float:
+        """(x**2 + y**2) ** 0.5. Point is NOT hashable (mutable + eq=True -> __hash__ is None)."""
+        raise NotImplementedError
 
 
-def make_coordinate(x: int, y: int):
-    """Return Coordinate(x, y)."""
-    raise NotImplementedError
+@dataclasses.dataclass(frozen=True)
+class FrozenPoint:
+    x: int
+    y: int
+
+    def distance_from_origin(self) -> float:
+        """(x**2 + y**2) ** 0.5. frozen=True gives FrozenPoint a working, auto-generated __hash__."""
+        raise NotImplementedError
 
 
 class SimpleFraction:
     def __init__(self, numerator: int, denominator: int):
-        """Reduce to lowest terms via math.gcd; raise ZeroDivisionError if denominator == 0."""
-        raise NotImplementedError
+        if denominator == 0:
+            raise ZeroDivisionError("denominator cannot be 0")
+        if denominator < 0:
+            numerator, denominator = -numerator, -denominator
+        g = math.gcd(numerator, denominator)
+        self.numerator = numerator // g
+        self.denominator = denominator // g
 
     def __eq__(self, other) -> bool:
         """True if other is a SimpleFraction with the same reduced numerator/denominator."""
         raise NotImplementedError
 
     def __hash__(self) -> int:
-        """hash((self.numerator, self.denominator)) -- required alongside __eq__."""
+        """hash((self.numerator, self.denominator)) -- must be written BY HAND; nothing generates it for a plain class."""
         raise NotImplementedError
 
 
@@ -642,14 +750,26 @@ def dedupe_preserving_order(items: list) -> list:
     raise NotImplementedError
 ''',
         "reference": '''\
-import collections
+import dataclasses
 import math
 
-Coordinate = collections.namedtuple("Coordinate", ["x", "y"])
+
+@dataclasses.dataclass
+class Point:
+    x: int
+    y: int
+
+    def distance_from_origin(self) -> float:
+        return (self.x ** 2 + self.y ** 2) ** 0.5
 
 
-def make_coordinate(x: int, y: int):
-    return Coordinate(x, y)
+@dataclasses.dataclass(frozen=True)
+class FrozenPoint:
+    x: int
+    y: int
+
+    def distance_from_origin(self) -> float:
+        return (self.x ** 2 + self.y ** 2) ** 0.5
 
 
 class SimpleFraction:
@@ -678,51 +798,60 @@ def dedupe_preserving_order(items: list) -> list:
 ''',
         "test": '''\
 import pytest
-from exercises.stage04.exercise06.solution import (
-    Coordinate,
-    make_coordinate,
+from exercises.stage04.advanced02.solution import (
+    Point,
+    FrozenPoint,
     SimpleFraction,
     dedupe_preserving_order,
 )
 
 
-def test_make_coordinate():
-    c = make_coordinate(1, 2)
-    assert c == Coordinate(1, 2)
-    assert c.x == 1 and c.y == 2
+def test_point_distance():
+    """Point.distance_from_origin() == (x**2 + y**2) ** 0.5."""
+    assert Point(3, 4).distance_from_origin() == 5.0
 
 
-def test_simple_fraction_reduces():
+def test_point_is_not_hashable():
+    """Point is a plain (mutable) dataclass with eq=True -- dataclass sets __hash__ = None, so hash() must raise TypeError."""
+    with pytest.raises(TypeError):
+        hash(Point(1, 2))
+
+
+def test_frozen_point_distance_and_is_hashable():
+    """FrozenPoint.distance_from_origin() works, and frozen=True gives it a working auto-generated __hash__."""
+    assert FrozenPoint(3, 4).distance_from_origin() == 5.0
+    points = {FrozenPoint(1, 2), FrozenPoint(1, 2), FrozenPoint(3, 4)}
+    assert len(points) == 2
+
+
+def test_simple_fraction_eq_compares_reduced_values():
+    """SimpleFraction.__eq__ must compare reduced numerator/denominator, not object identity."""
     assert SimpleFraction(2, 4) == SimpleFraction(1, 2)
+    assert SimpleFraction(1, 2) != SimpleFraction(1, 3)
 
 
-def test_simple_fraction_normalizes_negative_denominator():
-    assert SimpleFraction(1, -2) == SimpleFraction(-1, 2)
-
-
-def test_simple_fraction_zero_denominator_raises():
-    with pytest.raises(ZeroDivisionError):
-        SimpleFraction(1, 0)
-
-
-def test_simple_fraction_is_hashable():
+def test_simple_fraction_is_hashable_via_hand_written_hash():
+    """SimpleFraction.__hash__ must be written by hand (hash((numerator, denominator))) -- without it, defining __eq__ alone makes it unhashable."""
     fractions = {SimpleFraction(1, 2), SimpleFraction(2, 4), SimpleFraction(1, 3)}
     assert len(fractions) == 2
 
 
-def test_dedupe_preserving_order_with_hashable_records():
+def test_dedupe_preserving_order_relies_on_hashability():
+    """dedupe_preserving_order (dict.fromkeys) only works because SimpleFraction/FrozenPoint are both hashable."""
     items = [
         SimpleFraction(1, 2),
         SimpleFraction(2, 4),
-        Coordinate(1, 1),
+        FrozenPoint(1, 1),
         SimpleFraction(1, 3),
-        Coordinate(1, 1),
+        FrozenPoint(1, 1),
     ]
     result = dedupe_preserving_order(items)
-    assert result == [SimpleFraction(1, 2), Coordinate(1, 1), SimpleFraction(1, 3)]
+    assert result == [SimpleFraction(1, 2), FrozenPoint(1, 1), SimpleFraction(1, 3)]
+    assert len(result) == 3
 
 
 def test_dedupe_preserving_order_with_plain_values():
+    """dedupe_preserving_order also works on ordinary hashable values like ints."""
     assert dedupe_preserving_order([1, 2, 1, 3, 2]) == [1, 2, 3]
 ''',
     },
