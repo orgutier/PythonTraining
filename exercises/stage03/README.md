@@ -1,16 +1,14 @@
 # Functions
 
-Eight exercises covering every function-definition keyword and functools tool from Topic 3 at least three times each -- including the two argument styles (keyword-only, positional-only) most people never write on purpose until they hit a library that requires them.
+Six exercises, two per tier. Every one is function-based -- Stage 3's whole subject is writing functions, so (unlike Stage 1/2) there's no reason to dodge `def` here. Each exercise is a small, realistic scenario combining several of that tier's specific tools at once.
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage03_<name>` (e.g. `python tools/cli.py test stage03_exercise01`). Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage03_<name>` (e.g. `python tools/cli.py test stage03_basic01`). Work through them in order.
 
-- **`exercise01/`** -- def, return, ->, recursion
-- **`exercise02/`** -- *args, **kwargs
-- **`exercise03/`** -- lambda x3, functions that take/return callables
-- **`exercise04/`** -- global x3, nonlocal x3, closures
-- **`exercise05/`** -- decorators x3, functools.wraps() x3
-- **`exercise06/`** -- functools.lru_cache() x3, functools.partial() x3
-- **`exercise07/`** -- keyword-only arguments x3, positional-only parameters x3
-- **`exercise08/`** -- yield x3
+- **`basic01/`** -- def, return, ->, default args, *args, **kwargs
+- **`basic02/`** -- basic recursion, lambda, return type hints
+- **`mid01/`** -- closures, keyword-only args, positional-only params, docstrings & introspection
+- **`mid02/`** -- a simple decorator, closures, keyword-only args (a different scenario)
+- **`advanced01/`** -- functools.wraps, functools.lru_cache, functools.partial
+- **`advanced02/`** -- yield / generator functions, global + LEGB scoping, the mutable-default-argument bug
