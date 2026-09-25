@@ -855,4 +855,159 @@ def test_dedupe_preserving_order_with_plain_values():
     assert dedupe_preserving_order([1, 2, 1, 3, 2]) == [1, 2, 3]
 ''',
     },
+    {
+        "name": "tier4_testing",
+        "title": "Testing Without a Framework: Catch the Bug",
+        "summary": "manual, framework-free verification -- your own check() helper, no assert, no pytest",
+        "readme": (
+            "Every other exercise in this stage asked you to implement "
+            "something. This one asks you to **verify** something -- with "
+            "your own hand-rolled tools, not `pytest`/`unittest` (don't "
+            "import either in this file).\n\n"
+            "Given, don't modify -- two pairs of functions, each pair "
+            "*supposed* to compute the same thing; at least one function "
+            "in each pair has a bug. Your job is to catch it by testing, "
+            "not to fix it:\n\n"
+            "```python\n"
+            "def dedupe_correct(items):\n"
+            "    return list(dict.fromkeys(items))\n\n"
+            "def dedupe_buggy(items):\n"
+            "    return list(set(items))\n\n"
+            "def evens_correct(numbers):\n"
+            "    return [n for n in numbers if n % 2 == 0]\n\n"
+            "def evens_buggy(numbers):\n"
+            "    return [n for n in numbers if n % 2 == 1]\n"
+            "```\n\n"
+            "The spec each pair is supposed to meet:\n\n"
+            "- **dedupe** should remove duplicates while preserving "
+            "**first-seen order**.\n"
+            "- **evens** should keep only the **even** numbers from the "
+            "input, in order.\n\n"
+            "Implement:\n\n"
+            "- `check(description: str, condition: bool) -> bool` -- "
+            "append `(description, condition)` to the given `_check_log` "
+            "list, then return `condition`. Unlike `assert`, this must "
+            "**never raise** -- a failed check should become a recorded "
+            "`False` in the log, not a crash that stops every check after "
+            "it from running.\n"
+            "- `run_all_checks() -> dict` -- using the shared input "
+            "`[3, 1, 2, 1, 3, 5, 2]`, call `check()` **exactly four "
+            "times**, once per function above, each time comparing that "
+            "function's result on this input against what the *spec* "
+            "says it should be (compute the expected value yourself, "
+            "e.g. with a comprehension or `dict.fromkeys` -- not by "
+            "copying whatever `dedupe_correct`/`evens_correct` happen to "
+            "return). Then return `{\"total\": ..., \"passed\": ..., "
+            "\"failed\": ...}` built from `_check_log`: `total` is how "
+            "many entries it has, `passed` is how many passed, `failed` "
+            "is the list of descriptions of the ones that didn't.\n\n"
+            "If you check both functions in a pair against the **same** "
+            "spec-derived expected value, the buggy one will fail -- "
+            "that's the whole exercise.\n\n"
+            "See the Study Reference presentation, Topic 4, for the theory."
+        ),
+        "stub": '''\
+def dedupe_correct(items):
+    return list(dict.fromkeys(items))
+
+
+def dedupe_buggy(items):
+    return list(set(items))
+
+
+def evens_correct(numbers):
+    return [n for n in numbers if n % 2 == 0]
+
+
+def evens_buggy(numbers):
+    return [n for n in numbers if n % 2 == 1]
+
+
+_check_log = []
+
+
+def check(description: str, condition: bool) -> bool:
+    """Append (description, condition) to _check_log; return condition. Must NEVER raise."""
+    raise NotImplementedError
+
+
+def run_all_checks() -> dict:
+    """Call check() exactly 4 times (see README.md), then return {"total": ..., "passed": ..., "failed": [...]}."""
+    raise NotImplementedError
+''',
+        "reference": '''\
+def dedupe_correct(items):
+    return list(dict.fromkeys(items))
+
+
+def dedupe_buggy(items):
+    return list(set(items))
+
+
+def evens_correct(numbers):
+    return [n for n in numbers if n % 2 == 0]
+
+
+def evens_buggy(numbers):
+    return [n for n in numbers if n % 2 == 1]
+
+
+_check_log = []
+
+
+def check(description: str, condition: bool) -> bool:
+    _check_log.append((description, condition))
+    return condition
+
+
+def run_all_checks() -> dict:
+    _check_log.clear()
+    sample = [3, 1, 2, 1, 3, 5, 2]
+
+    expected_dedupe = list(dict.fromkeys(sample))
+    check("dedupe_correct(sample) preserves first-seen order", dedupe_correct(sample) == expected_dedupe)
+    check("dedupe_buggy(sample) preserves first-seen order", dedupe_buggy(sample) == expected_dedupe)
+
+    expected_evens = [n for n in sample if n % 2 == 0]
+    check("evens_correct(sample) keeps only even numbers", evens_correct(sample) == expected_evens)
+    check("evens_buggy(sample) keeps only even numbers", evens_buggy(sample) == expected_evens)
+
+    total = len(_check_log)
+    passed = sum(1 for _, ok in _check_log if ok)
+    failed = [desc for desc, ok in _check_log if not ok]
+    return {"total": total, "passed": passed, "failed": failed}
+''',
+        "test": '''\
+from exercises.stage04.tier4_testing.solution import check, run_all_checks, _check_log
+
+
+def test_check_records_a_passing_condition_and_returns_it():
+    """check(description, True) must append (description, True) to _check_log and return True."""
+    _check_log.clear()
+    result = check("sample passing check", True)
+    assert result is True
+    assert _check_log[-1] == ("sample passing check", True)
+
+
+def test_check_never_raises_on_a_failing_condition():
+    """check(description, False) must NOT raise -- unlike assert, it records the failure and returns False."""
+    _check_log.clear()
+    result = check("sample failing check", False)
+    assert result is False
+    assert _check_log[-1] == ("sample failing check", False)
+
+
+def test_run_all_checks_runs_exactly_four_checks():
+    """run_all_checks must call check() exactly once per function named in README.md -- four total."""
+    summary = run_all_checks()
+    assert summary["total"] == 4
+
+
+def test_run_all_checks_catches_both_bugs():
+    """Checked against the shared spec-derived value, dedupe_correct/evens_correct pass and the _buggy versions fail."""
+    summary = run_all_checks()
+    assert summary["passed"] == 2
+    assert len(summary["failed"]) == 2
+''',
+    },
 ]

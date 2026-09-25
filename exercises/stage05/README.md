@@ -12,3 +12,4 @@ Each exercise below lives in its own folder with its own `solution.py` (the entr
 - **`tier2_mid02/`** -- re.compile(), regex named groups
 - **`tier3_advanced01/`** -- __enter__/__exit__
 - **`tier3_advanced02/`** -- @contextlib.contextmanager
+- **`tier4_testing/`** -- manual, framework-free verification -- your own check() helper, no assert, no pytest

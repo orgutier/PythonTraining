@@ -789,4 +789,200 @@ def test_coin_never_inherits_from_supports_area():
     assert SupportsArea not in Coin.__bases__
 ''',
     },
+    {
+        "name": "tier4_testing",
+        "title": "Testing Without a Framework: Catch the Bug",
+        "summary": "manual, framework-free verification -- your own check() helper, no assert, no pytest",
+        "readme": (
+            "Every other exercise in this stage asked you to implement "
+            "something. This one asks you to **verify** something -- with "
+            "your own hand-rolled tools, not `pytest`/`unittest` (don't "
+            "import either in this file).\n\n"
+            "Given, don't modify -- two pairs of implementations, each "
+            "pair *supposed* to behave the same way; at least one in each "
+            "pair has a bug. Your job is to catch it by testing, not to "
+            "fix it:\n\n"
+            "```python\n"
+            "class Shape:\n"
+            "    def area(self):\n"
+            "        raise NotImplementedError\n\n"
+            "class Square(Shape):\n"
+            "    def __init__(self, side):\n"
+            "        self.side = side\n\n"
+            "    def area(self):\n"
+            "        return self.side ** 2\n\n"
+            "class SquareBuggy(Shape):\n"
+            "    def __init__(self, side):\n"
+            "        self.side = side\n\n"
+            "    def area(self):\n"
+            "        return self.side * 2\n\n"
+            "class Duck:\n"
+            "    def quack(self):\n"
+            "        return \"Quack!\"\n\n"
+            "def make_it_quack_correct(obj):\n"
+            "    return obj.quack()\n\n"
+            "def make_it_quack_buggy(obj):\n"
+            "    return obj.quack\n"
+            "```\n\n"
+            "The spec each pair is supposed to meet:\n\n"
+            "- **area** (on a `Shape` subclass) should equal `side ** 2` "
+            "for a square.\n"
+            "- **make_it_quack** should **call** the object's `.quack()` "
+            "method and return its result (a `str`), not the method "
+            "object itself.\n\n"
+            "Implement:\n\n"
+            "- `check(description: str, condition: bool) -> bool` -- "
+            "append `(description, condition)` to the given `_check_log` "
+            "list, then return `condition`. Unlike `assert`, this must "
+            "**never raise** -- a failed check should become a recorded "
+            "`False` in the log, not a crash that stops every check after "
+            "it from running.\n"
+            "- `run_all_checks() -> dict` -- call `check()` **exactly "
+            "four times**:\n"
+            "  - `Square(4).area()` and `SquareBuggy(4).area()`, each "
+            "compared against the spec-computed expected value, `16`.\n"
+            "  - `make_it_quack_correct(Duck())` and "
+            "`make_it_quack_buggy(Duck())`, each compared against the "
+            "spec-computed expected value, `\"Quack!\"`.\n\n"
+            "  Then return `{\"total\": ..., \"passed\": ..., \"failed\": "
+            "...}` built from `_check_log`.\n\n"
+            "See the Study Reference presentation, Topic 7, for the theory."
+        ),
+        "stub": '''\
+class Shape:
+    def area(self):
+        raise NotImplementedError
+
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side ** 2
+
+
+class SquareBuggy(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side * 2
+
+
+class Duck:
+    def quack(self):
+        return "Quack!"
+
+
+def make_it_quack_correct(obj):
+    return obj.quack()
+
+
+def make_it_quack_buggy(obj):
+    return obj.quack
+
+
+_check_log = []
+
+
+def check(description: str, condition: bool) -> bool:
+    """Append (description, condition) to _check_log; return condition. Must NEVER raise."""
+    raise NotImplementedError
+
+
+def run_all_checks() -> dict:
+    """Call check() exactly 4 times (see README.md), then return {"total": ..., "passed": ..., "failed": [...]}."""
+    raise NotImplementedError
+''',
+        "reference": '''\
+class Shape:
+    def area(self):
+        raise NotImplementedError
+
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side ** 2
+
+
+class SquareBuggy(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side * 2
+
+
+class Duck:
+    def quack(self):
+        return "Quack!"
+
+
+def make_it_quack_correct(obj):
+    return obj.quack()
+
+
+def make_it_quack_buggy(obj):
+    return obj.quack
+
+
+_check_log = []
+
+
+def check(description: str, condition: bool) -> bool:
+    _check_log.append((description, condition))
+    return condition
+
+
+def run_all_checks() -> dict:
+    _check_log.clear()
+
+    check("Square(4).area() == 16", Square(4).area() == 16)
+    check("SquareBuggy(4).area() == 16", SquareBuggy(4).area() == 16)
+
+    check("make_it_quack_correct(Duck()) == 'Quack!'", make_it_quack_correct(Duck()) == "Quack!")
+    check("make_it_quack_buggy(Duck()) == 'Quack!'", make_it_quack_buggy(Duck()) == "Quack!")
+
+    total = len(_check_log)
+    passed = sum(1 for _, ok in _check_log if ok)
+    failed = [desc for desc, ok in _check_log if not ok]
+    return {"total": total, "passed": passed, "failed": failed}
+''',
+        "test": '''\
+from exercises.stage07.tier4_testing.solution import check, run_all_checks, _check_log
+
+
+def test_check_records_a_passing_condition_and_returns_it():
+    """check(description, True) must append (description, True) to _check_log and return True."""
+    _check_log.clear()
+    result = check("sample passing check", True)
+    assert result is True
+    assert _check_log[-1] == ("sample passing check", True)
+
+
+def test_check_never_raises_on_a_failing_condition():
+    """check(description, False) must NOT raise -- unlike assert, it records the failure and returns False."""
+    _check_log.clear()
+    result = check("sample failing check", False)
+    assert result is False
+    assert _check_log[-1] == ("sample failing check", False)
+
+
+def test_run_all_checks_runs_exactly_four_checks():
+    """run_all_checks must call check() exactly once per implementation named in README.md -- four total."""
+    summary = run_all_checks()
+    assert summary["total"] == 4
+
+
+def test_run_all_checks_catches_both_bugs():
+    """Checked against the shared spec-derived value, Square/make_it_quack_correct pass and the _buggy versions fail."""
+    summary = run_all_checks()
+    assert summary["passed"] == 2
+    assert len(summary["failed"]) == 2
+''',
+    },
 ]

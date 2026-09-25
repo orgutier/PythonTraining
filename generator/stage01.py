@@ -750,4 +750,127 @@ def test_runtime_built_string_not_interned():
     assert solution.runtime_string_shares_identity is False
 ''',
     },
+    {
+        "name": "tier4_testing",
+        "title": "Testing Without a Framework: Catch the Bug",
+        "summary": "manual, framework-free verification -- plain comparisons, no assert, no pytest",
+        "instructions": SCRIPT_INSTRUCTIONS,
+        "readme": (
+            "Every other exercise in this stage asked you to implement "
+            "something. This one asks you to **verify** something -- the "
+            "instinct you'll need for the rest of your career, long before "
+            "(and long after) any test framework is involved. You will "
+            "**not** import `pytest`, `unittest`, or anything like them in "
+            "this file -- just plain Python comparisons.\n\n"
+            "Given, don't modify (both pairs below are *supposed* to "
+            "compute the same thing -- at least one of each pair has a "
+            "bug; your job is to catch it by testing, not to fix it):\n\n"
+            "```python\n"
+            'price_text = "19.99"\n'
+            'quantity_text = "3"\n'
+            'discount_flag_text = "False"\n\n'
+            "target_total_v1 = float(price_text) * int(quantity_text)\n"
+            "target_total_v2 = float(price_text) + int(quantity_text)\n\n"
+            'target_is_discounted_v1 = discount_flag_text == "True"\n'
+            "target_is_discounted_v2 = bool(discount_flag_text)\n"
+            "```\n\n"
+            "The spec each pair is supposed to meet:\n\n"
+            "- **total** should equal `price * quantity`.\n"
+            '- **is_discounted** should be `True` only if `discount_flag_text` '
+            'is literally the string `"True"`.\n\n'
+            "Write plain top-level code that:\n\n"
+            "- Builds `check_results` -- a list of `(description, passed)` "
+            "tuples, `description` a short string and `passed` a `bool` -- "
+            "with **exactly one entry per target value above** (four "
+            "total): compute the expected value from the spec yourself "
+            "(e.g. `float(price_text) * int(quantity_text)`), compare it "
+            "against the target with `==`, and append the result. No "
+            "`assert` -- a failing comparison should become a recorded "
+            "`False`, not a crash that stops the remaining checks from "
+            "running.\n"
+            "- `total_checks` -- `len(check_results)`.\n"
+            "- `passed_checks` -- how many entries in `check_results` "
+            "passed.\n"
+            "- `failed_descriptions` -- the `description` of every entry "
+            "that did **not** pass, in order.\n\n"
+            "If you did this right, `passed_checks` won't be `4` -- and "
+            "that's the point: a check written against the *spec* (not "
+            "against \"whatever the target already returns\") is what "
+            "catches a real bug instead of just rubber-stamping it.\n\n"
+            "See the Study Reference presentation, Topic 1, for the theory."
+        ),
+        "stub": '''\
+price_text = "19.99"
+quantity_text = "3"
+discount_flag_text = "False"
+
+target_total_v1 = float(price_text) * int(quantity_text)
+target_total_v2 = float(price_text) + int(quantity_text)
+
+target_is_discounted_v1 = discount_flag_text == "True"
+target_is_discounted_v2 = bool(discount_flag_text)
+
+raise NotImplementedError  # delete this line once you've written the code below
+
+# Write your code here: build check_results (a list of (description, bool)
+# tuples) using plain comparisons against the spec in README.md -- no
+# assert, no test framework -- then compute total_checks/passed_checks/
+# failed_descriptions from check_results.
+''',
+        "reference": '''\
+price_text = "19.99"
+quantity_text = "3"
+discount_flag_text = "False"
+
+target_total_v1 = float(price_text) * int(quantity_text)
+target_total_v2 = float(price_text) + int(quantity_text)
+
+target_is_discounted_v1 = discount_flag_text == "True"
+target_is_discounted_v2 = bool(discount_flag_text)
+
+check_results = []
+
+expected_total = float(price_text) * int(quantity_text)
+check_results.append(("target_total_v1 meets spec", target_total_v1 == expected_total))
+check_results.append(("target_total_v2 meets spec", target_total_v2 == expected_total))
+
+expected_is_discounted = discount_flag_text == "True"
+check_results.append(("target_is_discounted_v1 meets spec", target_is_discounted_v1 == expected_is_discounted))
+check_results.append(("target_is_discounted_v2 meets spec", target_is_discounted_v2 == expected_is_discounted))
+
+total_checks = len(check_results)
+passed_checks = sum(1 for _, ok in check_results if ok)
+failed_descriptions = [desc for desc, ok in check_results if not ok]
+''',
+        "test": '''\
+import exercises.stage01.tier4_testing.solution as solution
+
+
+def test_check_results_has_one_entry_per_target_value():
+    """check_results must have exactly four (description, bool) entries, one per target value in README.md."""
+    assert len(solution.check_results) == 4
+
+
+def test_check_results_entries_are_description_bool_pairs():
+    """Each check_results entry must be a (str, bool) tuple, not a raised assert."""
+    for entry in solution.check_results:
+        assert isinstance(entry, tuple) and len(entry) == 2
+        description, passed = entry
+        assert isinstance(description, str) and description != ""
+        assert isinstance(passed, bool)
+
+
+def test_total_and_passed_checks_reflect_the_real_bugs():
+    """total_checks == 4; passed_checks == 2 -- the v1 variants meet spec, the v2 variants don't."""
+    assert solution.total_checks == 4
+    assert solution.passed_checks == 2
+
+
+def test_failed_descriptions_derived_from_check_results():
+    """failed_descriptions must be exactly the descriptions of the failing entries in check_results, in order."""
+    expected = [desc for desc, ok in solution.check_results if not ok]
+    assert solution.failed_descriptions == expected
+    assert len(solution.failed_descriptions) == 2
+''',
+    },
 ]

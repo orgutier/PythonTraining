@@ -672,4 +672,209 @@ def test_same_descriptor_class_reused_with_different_expected_types():
     assert person.age == 31
 ''',
     },
+    {
+        "name": "tier4_testing",
+        "title": "Testing Without a Framework: Catch the Bug",
+        "summary": "manual, framework-free verification -- your own check() helper, no assert, no pytest",
+        "readme": (
+            "Every other exercise in this stage asked you to implement "
+            "something. This one asks you to **verify** something -- with "
+            "your own hand-rolled tools, not `pytest`/`unittest` (don't "
+            "import either in this file).\n\n"
+            "Given, don't modify -- two pairs of classes, each pair "
+            "*supposed* to behave the same way; at least one class in "
+            "each pair has a bug. Your job is to catch it by testing, not "
+            "to fix it:\n\n"
+            "```python\n"
+            "class Temperature:\n"
+            "    def __init__(self, celsius):\n"
+            "        self.celsius = celsius\n\n"
+            "    @property\n"
+            "    def fahrenheit(self):\n"
+            "        return self.celsius * 9 / 5 + 32\n\n"
+            "class TemperatureBuggy:\n"
+            "    def __init__(self, celsius):\n"
+            "        self.celsius = celsius\n\n"
+            "    @property\n"
+            "    def fahrenheit(self):\n"
+            "        return self.celsius * 9 / 5\n\n"
+            "class Counter:\n"
+            "    def __init__(self, start=0):\n"
+            "        self.value = start\n\n"
+            "    @classmethod\n"
+            "    def from_string(cls, text):\n"
+            "        return cls(int(text))\n\n"
+            "class CounterBuggy:\n"
+            "    def __init__(self, start=0):\n"
+            "        self.value = start\n\n"
+            "    @classmethod\n"
+            "    def from_string(cls, text):\n"
+            "        return cls(text)\n"
+            "```\n\n"
+            "The spec each pair is supposed to meet:\n\n"
+            "- **fahrenheit** should equal `celsius * 9 / 5 + 32`.\n"
+            "- **from_string** should build an instance whose `.value` is "
+            "the **integer** the string represents, not the string "
+            "itself.\n\n"
+            "Implement:\n\n"
+            "- `check(description: str, condition: bool) -> bool` -- "
+            "append `(description, condition)` to the given `_check_log` "
+            "list, then return `condition`. Unlike `assert`, this must "
+            "**never raise** -- a failed check should become a recorded "
+            "`False` in the log, not a crash that stops every check after "
+            "it from running.\n"
+            "- `run_all_checks() -> dict` -- call `check()` **exactly "
+            "four times**:\n"
+            "  - `Temperature(100).fahrenheit` and "
+            "`TemperatureBuggy(100).fahrenheit`, each compared against "
+            "the spec-computed expected value, `212.0`.\n"
+            "  - `Counter.from_string(\"5\").value` and "
+            "`CounterBuggy.from_string(\"5\").value`, each compared "
+            "against the spec-computed expected value, `5` (the `int`, "
+            "not the string `\"5\"`).\n\n"
+            "  Then return `{\"total\": ..., \"passed\": ..., \"failed\": "
+            "...}` built from `_check_log`.\n\n"
+            "See the Study Reference presentation, Topic 6, for the theory."
+        ),
+        "stub": '''\
+class Temperature:
+    def __init__(self, celsius):
+        self.celsius = celsius
+
+    @property
+    def fahrenheit(self):
+        return self.celsius * 9 / 5 + 32
+
+
+class TemperatureBuggy:
+    def __init__(self, celsius):
+        self.celsius = celsius
+
+    @property
+    def fahrenheit(self):
+        return self.celsius * 9 / 5
+
+
+class Counter:
+    def __init__(self, start=0):
+        self.value = start
+
+    @classmethod
+    def from_string(cls, text):
+        return cls(int(text))
+
+
+class CounterBuggy:
+    def __init__(self, start=0):
+        self.value = start
+
+    @classmethod
+    def from_string(cls, text):
+        return cls(text)
+
+
+_check_log = []
+
+
+def check(description: str, condition: bool) -> bool:
+    """Append (description, condition) to _check_log; return condition. Must NEVER raise."""
+    raise NotImplementedError
+
+
+def run_all_checks() -> dict:
+    """Call check() exactly 4 times (see README.md), then return {"total": ..., "passed": ..., "failed": [...]}."""
+    raise NotImplementedError
+''',
+        "reference": '''\
+class Temperature:
+    def __init__(self, celsius):
+        self.celsius = celsius
+
+    @property
+    def fahrenheit(self):
+        return self.celsius * 9 / 5 + 32
+
+
+class TemperatureBuggy:
+    def __init__(self, celsius):
+        self.celsius = celsius
+
+    @property
+    def fahrenheit(self):
+        return self.celsius * 9 / 5
+
+
+class Counter:
+    def __init__(self, start=0):
+        self.value = start
+
+    @classmethod
+    def from_string(cls, text):
+        return cls(int(text))
+
+
+class CounterBuggy:
+    def __init__(self, start=0):
+        self.value = start
+
+    @classmethod
+    def from_string(cls, text):
+        return cls(text)
+
+
+_check_log = []
+
+
+def check(description: str, condition: bool) -> bool:
+    _check_log.append((description, condition))
+    return condition
+
+
+def run_all_checks() -> dict:
+    _check_log.clear()
+
+    check("Temperature(100).fahrenheit == 212.0", Temperature(100).fahrenheit == 212.0)
+    check("TemperatureBuggy(100).fahrenheit == 212.0", TemperatureBuggy(100).fahrenheit == 212.0)
+
+    check("Counter.from_string('5').value == 5", Counter.from_string("5").value == 5)
+    check("CounterBuggy.from_string('5').value == 5", CounterBuggy.from_string("5").value == 5)
+
+    total = len(_check_log)
+    passed = sum(1 for _, ok in _check_log if ok)
+    failed = [desc for desc, ok in _check_log if not ok]
+    return {"total": total, "passed": passed, "failed": failed}
+''',
+        "test": '''\
+from exercises.stage06.tier4_testing.solution import check, run_all_checks, _check_log
+
+
+def test_check_records_a_passing_condition_and_returns_it():
+    """check(description, True) must append (description, True) to _check_log and return True."""
+    _check_log.clear()
+    result = check("sample passing check", True)
+    assert result is True
+    assert _check_log[-1] == ("sample passing check", True)
+
+
+def test_check_never_raises_on_a_failing_condition():
+    """check(description, False) must NOT raise -- unlike assert, it records the failure and returns False."""
+    _check_log.clear()
+    result = check("sample failing check", False)
+    assert result is False
+    assert _check_log[-1] == ("sample failing check", False)
+
+
+def test_run_all_checks_runs_exactly_four_checks():
+    """run_all_checks must call check() exactly once per class named in README.md -- four total."""
+    summary = run_all_checks()
+    assert summary["total"] == 4
+
+
+def test_run_all_checks_catches_both_bugs():
+    """Checked against the shared spec-derived value, Temperature/Counter pass and the _buggy versions fail."""
+    summary = run_all_checks()
+    assert summary["passed"] == 2
+    assert len(summary["failed"]) == 2
+''',
+    },
 ]

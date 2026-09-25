@@ -13,3 +13,4 @@ Each exercise below lives in its own folder with its own `solution.py` (the entr
 - **`tier2_mid02/`** -- more precedence/walrus/chained-comparison/augmented-assignment practice, a different scenario
 - **`tier3_advanced01/`** -- Decimal built from string (not float), math.isclose() vs ==, the classic 0.1+0.2 case
 - **`tier3_advanced02/`** -- arbitrary-precision integers, small-int caching, string interning (and its limits)
+- **`tier4_testing/`** -- manual, framework-free verification -- plain comparisons, no assert, no pytest

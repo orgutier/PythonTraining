@@ -12,3 +12,4 @@ Each exercise below lives in its own folder with its own `solution.py` (the entr
 - **`tier2_mid02/`** -- a simple decorator, closures, keyword-only args (a different scenario)
 - **`tier3_advanced01/`** -- functools.wraps, functools.lru_cache, functools.partial
 - **`tier3_advanced02/`** -- yield / generator functions, global + LEGB scoping, the mutable-default-argument bug
+- **`tier4_testing/`** -- manual, framework-free verification -- your own check() helper, no assert, no pytest

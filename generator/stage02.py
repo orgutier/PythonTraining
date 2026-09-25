@@ -660,4 +660,161 @@ def test_worker_task_counts():
     assert solution.worker_task_counts == {"alpha": 3, "beta": 2, "gamma": 2}
 ''',
     },
+    {
+        "name": "tier4_testing",
+        "title": "Testing Without a Framework: Catch the Bug",
+        "summary": "manual, framework-free verification -- plain comparisons, no assert, no pytest",
+        "instructions": SCRIPT_INSTRUCTIONS,
+        "readme": (
+            "Every other exercise in this stage asked you to implement "
+            "something. This one asks you to **verify** something. You "
+            "will **not** import `pytest`, `unittest`, or anything like "
+            "them in this file -- just plain Python comparisons and loops.\n\n"
+            "Given, don't modify (both pairs below are *supposed* to "
+            "compute the same thing over `numbers`/`threshold` -- at least "
+            "one of each pair has a bug; your job is to catch it by "
+            "testing, not to fix it):\n\n"
+            "```python\n"
+            "numbers = [4, 7, 2, 9, 3, 5, 8]\n"
+            "threshold = 5\n\n"
+            "target_count_v1 = 0\n"
+            "for n in numbers:\n"
+            "    if n > threshold:\n"
+            "        target_count_v1 += 1\n\n"
+            "target_count_v2 = 0\n"
+            "for n in numbers:\n"
+            "    if n >= threshold:\n"
+            "        target_count_v2 += 1\n\n"
+            "target_first_over_v1 = None\n"
+            "for n in numbers:\n"
+            "    if n > threshold:\n"
+            "        target_first_over_v1 = n\n"
+            "        break\n\n"
+            "target_first_over_v2 = None\n"
+            "for n in numbers:\n"
+            "    if n > threshold:\n"
+            "        target_first_over_v2 = n\n"
+            "```\n\n"
+            "The spec each pair is supposed to meet:\n\n"
+            "- **count** should be how many numbers are **strictly greater "
+            "than** `threshold`.\n"
+            "- **first_over** should be the **first** number strictly "
+            "greater than `threshold`, in iteration order.\n\n"
+            "Write plain top-level code that:\n\n"
+            "- Builds `check_results` -- a list of `(description, passed)` "
+            "tuples -- with **exactly one entry per target value above** "
+            "(four total): compute the expected value from the spec "
+            "yourself (a comprehension or your own loop is fine), compare "
+            "it against the target with `==`, and append the result. No "
+            "`assert` -- a failing comparison should become a recorded "
+            "`False`, not a crash.\n"
+            "- `total_checks` -- `len(check_results)`.\n"
+            "- `passed_checks` -- how many entries in `check_results` "
+            "passed.\n"
+            "- `failed_descriptions` -- the `description` of every entry "
+            "that did **not** pass, in order.\n\n"
+            "See the Study Reference presentation, Topic 2, for the theory."
+        ),
+        "stub": '''\
+numbers = [4, 7, 2, 9, 3, 5, 8]
+threshold = 5
+
+target_count_v1 = 0
+for n in numbers:
+    if n > threshold:
+        target_count_v1 += 1
+
+target_count_v2 = 0
+for n in numbers:
+    if n >= threshold:
+        target_count_v2 += 1
+
+target_first_over_v1 = None
+for n in numbers:
+    if n > threshold:
+        target_first_over_v1 = n
+        break
+
+target_first_over_v2 = None
+for n in numbers:
+    if n > threshold:
+        target_first_over_v2 = n
+
+raise NotImplementedError  # delete this line once you've written the code below
+
+# Write your code here: build check_results (a list of (description, bool)
+# tuples) using plain comparisons against the spec in README.md -- no
+# assert, no test framework -- then compute total_checks/passed_checks/
+# failed_descriptions from check_results.
+''',
+        "reference": '''\
+numbers = [4, 7, 2, 9, 3, 5, 8]
+threshold = 5
+
+target_count_v1 = 0
+for n in numbers:
+    if n > threshold:
+        target_count_v1 += 1
+
+target_count_v2 = 0
+for n in numbers:
+    if n >= threshold:
+        target_count_v2 += 1
+
+target_first_over_v1 = None
+for n in numbers:
+    if n > threshold:
+        target_first_over_v1 = n
+        break
+
+target_first_over_v2 = None
+for n in numbers:
+    if n > threshold:
+        target_first_over_v2 = n
+
+check_results = []
+
+expected_count = sum(1 for n in numbers if n > threshold)
+check_results.append(("target_count_v1 meets spec", target_count_v1 == expected_count))
+check_results.append(("target_count_v2 meets spec", target_count_v2 == expected_count))
+
+expected_first_over = next((n for n in numbers if n > threshold), None)
+check_results.append(("target_first_over_v1 meets spec", target_first_over_v1 == expected_first_over))
+check_results.append(("target_first_over_v2 meets spec", target_first_over_v2 == expected_first_over))
+
+total_checks = len(check_results)
+passed_checks = sum(1 for _, ok in check_results if ok)
+failed_descriptions = [desc for desc, ok in check_results if not ok]
+''',
+        "test": '''\
+import exercises.stage02.tier4_testing.solution as solution
+
+
+def test_check_results_has_one_entry_per_target_value():
+    """check_results must have exactly four (description, bool) entries, one per target value in README.md."""
+    assert len(solution.check_results) == 4
+
+
+def test_check_results_entries_are_description_bool_pairs():
+    """Each check_results entry must be a (str, bool) tuple, not a raised assert."""
+    for entry in solution.check_results:
+        assert isinstance(entry, tuple) and len(entry) == 2
+        description, passed = entry
+        assert isinstance(description, str) and description != ""
+        assert isinstance(passed, bool)
+
+
+def test_total_and_passed_checks_reflect_the_real_bugs():
+    """total_checks == 4; passed_checks == 2 -- the v1 variants meet spec, the v2 variants don't."""
+    assert solution.total_checks == 4
+    assert solution.passed_checks == 2
+
+
+def test_failed_descriptions_derived_from_check_results():
+    """failed_descriptions must be exactly the descriptions of the failing entries in check_results, in order."""
+    expected = [desc for desc, ok in solution.check_results if not ok]
+    assert solution.failed_descriptions == expected
+    assert len(solution.failed_descriptions) == 2
+''',
+    },
 ]

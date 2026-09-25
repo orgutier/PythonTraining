@@ -12,3 +12,4 @@ Each exercise below lives in its own folder with its own `solution.py` (the entr
 - **`tier2_mid02/`** -- set operations: union, intersection, difference
 - **`tier3_advanced01/`** -- collections.defaultdict(), collections.Counter() x2, collections.deque() x2
 - **`tier3_advanced02/`** -- __hash__, hashability -- automatic (frozen dataclass) and manual (__eq__ + __hash__ pair)
+- **`tier4_testing/`** -- manual, framework-free verification -- your own check() helper, no assert, no pytest

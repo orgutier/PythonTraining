@@ -12,3 +12,4 @@ Each exercise below lives in its own folder with its own `solution.py` (the entr
 - **`tier2_mid02/`** -- composition vs inheritance
 - **`tier3_advanced01/`** -- mixins (multiple inheritance for composed-in behavior)
 - **`tier3_advanced02/`** -- typing.Protocol, @runtime_checkable, isinstance() (structural)
+- **`tier4_testing/`** -- manual, framework-free verification -- your own check() helper, no assert, no pytest

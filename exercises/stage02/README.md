@@ -12,3 +12,4 @@ Each exercise below lives in its own folder with its own `solution.py` (the entr
 - **`tier2_mid02/`** -- while...else, a short-circuit guard, a ternary, zip() -- a different combination
 - **`tier3_advanced01/`** -- a class implementing the iterator protocol (__iter__/__next__/StopIteration) by hand
 - **`tier3_advanced02/`** -- itertools.chain + itertools.cycle + itertools.islice, combined
+- **`tier4_testing/`** -- manual, framework-free verification -- plain comparisons, no assert, no pytest

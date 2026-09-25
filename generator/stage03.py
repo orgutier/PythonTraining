@@ -658,4 +658,165 @@ def test_append_safe_gives_a_fresh_list_each_call():
     assert second_call_result == [2]
 ''',
     },
+    {
+        "name": "tier4_testing",
+        "title": "Testing Without a Framework: Catch the Bug",
+        "summary": "manual, framework-free verification -- your own check() helper, no assert, no pytest",
+        "readme": (
+            "Every other exercise in this stage asked you to implement "
+            "something. This one asks you to **verify** something -- with "
+            "your own hand-rolled tools, not `pytest`/`unittest` (don't "
+            "import either in this file).\n\n"
+            "Given, don't modify -- two pairs of functions, each pair "
+            "*supposed* to compute the same thing; at least one function "
+            "in each pair has a bug. Your job is to catch it by testing, "
+            "not to fix it:\n\n"
+            "```python\n"
+            "def factorial_correct(n):\n"
+            "    if n <= 1:\n"
+            "        return 1\n"
+            "    return n * factorial_correct(n - 1)\n\n"
+            "def factorial_buggy(n):\n"
+            "    if n <= 1:\n"
+            "        return 1\n"
+            "    return n + factorial_buggy(n - 1)\n\n"
+            "def apply_discount_correct(price, pct=0.1):\n"
+            "    return round(price * (1 - pct), 2)\n\n"
+            "def apply_discount_buggy(price, pct=0.1):\n"
+            "    return round(price * (1 + pct), 2)\n"
+            "```\n\n"
+            "Implement:\n\n"
+            "- `check(description: str, condition: bool) -> bool` -- "
+            "append `(description, condition)` to the given `_check_log` "
+            "list, then return `condition`. Unlike `assert`, this must "
+            "**never raise** -- a failed check should become a recorded "
+            "`False` in the log, not a crash that stops every check after "
+            "it from running.\n"
+            "- `run_all_checks() -> dict` -- call `check()` **exactly "
+            "four times**, once per function above:\n"
+            "  - `check(\"factorial_correct(5) == 120\", "
+            "factorial_correct(5) == 120)`\n"
+            "  - the same shape for `factorial_buggy(5)` against the same "
+            "expected value, `120`\n"
+            "  - `apply_discount_correct(100)` against the expected "
+            "value, `90.0`\n"
+            "  - the same shape for `apply_discount_buggy(100)` against "
+            "that same expected value, `90.0`\n\n"
+            "  Then return `{\"total\": ..., \"passed\": ..., \"failed\": "
+            "...}` built from `_check_log`: `total` is how many entries it "
+            "has, `passed` is how many passed, `failed` is the list of "
+            "descriptions of the ones that didn't.\n\n"
+            "If you check both functions in a pair against the **same** "
+            "expected value (the spec, not \"whatever that function "
+            "already returns\"), the buggy one will fail -- that's the "
+            "whole exercise: a check written against the spec catches a "
+            "real bug instead of rubber-stamping it.\n\n"
+            "See the Study Reference presentation, Topic 3, for the theory."
+        ),
+        "stub": '''\
+def factorial_correct(n):
+    if n <= 1:
+        return 1
+    return n * factorial_correct(n - 1)
+
+
+def factorial_buggy(n):
+    if n <= 1:
+        return 1
+    return n + factorial_buggy(n - 1)
+
+
+def apply_discount_correct(price, pct=0.1):
+    return round(price * (1 - pct), 2)
+
+
+def apply_discount_buggy(price, pct=0.1):
+    return round(price * (1 + pct), 2)
+
+
+_check_log = []
+
+
+def check(description: str, condition: bool) -> bool:
+    """Append (description, condition) to _check_log; return condition. Must NEVER raise."""
+    raise NotImplementedError
+
+
+def run_all_checks() -> dict:
+    """Call check() exactly 4 times (see README.md), then return {"total": ..., "passed": ..., "failed": [...]}."""
+    raise NotImplementedError
+''',
+        "reference": '''\
+def factorial_correct(n):
+    if n <= 1:
+        return 1
+    return n * factorial_correct(n - 1)
+
+
+def factorial_buggy(n):
+    if n <= 1:
+        return 1
+    return n + factorial_buggy(n - 1)
+
+
+def apply_discount_correct(price, pct=0.1):
+    return round(price * (1 - pct), 2)
+
+
+def apply_discount_buggy(price, pct=0.1):
+    return round(price * (1 + pct), 2)
+
+
+_check_log = []
+
+
+def check(description: str, condition: bool) -> bool:
+    _check_log.append((description, condition))
+    return condition
+
+
+def run_all_checks() -> dict:
+    _check_log.clear()
+    check("factorial_correct(5) == 120", factorial_correct(5) == 120)
+    check("factorial_buggy(5) == 120", factorial_buggy(5) == 120)
+    check("apply_discount_correct(100) == 90.0", apply_discount_correct(100) == 90.0)
+    check("apply_discount_buggy(100) == 90.0", apply_discount_buggy(100) == 90.0)
+    total = len(_check_log)
+    passed = sum(1 for _, ok in _check_log if ok)
+    failed = [desc for desc, ok in _check_log if not ok]
+    return {"total": total, "passed": passed, "failed": failed}
+''',
+        "test": '''\
+from exercises.stage03.tier4_testing.solution import check, run_all_checks, _check_log
+
+
+def test_check_records_a_passing_condition_and_returns_it():
+    """check(description, True) must append (description, True) to _check_log and return True."""
+    _check_log.clear()
+    result = check("sample passing check", True)
+    assert result is True
+    assert _check_log[-1] == ("sample passing check", True)
+
+
+def test_check_never_raises_on_a_failing_condition():
+    """check(description, False) must NOT raise -- unlike assert, it records the failure and returns False."""
+    _check_log.clear()
+    result = check("sample failing check", False)
+    assert result is False
+    assert _check_log[-1] == ("sample failing check", False)
+
+
+def test_run_all_checks_runs_exactly_four_checks():
+    """run_all_checks must call check() exactly once per function named in README.md -- four total."""
+    summary = run_all_checks()
+    assert summary["total"] == 4
+
+
+def test_run_all_checks_catches_both_bugs():
+    """Checked against the shared spec value, factorial_correct/apply_discount_correct pass and the _buggy versions fail."""
+    summary = run_all_checks()
+    assert summary["passed"] == 2
+    assert len(summary["failed"]) == 2
+''',
+    },
 ]

@@ -12,3 +12,4 @@ Each exercise below lives in its own folder with its own `solution.py` (the entr
 - **`tier2_mid02/`** -- __slots__ (two more classes)
 - **`tier3_advanced01/`** -- __get__/__set__, descriptors
 - **`tier3_advanced02/`** -- __get__/__set__, descriptors (type-checking variant)
+- **`tier4_testing/`** -- manual, framework-free verification -- your own check() helper, no assert, no pytest
