@@ -1,5 +1,5 @@
 """
-OpenCV -- Image I/O, Shape, and NumPy Arrays
+OpenCV: Hand Posture & Face Gesture Recognition -- Loading and Inspecting Camera Frames
 Implement the function(s)/class(es) below.
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
@@ -16,31 +16,26 @@ import cv2
 import numpy as np
 
 
-def load_image(path: str):
+def load_frame(path: str):
     """cv2.imread(path)."""
     raise NotImplementedError
 
 
-def save_image(path: str, image) -> bool:
-    """cv2.imwrite(path, image)."""
+def save_frame(path: str, frame) -> bool:
+    """cv2.imwrite(path, frame)."""
     raise NotImplementedError
 
 
-def get_dimensions(image) -> tuple:
-    """image.shape[:2] -- (height, width)."""
+def get_frame_dimensions(frame) -> tuple:
+    """frame.shape[:2] -- (height, width)."""
     raise NotImplementedError
 
 
-def get_channel_count(image) -> int:
-    """image.shape[2] if 3-dimensional, else 1."""
+def create_blank_frame(height: int, width: int):
+    """np.zeros((height, width, 3), dtype=np.uint8)."""
     raise NotImplementedError
 
 
-def create_blank_image(height: int, width: int, channels: int):
-    """np.zeros((height, width, channels), dtype=np.uint8)."""
-    raise NotImplementedError
-
-
-def crop_image(image, y1: int, y2: int, x1: int, x2: int):
-    """image[y1:y2, x1:x2] -- rows (y) before columns (x)."""
+def crop_to_roi(frame, y1: int, y2: int, x1: int, x2: int):
+    """frame[y1:y2, x1:x2] -- rows (y) before columns (x)."""
     raise NotImplementedError

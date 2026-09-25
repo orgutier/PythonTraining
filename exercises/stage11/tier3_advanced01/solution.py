@@ -1,5 +1,5 @@
 """
-OpenCV -- Blurring and Contours
+OpenCV: Hand Posture & Face Gesture Recognition -- Hand Posture via Contours and Convexity Defects
 Implement the function(s)/class(es) below.
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
@@ -13,28 +13,26 @@ stay the entry point these tests import from.
 
 
 import cv2
+import numpy as np
+
+MIN_DEFECT_DEPTH = 8.0
 
 
-def apply_gaussian_blur(image, ksize: int):
-    """cv2.GaussianBlur(image, (ksize, ksize), 0)."""
+def preprocess_hand_mask(mask):
+    """GaussianBlur(mask, (5, 5), 0), then an explicit binary threshold pass."""
     raise NotImplementedError
 
 
-def apply_strong_blur(image):
-    """cv2.GaussianBlur(image, (15, 15), 0)."""
+def find_hand_contour(binary_mask):
+    """The largest contour from cv2.findContours(binary_mask, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE)."""
     raise NotImplementedError
 
 
-def find_contours(binary_image) -> list:
-    """cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]."""
+def count_extended_fingers(binary_mask) -> int:
+    """Convex hull + convexity defects on find_hand_contour(...); count defects deeper than MIN_DEFECT_DEPTH."""
     raise NotImplementedError
 
 
-def count_contours(binary_image) -> int:
-    """len(find_contours(binary_image))."""
-    raise NotImplementedError
-
-
-def largest_contour_area(binary_image) -> float:
-    """max(cv2.contourArea(c) for c in find_contours(binary_image))."""
+def classify_hand_posture(binary_mask) -> str:
+    """"fist" if count_extended_fingers == 0, "open_hand" if >= 4, else "partial"."""
     raise NotImplementedError

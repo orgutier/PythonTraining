@@ -1,30 +1,23 @@
 import cv2
 
 
-def to_grayscale(image):
-    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+def to_grayscale(frame):
+    return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 
-def to_rgb(image):
-    return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+def resize_for_processing(frame, width: int, height: int):
+    return cv2.resize(frame, (width, height))
 
 
-def resize_image(image, width: int, height: int):
-    return cv2.resize(image, (width, height))
-
-
-def resize_by_scale(image, scale: float):
-    return cv2.resize(image, None, fx=scale, fy=scale)
-
-
-def draw_rectangle(image, pt1: tuple, pt2: tuple, color: tuple):
-    result = image.copy()
-    cv2.rectangle(result, pt1, pt2, color, thickness=2)
+def draw_detection_box(frame, box: tuple, color: tuple, thickness: int = 2):
+    result = frame.copy()
+    x, y, w, h = box
+    cv2.rectangle(result, (x, y), (x + w, y + h), color, thickness)
     return result
 
 
-def draw_bounding_boxes(image, boxes: list, color: tuple):
-    result = image.copy()
-    for x1, y1, x2, y2 in boxes:
-        cv2.rectangle(result, (x1, y1), (x2, y2), color, 2)
+def draw_multiple_boxes(frame, boxes: list, color: tuple):
+    result = frame.copy()
+    for x, y, w, h in boxes:
+        cv2.rectangle(result, (x, y), (x + w, y + h), color, 2)
     return result

@@ -1,15 +1,18 @@
 import cv2
+import numpy as np
+
+SKIN_HSV_LOWER = np.array([0, 20, 70], dtype=np.uint8)
+SKIN_HSV_UPPER = np.array([20, 255, 255], dtype=np.uint8)
 
 
-def apply_threshold(gray_image, thresh_value: int):
-    return cv2.threshold(gray_image, thresh_value, 255, cv2.THRESH_BINARY)[1]
+def to_hsv(frame):
+    return cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
 
-def apply_otsu_threshold(gray_image):
-    return cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+def segment_skin(frame, lower, upper):
+    hsv = to_hsv(frame)
+    return cv2.inRange(hsv, lower, upper)
 
 
-def apply_adaptive_threshold(gray_image):
-    return cv2.adaptiveThreshold(
-        gray_image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2
-    )
+def refine_mask(mask):
+    return cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)[1]

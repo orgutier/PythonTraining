@@ -1,5 +1,5 @@
 """
-OpenCV -- Color Conversion, Resizing, and Drawing
+OpenCV: Hand Posture & Face Gesture Recognition -- Preparing Frames for Detection
 Implement the function(s)/class(es) below.
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
@@ -15,31 +15,21 @@ stay the entry point these tests import from.
 import cv2
 
 
-def to_grayscale(image):
-    """cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)."""
+def to_grayscale(frame):
+    """cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)."""
     raise NotImplementedError
 
 
-def to_rgb(image):
-    """cv2.cvtColor(image, cv2.COLOR_BGR2RGB)."""
+def resize_for_processing(frame, width: int, height: int):
+    """cv2.resize(frame, (width, height))."""
     raise NotImplementedError
 
 
-def resize_image(image, width: int, height: int):
-    """cv2.resize(image, (width, height))."""
+def draw_detection_box(frame, box: tuple, color: tuple, thickness: int = 2):
+    """Draw an outlined (x, y, w, h) box on a COPY of frame; return the copy."""
     raise NotImplementedError
 
 
-def resize_by_scale(image, scale: float):
-    """cv2.resize(image, None, fx=scale, fy=scale)."""
-    raise NotImplementedError
-
-
-def draw_rectangle(image, pt1: tuple, pt2: tuple, color: tuple):
-    """Draw an outlined rectangle on a COPY of image; return the copy."""
-    raise NotImplementedError
-
-
-def draw_bounding_boxes(image, boxes: list, color: tuple):
-    """Draw one rectangle per (x1, y1, x2, y2) in boxes, on a copy."""
+def draw_multiple_boxes(frame, boxes: list, color: tuple):
+    """Draw one box per (x, y, w, h) in boxes, on a copy; return the copy."""
     raise NotImplementedError

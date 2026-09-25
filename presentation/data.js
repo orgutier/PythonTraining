@@ -455,7 +455,7 @@ const TOPICS = [
   note: "Optional deeper book (not required): \u201cPython for Data Analysis\u201d by Wes McKinney — see repo README for why this is optional."
 },
 {
-  n: 11, title: "OpenCV", sub: "images as arrays",
+  n: 11, title: "OpenCV", sub: "hand posture & face gesture recognition",
   challenges: [
     {
       id: "challenge21",
@@ -471,7 +471,7 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { step: "1", title: "Learn", details: "Reading, writing, and transforming images, building up through thresholding and edge detection to contour detection and how images are represented as NumPy arrays.", tiers: [
+    { step: "1", title: "Learn", details: "Building a hand-posture and face-gesture recognition pipeline: reading/prepping camera frames, skin-tone thresholding and edge detection for the hand side, then counting extended fingers via contours and convexity defects (no trained model file needed) and detecting faces/smiles/gaze direction via OpenCV's own bundled Haar cascade files -- genuinely trained, fully local, no download required.", tiers: [
       { label: "Basic tier", guideKey: "stage11-basic", keywords: ["cv2.imread", "cv2.imwrite", "cv2.cvtColor", "cv2.resize", "cv2.rectangle", "image.shape"], modules: ["opencv-python (cv2)", "numpy"] },
       { label: "Mid tier", guideKey: "stage11-mid", methods: ["cv2.Canny()"], concepts: ["thresholding"] },
       { label: "Advanced tier & internals", guideKey: "stage11-advanced", methods: ["cv2.findContours()", "cv2.GaussianBlur()", "cv2.CascadeClassifier"], concepts: ["convolution filtering"], theory: ["images as NumPy arrays (height \u00d7 width \u00d7 channels)", "BGR vs RGB channel order"] }
