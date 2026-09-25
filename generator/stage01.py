@@ -2,8 +2,10 @@
 Stage 1 -- Python Fundamentals.
 
 Pilot of the tier-named exercise convention: a minimum of two exercises per
-Basic/Mid/Advanced tier (named "basic01"/"basic02"/"mid01"/... instead of a
-flat "exercise01".."exercise06" sequence), plus a "hello_world" exercise for
+Basic/Mid/Advanced tier, each folder prefixed with its tier number so a
+plain directory listing sorts in learning order --
+"tier1_basicNN"/"tier2_midNN"/"tier3_advancedNN" -- instead of a flat
+"exercise01".."exercise06" sequence, plus a "tier0_hello_world" exercise for
 the stage's Setup sub-stage. Every exercise here is deliberately
 **script-style**: plain top-level statements assigning specific
 module-level variable names, not a function/class to implement -- Stage 1
@@ -26,7 +28,7 @@ from generator.common import SCRIPT_INSTRUCTIONS
 STAGE = "stage01"
 TOPIC = "Python Fundamentals"
 OVERVIEW = (
-    "Seven small exercises, each in its own folder: hello_world (Setup), then "
+    "Seven small exercises, each in its own folder: tier0_hello_world (Setup), then "
     "two apiece for the Basic, Mid, and Advanced tiers. Every one is plain "
     "top-level code -- no function to implement -- since Stage 1 hasn't "
     "introduced `def` yet. Each is a small, self-contained scenario (never "
@@ -36,7 +38,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "hello_world",
+        "name": "tier0_hello_world",
         "title": "Hello, World! (Environment Check)",
         "summary": "print(), variable assignment, string concatenation -- confirms your environment and this repo's test runner both work",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -76,8 +78,8 @@ import sys
 
 def test_hello_world_variables_and_output(capsys):
     """greeting == "Hello, World!"; author_name is a non-empty str; two print() lines match exactly (concatenation, no f-strings)."""
-    sys.modules.pop("exercises.stage01.hello_world.solution", None)
-    import exercises.stage01.hello_world.solution as solution
+    sys.modules.pop("exercises.stage01.tier0_hello_world.solution", None)
+    import exercises.stage01.tier0_hello_world.solution as solution
 
     assert solution.greeting == "Hello, World!"
     assert isinstance(solution.author_name, str)
@@ -90,7 +92,7 @@ def test_hello_world_variables_and_output(capsys):
 ''',
     },
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Road Trip Fuel Ledger",
         "summary": "explicit int()/float() casting, arithmetic operators, isinstance(), no f-strings yet",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -160,7 +162,7 @@ print("Total cost: " + str(total_cost) + ", per passenger: " + str(cost_per_pass
         "test": '''\
 import pytest
 
-import exercises.stage01.basic01.solution as solution
+import exercises.stage01.tier1_basic01.solution as solution
 
 
 def test_casts_to_correct_types():
@@ -193,7 +195,7 @@ def test_cost_per_passenger():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Digital Clock Decoder",
         "summary": "// and % chained together, explicit bool-from-string casting (avoiding the bool(str) trap)",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -253,7 +255,7 @@ print(
 )
 ''',
         "test": '''\
-import exercises.stage01.basic02.solution as solution
+import exercises.stage01.tier1_basic02.solution as solution
 
 
 def test_total_seconds_cast():
@@ -280,7 +282,7 @@ def test_is_daylight_saving_avoids_bool_string_trap():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Precision Price Comparator",
         "summary": "operator precedence, chained comparisons, the walrus operator, f-strings, augmented assignment",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -357,7 +359,7 @@ print(savings_message)
         "test": '''\
 import pytest
 
-import exercises.stage01.mid01.solution as solution
+import exercises.stage01.tier2_mid01.solution as solution
 
 
 def test_casts_to_correct_types():
@@ -393,7 +395,7 @@ def test_weighted_score_respects_operator_precedence():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Marathon Pace Report",
         "summary": "more precedence/walrus/chained-comparison/augmented-assignment practice, a different scenario",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -474,7 +476,7 @@ print(pace_report)
         "test": '''\
 import pytest
 
-import exercises.stage01.mid02.solution as solution
+import exercises.stage01.tier2_mid02.solution as solution
 
 
 def test_casts_to_correct_types():
@@ -521,7 +523,7 @@ def test_fatigue_index_respects_operator_precedence():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Exact Ledger vs. Float Drift",
         "summary": "Decimal built from string (not float), math.isclose() vs ==, the classic 0.1+0.2 case",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -597,7 +599,7 @@ print(f"Exact total: {exact_total}, exactly matched float total: {totals_are_exa
 import math
 from decimal import Decimal
 
-import exercises.stage01.advanced01.solution as solution
+import exercises.stage01.tier3_advanced01.solution as solution
 
 
 def test_casts_and_float_total():
@@ -630,7 +632,7 @@ def test_point_one_plus_point_two_textbook_case():
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Big Numbers and String Identity",
         "summary": "arbitrary-precision integers, small-int caching, string interning (and its limits)",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -717,7 +719,7 @@ runtime_string_shares_identity = string_literal_a is string_built_at_runtime
 print(f"huge_power has {huge_power_digit_count} digits")
 ''',
         "test": '''\
-import exercises.stage01.advanced02.solution as solution
+import exercises.stage01.tier3_advanced02.solution as solution
 
 
 def test_huge_power_has_arbitrary_precision():

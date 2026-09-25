@@ -4,11 +4,11 @@ Six exercises, two per tier: basic HTTP calls and raw threading in Basic; raise_
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage12_<name>` (e.g. `python tools/cli.py test stage12_basic01`). Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage12_<name>` (e.g. `python tools/cli.py test stage12_tier1_basic01`). Work through them in order.
 
-- **`basic01/`** -- requests.get(), response.json(), requests.post()
-- **`basic02/`** -- threading.Thread, .start(), .join()
-- **`mid01/`** -- response.raise_for_status()
-- **`mid02/`** -- threading.Lock
-- **`advanced01/`** -- requests.Session(), connection reuse, retry/backoff strategies
-- **`advanced02/`** -- concurrent.futures.ThreadPoolExecutor
+- **`tier1_basic01/`** -- requests.get(), response.json(), requests.post()
+- **`tier1_basic02/`** -- threading.Thread, .start(), .join()
+- **`tier2_mid01/`** -- response.raise_for_status()
+- **`tier2_mid02/`** -- threading.Lock
+- **`tier3_advanced01/`** -- requests.Session(), connection reuse, retry/backoff strategies
+- **`tier3_advanced02/`** -- concurrent.futures.ThreadPoolExecutor

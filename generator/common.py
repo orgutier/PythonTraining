@@ -11,11 +11,13 @@ exercise dicts) -- write_stage() below turns that into the actual files:
     tests/test_stageNN_<name>.py                  that ONE exercise's tests
 
 `<name>` is whatever each exercise dict's "name" field says -- historically
-"exerciseXX" (still true for most stages), but a stage piloting the
+"exerciseXX" (still true for the Capstone stage), but every stage on the
 tier-named convention (minimum two exercises per Basic/Mid/Advanced tier,
-e.g. "basic01"/"basic02"/"mid01"/..., plus an optional "hello_world" for a
-stage's Setup sub-stage) uses those names instead. write_stage() itself
-doesn't care either way.
+plus a stages-1-7-only Testing tier) prefixes each name with its tier
+number so a plain directory listing sorts in learning order:
+"tier1_basicNN"/"tier2_midNN"/"tier3_advancedNN"/"tier4_testing", plus an
+optional "tier0_hello_world" for a stage's Setup sub-stage. write_stage()
+itself doesn't care either way -- it just uses "name" verbatim.
 
 An exercise dict may also set "instructions" (a one-line override of the
 stub's default "Implement the function(s)/class(es) below." -- see

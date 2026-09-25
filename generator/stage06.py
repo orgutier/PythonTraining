@@ -26,7 +26,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Bank Account",
         "summary": "class, self, __init__, @property, @x.setter, @staticmethod, encapsulation",
         "readme": (
@@ -115,7 +115,7 @@ class BankAccount:
 ''',
         "test": '''\
 import pytest
-from exercises.stage06.basic01.solution import BankAccount
+from exercises.stage06.tier1_basic01.solution import BankAccount
 
 
 def test_initial_balance_goes_through_the_setter():
@@ -159,7 +159,7 @@ def test_is_valid_amount_is_a_staticmethod():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Employee Registry",
         "summary": "instance vs class attributes, @classmethod, cls, @staticmethod, @property (read-only)",
         "readme": (
@@ -245,7 +245,7 @@ class Employee:
         return salary >= 0
 ''',
         "test": '''\
-from exercises.stage06.basic02.solution import Employee
+from exercises.stage06.tier1_basic02.solution import Employee
 
 
 def test_instance_attributes_are_per_employee():
@@ -297,7 +297,7 @@ def test_is_valid_salary_is_a_staticmethod():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Slotted Geometry",
         "summary": "__slots__",
         "readme": (
@@ -357,7 +357,7 @@ class Vector3DSlots:
 ''',
         "test": '''\
 import pytest
-from exercises.stage06.mid01.solution import PointSlots, Vector3DSlots
+from exercises.stage06.tier2_mid01.solution import PointSlots, Vector3DSlots
 
 
 def test_point_slots_basic():
@@ -386,7 +386,7 @@ def test_vector3d_slots_magnitude():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Slotted Records",
         "summary": "__slots__ (two more classes)",
         "readme": (
@@ -451,7 +451,7 @@ class InventoryItemSlots:
 ''',
         "test": '''\
 import pytest
-from exercises.stage06.mid02.solution import TemperatureSlots, InventoryItemSlots
+from exercises.stage06.tier2_mid02.solution import TemperatureSlots, InventoryItemSlots
 
 
 def test_temperature_slots_fahrenheit():
@@ -474,7 +474,7 @@ def test_inventory_item_slots_rejects_new_attribute():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Descriptors Preview: PositiveNumber",
         "summary": "__get__/__set__, descriptors",
         "readme": (
@@ -541,7 +541,7 @@ class Product:
 ''',
         "test": '''\
 import pytest
-from exercises.stage06.advanced01.solution import Product
+from exercises.stage06.tier3_advanced01.solution import Product
 
 
 def test_positive_number_descriptor_get_set():
@@ -566,7 +566,7 @@ def test_positive_number_descriptor_rejects_at_construction():
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Descriptors Preview: Typed",
         "summary": "__get__/__set__, descriptors (type-checking variant)",
         "readme": (
@@ -640,7 +640,7 @@ class Person:
 ''',
         "test": '''\
 import pytest
-from exercises.stage06.advanced02.solution import Person
+from exercises.stage06.tier3_advanced02.solution import Person
 
 
 def test_typed_descriptor_get_set():

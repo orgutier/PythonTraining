@@ -27,7 +27,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Reading and Inspecting Sales Data",
         "summary": "pd.read_csv, df.head(), df.describe()",
         "readme": (
@@ -77,7 +77,7 @@ def summarize(df: pd.DataFrame) -> pd.DataFrame:
 ''',
         "test": '''\
 import pandas as pd
-from exercises.stage10.basic01.solution import load_csv, preview_rows, summarize
+from exercises.stage10.tier1_basic01.solution import load_csv, preview_rows, summarize
 
 
 def test_load_csv(tmp_path):
@@ -103,7 +103,7 @@ def test_summarize():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Reading and Inspecting Employee Data",
         "summary": "pd.read_csv, df.head(), df.describe() (a second dataset)",
         "readme": (
@@ -175,7 +175,7 @@ def row_count(df: pd.DataFrame) -> int:
 ''',
         "test": '''\
 import pandas as pd
-from exercises.stage10.basic02.solution import (
+from exercises.stage10.tier1_basic02.solution import (
     load_employees,
     preview_employees,
     salary_summary,
@@ -219,7 +219,7 @@ def test_row_count():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Boolean Indexing",
         "summary": "boolean indexing",
         "readme": (
@@ -277,7 +277,7 @@ def filter_multiple_conditions(df: pd.DataFrame, region: str, threshold: float) 
 ''',
         "test": '''\
 import pandas as pd
-from exercises.stage10.mid01.solution import (
+from exercises.stage10.tier2_mid01.solution import (
     filter_by_region,
     filter_high_sales,
     filter_multiple_conditions,
@@ -311,7 +311,7 @@ def test_filter_multiple_conditions():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Sorting, Grouping, and Merging",
         "summary": "df.sort_values(), df.groupby(), df.merge()",
         "readme": (
@@ -387,7 +387,7 @@ def inner_join_products(orders_df: pd.DataFrame, products_df: pd.DataFrame) -> p
 ''',
         "test": '''\
 import pandas as pd
-from exercises.stage10.mid02.solution import (
+from exercises.stage10.tier2_mid02.solution import (
     sort_by_sales_desc,
     sort_by_multiple,
     total_sales_by_region,
@@ -441,7 +441,7 @@ def test_inner_join_products_drops_unmatched():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Inspecting, Pivoting, and Multi-Indexing",
         "summary": "df.info(), df.pivot_table(), multi-indexing (via groupby)",
         "readme": (
@@ -513,7 +513,7 @@ def sales_pivot_count(df: pd.DataFrame) -> pd.DataFrame:
 ''',
         "test": '''\
 import pandas as pd
-from exercises.stage10.advanced01.solution import (
+from exercises.stage10.tier3_advanced01.solution import (
     capture_info,
     avg_sales_by_region_and_product,
     sales_pivot_table,
@@ -565,7 +565,7 @@ def test_sales_pivot_count():
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Apply and Dtype Optimization",
         "summary": "df.apply(), dtype-based memory optimization, multi-indexing (via set_index)",
         "readme": (
@@ -671,7 +671,7 @@ def set_region_product_index(df: pd.DataFrame) -> pd.DataFrame:
 ''',
         "test": '''\
 import pandas as pd
-from exercises.stage10.advanced02.solution import (
+from exercises.stage10.tier3_advanced02.solution import (
     add_sales_tax_column,
     categorize_sales,
     full_name_column,

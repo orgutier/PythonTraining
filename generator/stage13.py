@@ -26,7 +26,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Basic Routes",
         "summary": "FastAPI(), @app.get, @app.post, path & query parameters",
         "readme": (
@@ -104,7 +104,7 @@ def echo(payload: dict):
 ''',
         "test": '''\
 from fastapi.testclient import TestClient
-from exercises.stage13.basic01.solution import app as basic_routes_app
+from exercises.stage13.tier1_basic01.solution import app as basic_routes_app
 
 basic_routes_client = TestClient(basic_routes_app)
 
@@ -135,7 +135,7 @@ def test_echo_post():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Running the App",
         "summary": "FastAPI(), @app.get, @app.post, uvicorn.run",
         "readme": (
@@ -201,7 +201,7 @@ def run_server(app, host: str = "127.0.0.1", port: int = 8000) -> None:
         "test": '''\
 from unittest.mock import patch
 from fastapi.testclient import TestClient
-from exercises.stage13.basic02.solution import app as running_app, run_server
+from exercises.stage13.tier1_basic02.solution import app as running_app, run_server
 
 running_client = TestClient(running_app)
 
@@ -224,7 +224,7 @@ def test_run_server_calls_uvicorn_run_without_starting_a_server():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Pydantic Models",
         "summary": "pydantic.BaseModel",
         "readme": (
@@ -329,7 +329,7 @@ def login(req: LoginRequest):
 ''',
         "test": '''\
 from fastapi.testclient import TestClient
-from exercises.stage13.mid01.solution import app as models_app
+from exercises.stage13.tier2_mid01.solution import app as models_app
 
 models_client = TestClient(models_app)
 
@@ -361,7 +361,7 @@ def test_login_never_echoes_password():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Dependency Injection and Automatic Docs",
         "summary": "Depends, dependency injection, automatic interactive docs (/docs)",
         "readme": (
@@ -489,7 +489,7 @@ def has_docs_route(app) -> bool:
 ''',
         "test": '''\
 from fastapi.testclient import TestClient
-from exercises.stage13.mid02.solution import app as di_app, get_openapi_schema, has_docs_route
+from exercises.stage13.tier2_mid02.solution import app as di_app, get_openapi_schema, has_docs_route
 
 di_client = TestClient(di_app)
 
@@ -532,7 +532,7 @@ def test_has_docs_route():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Async Endpoints",
         "summary": "async def endpoints",
         "readme": (
@@ -603,7 +603,7 @@ async def async_echo(payload: dict):
 ''',
         "test": '''\
 from fastapi.testclient import TestClient
-from exercises.stage13.advanced01.solution import app as async_app
+from exercises.stage13.tier3_advanced01.solution import app as async_app
 
 async_client = TestClient(async_app)
 
@@ -624,7 +624,7 @@ def test_async_echo():
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Testing Apps with TestClient",
         "summary": "TestClient()",
         "readme": (
@@ -706,7 +706,7 @@ def client_status_code(app, path: str) -> int:
     return TestClient(app).get(path).status_code
 ''',
         "test": '''\
-from exercises.stage13.advanced02.solution import (
+from exercises.stage13.tier3_advanced02.solution import (
     app,
     client_get_json,
     client_post_json,

@@ -27,7 +27,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Image I/O, Shape, and NumPy Arrays",
         "summary": "cv2.imread, cv2.imwrite, image.shape, numpy",
         "readme": (
@@ -121,7 +121,7 @@ def crop_image(image, y1: int, y2: int, x1: int, x2: int):
 ''',
         "test": '''\
 import numpy as np
-from exercises.stage11.basic01.solution import (
+from exercises.stage11.tier1_basic01.solution import (
     load_image,
     save_image,
     get_dimensions,
@@ -176,7 +176,7 @@ def test_crop_image_is_plain_array_slicing():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Color Conversion, Resizing, and Drawing",
         "summary": "cv2.cvtColor, cv2.resize, cv2.rectangle",
         "readme": (
@@ -279,7 +279,7 @@ def draw_bounding_boxes(image, boxes: list, color: tuple):
 ''',
         "test": '''\
 import numpy as np
-from exercises.stage11.basic02.solution import (
+from exercises.stage11.tier1_basic02.solution import (
     to_grayscale,
     to_rgb,
     resize_image,
@@ -338,7 +338,7 @@ def test_draw_bounding_boxes_draws_all_and_does_not_mutate():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Thresholding",
         "summary": "thresholding",
         "readme": (
@@ -399,7 +399,7 @@ def apply_adaptive_threshold(gray_image):
 ''',
         "test": '''\
 import numpy as np
-from exercises.stage11.mid01.solution import (
+from exercises.stage11.tier2_mid01.solution import (
     apply_threshold,
     apply_otsu_threshold,
     apply_adaptive_threshold,
@@ -433,7 +433,7 @@ def test_apply_adaptive_threshold_returns_binary_image():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Edge Detection with Canny",
         "summary": "cv2.Canny()",
         "readme": (
@@ -487,7 +487,7 @@ def count_edge_pixels(gray_image, low: int, high: int) -> int:
         "test": '''\
 import cv2
 import numpy as np
-from exercises.stage11.mid02.solution import detect_edges, detect_edges_default, count_edge_pixels
+from exercises.stage11.tier2_mid02.solution import detect_edges, detect_edges_default, count_edge_pixels
 
 
 def _square_image():
@@ -514,7 +514,7 @@ def test_count_edge_pixels():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Blurring and Contours",
         "summary": "cv2.GaussianBlur(), cv2.findContours(), convolution filtering",
         "readme": (
@@ -596,7 +596,7 @@ def largest_contour_area(binary_image) -> float:
         "test": '''\
 import cv2
 import numpy as np
-from exercises.stage11.advanced01.solution import (
+from exercises.stage11.tier3_advanced01.solution import (
     apply_gaussian_blur,
     apply_strong_blur,
     find_contours,
@@ -641,7 +641,7 @@ def test_largest_contour_area():
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Cascade Classifiers",
         "summary": "cv2.CascadeClassifier",
         "readme": (
@@ -696,7 +696,7 @@ def is_cascade_loaded(cascade) -> bool:
 ''',
         "test": '''\
 import cv2
-from exercises.stage11.advanced02.solution import (
+from exercises.stage11.tier3_advanced02.solution import (
     load_default_face_cascade,
     load_cascade_from_path,
     is_cascade_loaded,

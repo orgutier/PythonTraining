@@ -31,7 +31,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Requests Basics",
         "summary": "requests.get(), response.json(), requests.post()",
         "readme": (
@@ -85,7 +85,7 @@ def post_data(url: str, payload: dict) -> dict:
 ''',
         "test": '''\
 from unittest.mock import Mock, patch
-from exercises.stage12.basic01.solution import fetch_json, fetch_status_code, post_data
+from exercises.stage12.tier1_basic01.solution import fetch_json, fetch_status_code, post_data
 
 
 def _fake_response(json_data=None, status_code=200):
@@ -118,7 +118,7 @@ def test_post_data():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Threading Basics",
         "summary": "threading.Thread, .start(), .join()",
         "readme": (
@@ -180,7 +180,7 @@ def run_and_wait(funcs: list) -> None:
         "test": '''\
 import threading
 import time
-from exercises.stage12.basic02.solution import run_in_background, wait_for_all, run_and_wait
+from exercises.stage12.tier1_basic02.solution import run_in_background, wait_for_all, run_and_wait
 
 
 def test_run_in_background_runs_the_function():
@@ -215,7 +215,7 @@ def test_run_and_wait_runs_concurrently_and_completes():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Raising on HTTP Errors",
         "summary": "response.raise_for_status()",
         "readme": (
@@ -267,7 +267,7 @@ def url_is_healthy(url: str) -> bool:
 from unittest.mock import Mock, patch
 import pytest
 import requests
-from exercises.stage12.mid01.solution import fetch_with_raise, url_is_healthy
+from exercises.stage12.tier2_mid01.solution import fetch_with_raise, url_is_healthy
 
 
 def _fake_response(json_data=None, raise_error=False):
@@ -306,7 +306,7 @@ def test_url_is_healthy_false_on_http_error():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Locks Guarding Shared State",
         "summary": "threading.Lock",
         "readme": (
@@ -431,7 +431,7 @@ def parallel_increment(counter, times: int, num_threads: int) -> None:
 ''',
         "test": '''\
 import threading
-from exercises.stage12.mid02.solution import SafeCounter, SafeList, transfer_funds, parallel_increment
+from exercises.stage12.tier2_mid02.solution import SafeCounter, SafeList, transfer_funds, parallel_increment
 
 
 def test_safe_counter_survives_real_concurrency():
@@ -470,7 +470,7 @@ def test_transfer_funds_keeps_books_balanced():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Sessions and Retry/Backoff",
         "summary": "requests.Session(), connection reuse, retry/backoff strategies",
         "readme": (
@@ -556,7 +556,7 @@ def fetch_with_retry(url: str, max_attempts: int) -> dict:
 from unittest.mock import Mock, patch
 import pytest
 import requests
-from exercises.stage12.advanced01.solution import (
+from exercises.stage12.tier3_advanced01.solution import (
     make_default_session,
     create_session_with_headers,
     fetch_multiple_with_session,
@@ -615,7 +615,7 @@ def test_fetch_with_retry_raises_after_exhausting_attempts(monkeypatch):
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "ThreadPoolExecutor",
         "summary": "concurrent.futures.ThreadPoolExecutor",
         "readme": (
@@ -683,7 +683,7 @@ def compute_squares_concurrently(numbers: list) -> list:
 ''',
         "test": '''\
 from unittest.mock import Mock, patch
-from exercises.stage12.advanced02.solution import (
+from exercises.stage12.tier3_advanced02.solution import (
     fetch_all_concurrently,
     run_tasks_with_pool,
     compute_squares_concurrently,

@@ -28,7 +28,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Point: repr, str, eq",
         "summary": "__repr__, __str__, __eq__",
         "readme": (
@@ -84,7 +84,7 @@ class Point:
         return isinstance(other, Point) and self.x == other.x and self.y == other.y
 ''',
         "test": '''\
-from exercises.stage08.basic01.solution import Point
+from exercises.stage08.tier1_basic01.solution import Point
 
 
 def test_repr_is_unambiguous_and_developer_facing():
@@ -106,7 +106,7 @@ def test_eq_compares_field_values_not_identity():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "PlayingCard: repr, str, eq",
         "summary": "__repr__, __str__, __eq__ (a second scenario)",
         "readme": (
@@ -164,7 +164,7 @@ class PlayingCard:
         return isinstance(other, PlayingCard) and self.rank == other.rank and self.suit == other.suit
 ''',
         "test": '''\
-from exercises.stage08.basic02.solution import PlayingCard
+from exercises.stage08.tier1_basic02.solution import PlayingCard
 
 
 def test_repr_uses_bang_r_formatting():
@@ -185,7 +185,7 @@ def test_eq_compares_rank_and_suit():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Deck: A Collection Protocol",
         "summary": "__len__, __getitem__, __iter__, __contains__, __add__, operator overloading, protocols",
         "readme": (
@@ -262,7 +262,7 @@ class Deck:
         return NotImplemented
 ''',
         "test": '''\
-from exercises.stage08.mid01.solution import Deck
+from exercises.stage08.tier2_mid01.solution import Deck
 
 
 def test_init_copies_the_input_list():
@@ -309,7 +309,7 @@ def test_deck_has_no_special_base_class():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Inventory and Callables",
         "summary": "__contains__, __iter__, __bool__ (reinforced), __call__",
         "readme": (
@@ -427,7 +427,7 @@ class Toggler:
         return self.state
 ''',
         "test": '''\
-from exercises.stage08.mid02.solution import Inventory, Multiplier, Adder, Toggler
+from exercises.stage08.tier2_mid02.solution import Inventory, Multiplier, Adder, Toggler
 
 
 def test_empty_inventory_is_falsy():
@@ -486,7 +486,7 @@ def test_toggler_carries_state_across_calls():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Money and Score: Operator Overloading",
         "summary": "__repr__/__eq__ (reinforced), __add__, __radd__, __hash__",
         "readme": (
@@ -601,7 +601,7 @@ class Score:
         return hash(self.points)
 ''',
         "test": '''\
-from exercises.stage08.advanced01.solution import Money, Score
+from exercises.stage08.tier3_advanced01.solution import Money, Score
 
 
 def test_money_add_and_eq():
@@ -631,7 +631,7 @@ def test_money_repr():
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Context Managers as a Protocol",
         "summary": "__enter__, __exit__",
         "readme": (
@@ -720,7 +720,7 @@ class SuppressAll:
 ''',
         "test": '''\
 import pytest
-from exercises.stage08.advanced02.solution import ResourceGuard, Transaction, SuppressAll
+from exercises.stage08.tier3_advanced02.solution import ResourceGuard, Transaction, SuppressAll
 
 
 def test_resource_guard_active_during_block():

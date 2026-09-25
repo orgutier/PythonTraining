@@ -22,10 +22,12 @@
 
 granularity="${1:-exercise}"
 
-# An exercise folder is named "exerciseXX" on most stages, or (a stage
-# piloting the tier-named convention) "basicXX"/"midXX"/"advancedXX"/
-# "hello_world".
-EX_NAME='exercise[0-9][0-9]\|basic[0-9][0-9]\|mid[0-9][0-9]\|advanced[0-9][0-9]\|hello_world'
+# An exercise folder is named "exerciseXX" (the Capstone stage) or, on
+# every stage using the tier-named convention, "tierN_<name>XX" -- the
+# tier number prefix keeps a plain directory listing sorted in learning
+# order: tier0_hello_world (Setup, stage01 only), tier1_basicXX,
+# tier2_midXX, tier3_advancedXX, tier4_testing (stages 1-7 only).
+EX_NAME='exercise[0-9][0-9]\|tier[0-9]_[a-z_]*[0-9]*'
 
 case "$granularity" in
     exercise)

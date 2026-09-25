@@ -27,7 +27,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Animal Sounds: Inheritance and Duck Typing",
         "summary": "class Child(Parent), super(), polymorphism, duck typing (side by side)",
         "readme": (
@@ -149,7 +149,7 @@ def make_it_quack(obj) -> str:
     return obj.quack()
 ''',
         "test": '''\
-from exercises.stage07.basic01.solution import (
+from exercises.stage07.tier1_basic01.solution import (
     Animal,
     Dog,
     Cat,
@@ -194,7 +194,7 @@ def test_make_it_quack_duck_typing_with_no_shared_base_class():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Vehicle Fleet",
         "summary": "super() (three-level chain), isinstance(), typing module, polymorphism",
         "readme": (
@@ -305,7 +305,7 @@ def is_car(vehicle) -> bool:
     return isinstance(vehicle, Car)
 ''',
         "test": '''\
-from exercises.stage07.basic02.solution import (
+from exercises.stage07.tier1_basic02.solution import (
     Vehicle,
     Car,
     ElectricCar,
@@ -344,7 +344,7 @@ def test_is_car():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Abstract Base Classes",
         "summary": "abc module, ABC, @abstractmethod",
         "readme": (
@@ -463,7 +463,7 @@ class Square(Shape):
 ''',
         "test": '''\
 import pytest
-from exercises.stage07.mid01.solution import Shape, Circle, Square
+from exercises.stage07.tier2_mid01.solution import Shape, Circle, Square
 
 
 def test_shape_cannot_be_instantiated():
@@ -495,7 +495,7 @@ def test_circle_and_square_are_shapes():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Composition and Swappable Engines",
         "summary": "composition vs inheritance",
         "readme": (
@@ -573,7 +573,7 @@ def swap_engine(boat, new_engine) -> None:
     boat.engine = new_engine
 ''',
         "test": '''\
-from exercises.stage07.mid02.solution import GasEngine, ElectricEngine, Boat, swap_engine
+from exercises.stage07.tier2_mid02.solution import GasEngine, ElectricEngine, Boat, swap_engine
 
 
 def test_boat_composition_delegates_to_gas_engine():
@@ -604,7 +604,7 @@ def test_boat_is_not_an_engine():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Mixins",
         "summary": "mixins (multiple inheritance for composed-in behavior)",
         "readme": (
@@ -663,7 +663,7 @@ class Widget(LoggingMixin, SerializableMixin):
         self.name = name
 ''',
         "test": '''\
-from exercises.stage07.advanced01.solution import LoggingMixin, SerializableMixin, Widget
+from exercises.stage07.tier3_advanced01.solution import LoggingMixin, SerializableMixin, Widget
 
 
 def test_widget_uses_both_mixins():
@@ -688,7 +688,7 @@ def test_widget_is_instance_of_both_mixins():
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Protocol Structural Typing",
         "summary": "typing.Protocol, @runtime_checkable, isinstance() (structural)",
         "readme": (
@@ -770,7 +770,7 @@ def supports_area(obj) -> bool:
     return isinstance(obj, SupportsArea)
 ''',
         "test": '''\
-from exercises.stage07.advanced02.solution import SupportsArea, Coin, total_area, supports_area
+from exercises.stage07.tier3_advanced02.solution import SupportsArea, Coin, total_area, supports_area
 
 
 def test_total_area():

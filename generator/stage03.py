@@ -2,8 +2,10 @@
 Stage 3 -- Functions.
 
 Rolled onto the tier-named exercise convention: a minimum of two exercises
-per Basic/Mid/Advanced tier (named "basic01"/"basic02"/"mid01"/... instead
-of a flat "exercise01".."exercise08" sequence). Unlike Stage 1/2, these
+per Basic/Mid/Advanced tier, each folder prefixed with its tier number so a
+plain directory listing sorts in learning order --
+"tier1_basicNN"/"tier2_midNN"/"tier3_advancedNN" -- instead of a flat
+"exercise01".."exercise08" sequence. Unlike Stage 1/2, these
 exercises are naturally **function-based** (not script-style) -- Stage 3's
 entire content IS function definitions, so wrapping the work in `def`s is
 exactly the point, not something to avoid.
@@ -31,7 +33,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Order Total Calculator",
         "summary": "def, return, ->, default args, *args, **kwargs",
         "readme": (
@@ -74,7 +76,7 @@ def apply_discount(price, pct=0.10) -> float:
     return round(price * (1 - pct), 2)
 ''',
         "test": '''\
-from exercises.stage03.basic01.solution import compute_total, apply_discount
+from exercises.stage03.tier1_basic01.solution import compute_total, apply_discount
 
 
 def test_compute_total_with_surcharges_and_custom_tax_rate():
@@ -98,7 +100,7 @@ def test_apply_discount_custom_percentage():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Digit & List Utilities",
         "summary": "basic recursion, lambda, return type hints",
         "readme": (
@@ -151,7 +153,7 @@ square = lambda x: x * x
 is_even = lambda x: x % 2 == 0
 ''',
         "test": '''\
-from exercises.stage03.basic02.solution import (
+from exercises.stage03.tier1_basic02.solution import (
     count_digits,
     sum_of_squares_recursive,
     square,
@@ -183,7 +185,7 @@ def test_is_even_lambda():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Rate-Limited Logger Factory + Clamp",
         "summary": "closures, keyword-only args, positional-only params, docstrings & introspection",
         "readme": (
@@ -250,7 +252,7 @@ def function_signature_info(fn) -> dict:
 ''',
         "test": '''\
 import pytest
-from exercises.stage03.mid01.solution import make_logger, clamp, function_signature_info
+from exercises.stage03.tier2_mid01.solution import make_logger, clamp, function_signature_info
 
 
 def test_make_logger_accumulates_and_caps_entries():
@@ -289,7 +291,7 @@ def test_function_signature_info():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Call-Counting Decorator + Validated Config",
         "summary": "a simple decorator, closures, keyword-only args (a different scenario)",
         "readme": (
@@ -355,7 +357,7 @@ def make_validator(*, min_value, max_value=100):
 ''',
         "test": '''\
 import pytest
-from exercises.stage03.mid02.solution import count_calls, greet, make_validator
+from exercises.stage03.tier2_mid02.solution import count_calls, greet, make_validator
 
 
 def test_greet_returns_expected_message():
@@ -392,7 +394,7 @@ def test_make_validator_arguments_are_keyword_only():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "functools Toolkit",
         "summary": "functools.wraps, functools.lru_cache, functools.partial",
         "readme": (
@@ -473,7 +475,7 @@ def fib(n):
 add_ten = functools.partial(lambda a, b: a + b, b=10)
 ''',
         "test": '''\
-from exercises.stage03.advanced01.solution import logged, multiply, fib, add_ten
+from exercises.stage03.tier3_advanced01.solution import logged, multiply, fib, add_ten
 
 
 def test_logged_preserves_metadata_via_functools_wraps():
@@ -509,7 +511,7 @@ def test_add_ten_is_functools_partial():
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Generators, Scope & the Mutable-Default Trap",
         "summary": "yield / generator functions, global + LEGB scoping, the mutable-default-argument bug",
         "readme": (
@@ -605,12 +607,12 @@ def append_safe(item, target=None):
     return target
 ''',
         "test": '''\
-from exercises.stage03.advanced02.solution import (
+from exercises.stage03.tier3_advanced02.solution import (
     batch_generator,
     increment_global,
     make_local_shadow,
 )
-import exercises.stage03.advanced02.solution as solution
+import exercises.stage03.tier3_advanced02.solution as solution
 
 
 def test_batch_generator_yields_slices():

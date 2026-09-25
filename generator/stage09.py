@@ -28,7 +28,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Config File Manager",
         "summary": "os.listdir, os.path, json.load/dump",
         "readme": (
@@ -107,7 +107,7 @@ def list_config_names(directory: str) -> list[str]:
     return sorted(f[:-5] for f in os.listdir(directory) if f.endswith(".json"))
 ''',
         "test": '''\
-from exercises.stage09.basic01.solution import (
+from exercises.stage09.tier1_basic01.solution import (
     config_path,
     config_exists,
     save_config,
@@ -146,7 +146,7 @@ def test_list_config_names_strips_json_suffix(tmp_path):
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Library Catalog: Dates and XML",
         "summary": "datetime.now/isoformat, ElementTree.parse/findall",
         "readme": (
@@ -222,7 +222,7 @@ def count_catalog_books(path: str) -> int:
 ''',
         "test": '''\
 import datetime
-from exercises.stage09.basic02.solution import (
+from exercises.stage09.tier1_basic02.solution import (
     catalog_timestamp,
     parse_catalog_titles,
     parse_catalog_titles_from_string,
@@ -264,7 +264,7 @@ def test_count_catalog_books(tmp_path):
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "pathlib: The Modern os.path Alternative",
         "summary": "pathlib.Path, pathlib as the modern os.path alternative",
         "readme": (
@@ -337,7 +337,7 @@ def find_txt_files(root: str) -> list[str]:
 ''',
         "test": '''\
 import pathlib
-from exercises.stage09.mid01.solution import (
+from exercises.stage09.tier2_mid01.solution import (
     list_entries,
     build_path,
     read_and_write_pathlib,
@@ -377,7 +377,7 @@ def test_find_txt_files_recursive_glob(tmp_path):
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Timezone-Aware Timestamps in JSON",
         "summary": "json.dumps(default=...), timezone-aware vs naive datetimes",
         "readme": (
@@ -474,7 +474,7 @@ def serialize_event(name: str, timestamp) -> str:
 import json
 import datetime
 import pytest
-from exercises.stage09.mid02.solution import (
+from exercises.stage09.tier2_mid02.solution import (
     aware_now_utc,
     is_timezone_aware,
     make_aware,
@@ -517,7 +517,7 @@ def test_serialize_event_uses_datetime_default_under_the_hood():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Recursing with os.walk: File Discovery",
         "summary": "os.walk()",
         "readme": (
@@ -570,7 +570,7 @@ def count_files_by_extension(root: str) -> dict:
     return counts
 ''',
         "test": '''\
-from exercises.stage09.advanced01.solution import find_all_py_files, count_files_by_extension
+from exercises.stage09.tier3_advanced01.solution import find_all_py_files, count_files_by_extension
 
 
 def _make_tree(tmp_path):
@@ -599,7 +599,7 @@ def test_count_files_by_extension(tmp_path):
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Recursing with os.walk: Size and Depth",
         "summary": "os.walk() (two more scenarios)",
         "readme": (
@@ -655,7 +655,7 @@ def max_directory_depth(root: str) -> int:
     return max_depth
 ''',
         "test": '''\
-from exercises.stage09.advanced02.solution import total_size_of_directory, max_directory_depth
+from exercises.stage09.tier3_advanced02.solution import total_size_of_directory, max_directory_depth
 
 
 def _make_tree(tmp_path):

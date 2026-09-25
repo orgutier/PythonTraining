@@ -29,7 +29,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Session Log Files",
         "summary": "open(), with, as",
         "readme": (
@@ -90,7 +90,7 @@ def count_lines(path: str) -> int:
         return len(f.read().splitlines())
 ''',
         "test": '''\
-from exercises.stage05.basic01.solution import (
+from exercises.stage05.tier1_basic01.solution import (
     write_lines,
     read_lines,
     append_line,
@@ -121,7 +121,7 @@ def test_count_lines(tmp_path):
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Support Ticket Intake",
         "summary": "try, except, finally, raise, Exception, re.search(), re.findall(), re.match(), re.sub()",
         "readme": (
@@ -240,7 +240,7 @@ def get_parse_attempts() -> int:
 ''',
         "test": '''\
 import pytest
-from exercises.stage05.basic02.solution import (
+from exercises.stage05.tier1_basic02.solution import (
     extract_ticket_ids,
     contains_urgent_flag,
     clean_ticket_text,
@@ -297,7 +297,7 @@ def test_parse_priority_with_default_and_finally_counts_every_attempt():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Order Validation Pipeline",
         "summary": "exception hierarchies, exception chaining (raise ... from ...)",
         "readme": (
@@ -404,7 +404,7 @@ def fulfill_order(quantity: int, stock: int) -> int:
 ''',
         "test": '''\
 import pytest
-from exercises.stage05.mid01.solution import (
+from exercises.stage05.tier2_mid01.solution import (
     OrderError,
     OrderValidationError,
     OrderProcessingError,
@@ -467,7 +467,7 @@ def test_fulfill_order():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Config and Log Parsers",
         "summary": "re.compile(), regex named groups",
         "readme": (
@@ -555,7 +555,7 @@ def parse_log_entry(line: str) -> dict:
 ''',
         "test": '''\
 import pytest
-from exercises.stage05.mid02.solution import parse_config_line, find_date, parse_log_entry
+from exercises.stage05.tier2_mid02.solution import parse_config_line, find_date, parse_log_entry
 
 
 def test_parse_config_line_uses_compiled_pattern_and_named_groups():
@@ -593,7 +593,7 @@ def test_parse_log_entry_invalid_raises():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Class-Based Context Managers",
         "summary": "__enter__/__exit__",
         "readme": (
@@ -696,7 +696,7 @@ class FileLineCounter:
 ''',
         "test": '''\
 import pytest
-from exercises.stage05.advanced01.solution import Timer, SuppressErrors, FileLineCounter
+from exercises.stage05.tier3_advanced01.solution import Timer, SuppressErrors, FileLineCounter
 
 
 def test_timer_records_elapsed():
@@ -730,7 +730,7 @@ def test_file_line_counter(tmp_path):
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Generator-Based Context Managers",
         "summary": "@contextlib.contextmanager",
         "readme": (
@@ -812,7 +812,7 @@ def timing_block(results: list):
 ''',
         "test": '''\
 import pytest
-from exercises.stage05.advanced02.solution import temporary_value, suppress_and_log, timing_block
+from exercises.stage05.tier3_advanced02.solution import temporary_value, suppress_and_log, timing_block
 
 
 class _Config:

@@ -5,7 +5,7 @@ Tier-named convention (see generator/stage01.py for the full rationale):
 minimum two exercises per Basic/Mid/Advanced tier, script-style (plain
 top-level code, no function to implement) wherever the tier's own content
 doesn't itself require one. Stage 2 still hasn't taught `def` (that's
-Stage 3), so every exercise here is script-style *except* advanced01,
+Stage 3), so every exercise here is script-style *except* tier3_advanced01,
 which is deliberately class-based -- writing a custom iterator is this
 tier's own named learning objective (see data.js's Advanced tier text:
 "custom iterable/iterator class... the iterator protocol").
@@ -32,7 +32,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Warehouse Grid Scanner",
         "summary": "nested for + range(), if/elif/else, continue, pass, while + break",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -125,7 +125,7 @@ while row_cursor >= 0:
     row_cursor -= 1
 ''',
         "test": '''\
-import exercises.stage02.basic01.solution as solution
+import exercises.stage02.tier1_basic01.solution as solution
 
 
 def test_obstacle_count():
@@ -160,7 +160,7 @@ def test_last_obstacle_row_via_while_and_break():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Bus Route Ticket Counter",
         "summary": "while as the main loop, if/elif/else, break, continue, pass, nested for",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -248,7 +248,7 @@ for section in range(sections):
 capacity_is_valid = capacity <= total_seats
 ''',
         "test": '''\
-import exercises.stage02.basic02.solution as solution
+import exercises.stage02.tier1_basic02.solution as solution
 
 
 def test_passengers_after_processing():
@@ -283,7 +283,7 @@ def test_capacity_is_valid():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Shift Coverage Checker",
         "summary": "for...else, a short-circuit guard, a ternary, zip()",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -362,7 +362,7 @@ for name, hours in zip(scheduled_names, shift_hours):
         overtime_names.append(name)
 ''',
         "test": '''\
-import exercises.stage02.mid01.solution as solution
+import exercises.stage02.tier2_mid01.solution as solution
 
 
 def test_all_checked_in_via_for_else():
@@ -391,7 +391,7 @@ def test_overtime_names_via_zip():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "Inventory Restock Matcher",
         "summary": "while...else, a short-circuit guard, a ternary, zip() -- a different combination",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -457,7 +457,7 @@ for name, level in zip(item_names, stock_levels):
         low_stock_items.append(name)
 ''',
         "test": '''\
-import exercises.stage02.mid02.solution as solution
+import exercises.stage02.tier2_mid02.solution as solution
 
 
 def test_out_of_stock_index_via_while_else():
@@ -481,7 +481,7 @@ def test_low_stock_items_via_zip():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Custom Iterator: CountdownTimer",
         "summary": "a class implementing the iterator protocol (__iter__/__next__/StopIteration) by hand",
         "readme": (
@@ -535,7 +535,7 @@ class CountdownTimer:
         "test": '''\
 import pytest
 
-from exercises.stage02.advanced01.solution import CountdownTimer
+from exercises.stage02.tier3_advanced01.solution import CountdownTimer
 
 
 def test_list_of_countdown_timer():
@@ -576,7 +576,7 @@ def test_for_loop_consumes_it_correctly():
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Round-Robin Task Scheduler",
         "summary": "itertools.chain + itertools.cycle + itertools.islice, combined",
         "instructions": SCRIPT_INSTRUCTIONS,
@@ -634,7 +634,7 @@ for task, worker in assignments:
     worker_task_counts[worker] = worker_task_counts.get(worker, 0) + 1
 ''',
         "test": '''\
-import exercises.stage02.advanced02.solution as solution
+import exercises.stage02.tier3_advanced02.solution as solution
 
 
 def test_all_tasks_via_chain():

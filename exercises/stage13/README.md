@@ -4,11 +4,11 @@ Six exercises, two per tier: routing with path/query parameters plus running the
 
 ## Exercises
 
-Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage13_<name>` (e.g. `python tools/cli.py test stage13_basic01`). Work through them in order.
+Each exercise below lives in its own folder with its own `solution.py` (the entry point) and `README.md` (the problem statement), and is independently testable with `python tools/cli.py test stage13_<name>` (e.g. `python tools/cli.py test stage13_tier1_basic01`). Work through them in order.
 
-- **`basic01/`** -- FastAPI(), @app.get, @app.post, path & query parameters
-- **`basic02/`** -- FastAPI(), @app.get, @app.post, uvicorn.run
-- **`mid01/`** -- pydantic.BaseModel
-- **`mid02/`** -- Depends, dependency injection, automatic interactive docs (/docs)
-- **`advanced01/`** -- async def endpoints
-- **`advanced02/`** -- TestClient()
+- **`tier1_basic01/`** -- FastAPI(), @app.get, @app.post, path & query parameters
+- **`tier1_basic02/`** -- FastAPI(), @app.get, @app.post, uvicorn.run
+- **`tier2_mid01/`** -- pydantic.BaseModel
+- **`tier2_mid02/`** -- Depends, dependency injection, automatic interactive docs (/docs)
+- **`tier3_advanced01/`** -- async def endpoints
+- **`tier3_advanced02/`** -- TestClient()

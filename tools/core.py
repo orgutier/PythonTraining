@@ -16,8 +16,9 @@ EXAMS = [f"exam{n:02d}" for n in range(1, 4)]
 def _discover_exercises() -> list:
     """Every "stageNN_<name>" id with a tests/test_stageNN_<name>.py file on
     disk, sorted. "<name>" is whatever generate.py named that exercise's
-    folder -- historically "exerciseXX", but a stage piloting the tier-named
-    convention (e.g. "basic01", "hello_world") works the same way. Computed
+    folder -- historically "exerciseXX" (still true for the Capstone
+    stage), but every other stage uses the tier-named convention (e.g.
+    "tier1_basic01", "tier0_hello_world") and works the same way. Computed
     from the filesystem (not hardcoded) so it can't drift out of sync with
     what generate.py actually produced."""
     tests_dir = REPO_ROOT / "tests"

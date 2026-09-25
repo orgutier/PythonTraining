@@ -31,7 +31,7 @@ OVERVIEW = (
 
 EXERCISES = [
     {
-        "name": "basic01",
+        "name": "tier1_basic01",
         "title": "Race Results Ledger",
         "summary": "list, tuple, append(), sort()/sorted(), zip(), enumerate(), len()",
         "readme": (
@@ -110,7 +110,7 @@ def racer_count(names: list[str]) -> int:
     return len(names)
 ''',
         "test": '''\
-from exercises.stage04.basic01.solution import (
+from exercises.stage04.tier1_basic01.solution import (
     build_results,
     rank_by_time,
     fastest_n,
@@ -155,7 +155,7 @@ def test_racer_count():
 ''',
     },
     {
-        "name": "basic02",
+        "name": "tier1_basic02",
         "title": "Inventory Category Summary",
         "summary": "dict, set, dict comprehension, list comprehension, zip(), len()",
         "readme": (
@@ -237,7 +237,7 @@ def product_count(names: list[str]) -> int:
     return len(names)
 ''',
         "test": '''\
-from exercises.stage04.basic02.solution import (
+from exercises.stage04.tier1_basic02.solution import (
     category_by_product,
     unique_categories,
     products_in_category,
@@ -278,7 +278,7 @@ def test_product_count():
 ''',
     },
     {
-        "name": "mid01",
+        "name": "tier2_mid01",
         "title": "Player Records: Dataclass vs. namedtuple",
         "summary": "dataclasses.dataclass, __eq__, collections module (namedtuple), dataclasses module, records",
         "readme": (
@@ -366,7 +366,7 @@ def records_are_equal(a: PlayerRecord, b: PlayerRecord) -> bool:
     return a == b
 ''',
         "test": '''\
-from exercises.stage04.mid01.solution import (
+from exercises.stage04.tier2_mid01.solution import (
     Player,
     PlayerRecord,
     convert_to_record,
@@ -403,7 +403,7 @@ def test_records_are_equal_uses_namedtuple_field_equality():
 ''',
     },
     {
-        "name": "mid02",
+        "name": "tier2_mid02",
         "title": "League Membership Analyzer",
         "summary": "set operations: union, intersection, difference",
         "readme": (
@@ -480,7 +480,7 @@ def symmetric_difference_manual(east: set, west: set) -> set:
     return (east - west) | (west - east)
 ''',
         "test": '''\
-from exercises.stage04.mid02.solution import (
+from exercises.stage04.tier2_mid02.solution import (
     both_conferences,
     all_players,
     east_only,
@@ -521,7 +521,7 @@ def test_symmetric_difference_manual_matches_builtin_xor():
 ''',
     },
     {
-        "name": "advanced01",
+        "name": "tier3_advanced01",
         "title": "Log Aggregator",
         "summary": "collections.defaultdict(), collections.Counter() x2, collections.deque() x2",
         "readme": (
@@ -618,7 +618,7 @@ def rotate_entries(entries: list[str], k: int) -> list[str]:
     return list(d)
 ''',
         "test": '''\
-from exercises.stage04.advanced01.solution import (
+from exercises.stage04.tier3_advanced01.solution import (
     entries_by_level,
     level_counts,
     most_common_level,
@@ -662,7 +662,7 @@ def test_rotate_entries_uses_deque_rotate():
 ''',
     },
     {
-        "name": "advanced02",
+        "name": "tier3_advanced02",
         "title": "Hashable Records: Frozen Dataclasses and Manual __hash__",
         "summary": "__hash__, hashability -- automatic (frozen dataclass) and manual (__eq__ + __hash__ pair)",
         "readme": (
@@ -798,7 +798,7 @@ def dedupe_preserving_order(items: list) -> list:
 ''',
         "test": '''\
 import pytest
-from exercises.stage04.advanced02.solution import (
+from exercises.stage04.tier3_advanced02.solution import (
     Point,
     FrozenPoint,
     SimpleFraction,

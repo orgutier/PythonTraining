@@ -10,9 +10,9 @@ PythonTraining/
 ├── exercises/            One folder per stage, one subfolder per exercise --
 │   └── stageNN/            trainees edit each exercise's own solution.py.
 │       ├── README.md      Stage overview + list of that stage's exercises
-│       └── <name>/          "exerciseXX" on most stages; "basicXX"/"midXX"/
-│           ├── README.md    "advancedXX"/"hello_world" on a stage piloting
-│           └── solution.py  the tier-named convention -- see below.
+│       └── <name>/          "exerciseXX" on the Capstone stage; every other
+│           ├── README.md    stage uses "tierN_<name>XX" -- see below.
+│           └── solution.py
 │                            Stub with signatures + docstrings (or, for a
 │                            script-style exercise, top-level statements),
 │                            raises NotImplementedError until filled in. No
@@ -85,43 +85,66 @@ Every stage's exercises are designed so that every keyword, builtin, dunder,
 stdlib module, and named concept from that stage's presentation topic
 (`presentation/data.js`) gets exercised by the trainee's own code in **at
 least three separate places** within that stage -- not just demonstrated
-once and moved past. That's why most stages have five to eight exercises
+once and moved past. That's why most stages have six or seven exercises
 instead of one: the extra exercises exist specifically to revisit the same
 handful of constructs from a different angle, not to introduce new scope.
 Stage 14 (Capstone) is the one exception -- see `generator/stage14.py` for
 why.
 
-### Stage 1's tier-named exercise convention (pilot)
+### The tier-named exercise convention
 
-Stage 1 pilots a different exercise shape, which the rest of the stages may
-move to later once this holds up in practice:
+Every stage but the Capstone uses one exercise shape:
 
-- **Named by tier, not sequence.** Instead of `exercise01`..`exercise06`,
-  Stage 1 has `hello_world` (for the Setup sub-stage -- see "Presentation"
-  below) plus a **minimum of two exercises per Basic/Mid/Advanced tier**:
-  `basic01`/`basic02`, `mid01`/`mid02`, `advanced01`/`advanced02`. Test ids
-  follow the same shape, e.g. `python tools/cli.py test stage01_basic01`.
-- **Script-style, not function-style.** Every one of these is plain
-  top-level code -- specific module-level variable names the tests import
-  and read directly -- not a function/class to implement. Stage 1 hasn't
-  taught `def` yet (that's Stage 3), so there's no reason to force
-  anything into a function just to have something to call from a test.
-  Other stages still use the function-based stub pattern where it's the
-  natural fit; script-style is used where it lets a trainee write real
-  code without a premature abstraction, not as a blanket rule.
+- **Named by tier, and tier-number-prefixed so a plain directory listing
+  sorts in learning order.** Instead of `exercise01`..`exercise06`, each
+  stage has a **minimum of two exercises per Basic/Mid/Advanced tier**:
+  `tier1_basic01`/`tier1_basic02`, `tier2_mid01`/`tier2_mid02`,
+  `tier3_advanced01`/`tier3_advanced02`. The leading `tierN_` exists
+  purely so `ls`/a file browser lists them Basic-then-Mid-then-Advanced
+  instead of alphabetically (which would put Advanced first). Test ids
+  follow the same shape, e.g.
+  `python tools/cli.py test stage01_tier1_basic01`. Two stages add one
+  more folder outside that numbering:
+  - Stage 1 alone also has `tier0_hello_world`, for the Setup sub-stage
+    (see "Presentation" below) -- numbered `0` so it sorts before Basic.
+  - Stages 1-7 each also have a single `tier4_testing` exercise -- manual,
+    framework-free verification practice (writing your own `assert`-based
+    checks against that stage's own topics) -- numbered `4` so it sorts
+    after Advanced. See "The Testing tier" below.
+- **Script-style where the stage hasn't taught `def` yet, function-style
+  everywhere else.** Stage 1's exercises are plain top-level code --
+  specific module-level variable names the tests import and read directly
+  -- not a function/class to implement, since Stage 1 hasn't taught `def`
+  yet (that's Stage 3). Every later stage uses the function-based stub
+  pattern where it's the natural fit; script-style is used where it lets a
+  trainee write real code without a premature abstraction, not as a
+  blanket rule.
 - **Non-trivial by design.** None of these are a bare "print this value."
   Each is a small, self-contained scenario (a fuel-cost ledger, a marathon
-  pace report, exact-vs-float currency drift, ...) that forces you to
-  combine several of that tier's tools at once, the same "integration
-  over demonstration" philosophy the interview challenges and exams use
-  at a bigger scale.
+  pace report, a card-deck collection protocol, ...) that forces you to
+  combine several of that tier's tools at once, the same "integration over
+  demonstration" philosophy the interview challenges and exams use at a
+  bigger scale.
 - **One consequence worth knowing:** because a script-style exercise
   raises `NotImplementedError` at *import* time rather than inside a
   function body, pytest treats an unfilled one as a **collection error**
   for that file, not a per-test failure. `tools/core.py` always runs
   pytest with `--continue-on-collection-errors` specifically so that one
-  unfilled Stage 1 exercise never takes down the rest of the suite's
+  unfilled script-style exercise never takes down the rest of the suite's
   results.
+
+### The Testing tier
+
+Stages 1-7 (Python Fundamentals through OOP II) each add a `tier4_testing`
+exercise that has nothing to do with `pytest`. Trainees don't meet a test
+framework until much later in the course (see "Running tests" below), but
+the *instinct* -- state what a piece of code should do, then mechanically
+check that it actually does it -- is worth practicing from day one, with
+tools they already have: plain `assert`, `==`, and a hand-rolled
+`check(actual, expected)`-style helper of their own, run straight from
+`solution.py`. Each one exercises that stage's own topics (e.g. Stage 4's
+`tier4_testing` writes checks against data-structure code), so it's also
+one more rep of that stage's material, not a detour into new scope.
 
 ## Setup
 
@@ -141,7 +164,7 @@ point of the GUI. Both tools call the same underlying test-running code
 ```bash
 python tools/cli.py list                    # see all 14 stages, their exercises, 26 challenges, + 3 exams
 python tools/cli.py test stage01             # run every exercise in one stage
-python tools/cli.py test stage01_basic01     # run just that one exercise (stage02_exercise03 on most other stages)
+python tools/cli.py test stage01_tier1_basic01  # run just that one exercise (stage14_exercise03 on the Capstone)
 python tools/cli.py test challenge01        # run one interview challenge
 python tools/cli.py test exam01             # run one evaluation exam
 python tools/cli.py test --all              # run everything (stages + challenges + exams)
@@ -160,12 +183,12 @@ let a `test --all` pick them up.
 
 Every failure or error -- whether it's a normal assertion failure, or a
 script-style exercise's whole module failing to *import* because of its
-`raise NotImplementedError` (see "Stage 1's tier-named exercise
-convention" above) -- gets a **"requirement" section** appended right
-below it, care of `conftest.py`:
+`raise NotImplementedError` (see "The tier-named exercise convention"
+above) -- gets a **"requirement" section** appended right below it, care
+of `conftest.py`:
 
 ```
-FAILED tests/test_stage01_basic01.py::test_total_cost
+FAILED tests/test_stage01_tier1_basic01.py::test_total_cost
 
     def test_total_cost():
         """total_cost == total_fuel_liters * fuel_price_per_liter."""
@@ -174,7 +197,7 @@ E       assert 1528.47 == 77.2497 ± 7.7e-05
 
 --------------------------------- requirement ----------------------------------
 Checks: total_cost == total_fuel_liters * fuel_price_per_liter.
-Full requirement: exercises/stage01/basic01/README.md (exists)
+Full requirement: exercises/stage01/tier1_basic01/README.md (exists)
 ```
 
 Two independent things happen here, and neither needs any per-exercise
@@ -207,7 +230,7 @@ A ready-to-run pre-commit + pre-push hook is included:
   `exams/examNN/solution.py`, or `challenges/challengeNN/solution.py`
   files are staged, maps each one to its own exercise/exam/challenge id,
   and runs `python tools/cli.py test <id>` for **only** that one --
-  `stage02_exercise03`, not all of `stage02`. Fast, focused feedback on
+  `stage02_tier1_basic01`, not all of `stage02`. Fast, focused feedback on
   exactly what you just changed. Always this granularity, not
   configurable.
 - **pre-push** does the same mapping over whatever changed between the
@@ -297,14 +320,15 @@ trainer/trainee, not fixed to a training-stage's number of days. Stage 1
 (Python Fundamentals) is the only one with a **Setup** sub-stage --
 installing Python, creating the virtual environment, running
 `tools/cli.py` for the first time, touring the repo, and finishing with
-the `hello_world` exercise (`python tools/cli.py test stage01_hello_world`)
-as the first graded, green checkmark of the course -- since it's the
-only point in the course where none of that exists yet. Every
-stage then goes **Learn**, **Practice** (work the stage's exercises),
-and **Review** (finish up, get the stage's tests green, review as a
-group). Stage 14 (Capstone) swaps that shape for its own 4-sub-stage
-project process (Kickoff, Build, Polish, Demo & Review) instead of
-tiers, since it has no new content of its own.
+the `tier0_hello_world` exercise
+(`python tools/cli.py test stage01_tier0_hello_world`) as the first
+graded, green checkmark of the course -- since it's the only point in
+the course where none of that exists yet. Every stage then goes
+**Learn**, **Practice** (work the stage's exercises), and **Review**
+(finish up, get the stage's tests green, review as a group). Stage 14
+(Capstone) swaps that shape for its own 4-sub-stage project process
+(Kickoff, Build, Polish, Demo & Review) instead of tiers, since it has
+no new content of its own.
 
 **Learn** is deliberately explicit, not just a link -- this is a
 trainer's reference, so it spells out every keyword/method/dunder/
