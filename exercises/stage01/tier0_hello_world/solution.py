@@ -12,7 +12,11 @@ stay the entry point these tests import from.
 """
 
 
-raise NotImplementedError  # delete this line once you've written the two lines below
+greeting = "Hello, World!"
+print(greeting)
+
+author_name = "Osvaldo"
+print("This is " + author_name + "'s first Python program.")
 
 # Write your code here: assign `greeting` and `author_name`, and print both
 # lines exactly as described in README.md.
