@@ -383,6 +383,26 @@ html, body{
 }
 .internals p{ margin: 0; color: var(--text); }
 
+.setup-page{
+  max-width: var(--max-line);
+}
+.setup-section{
+  margin-bottom: 26px;
+}
+.setup-section h2{
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+.setup-section p{
+  margin: 0 0 10px;
+  color: var(--text);
+}
+.setup-section .vscode-block{
+  margin-top: 4px;
+}
+
 .meta-row{
   display: flex;
   flex-wrap: wrap;

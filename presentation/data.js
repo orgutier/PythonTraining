@@ -3,6 +3,64 @@
 
 const TOPICS = [
 {
+  n: 0, title: "Setup", sub: "configure your environment, get your first green checkmark",
+  isSetupPage: true,
+  setupSections: [
+    {
+      heading: "Prerequisites",
+      body: "Python 3.11 or newer, Git, a code editor (VS Code is a reasonable default if you don't already have a preference), and a terminal. If you can run `python --version` and `git --version` and both print something, you're ready to start."
+    },
+    {
+      heading: "1. Clone the repo and create your branch",
+      body: "Before you touch anything else: create your own branch, named exactly `training/<your-username>` (replace `<your-username>` with your own name or handle -- all lowercase, no spaces; use a hyphen if you need one, e.g. `training/ada-lovelace`). This is how your work gets identified once you push it -- do this first, not after you've already started editing exercises on whatever branch you happened to be on.",
+      code: "git clone https://github.com/orgutier/PythonTraining.git\ncd PythonTraining\ngit checkout -b training/<your-username>",
+      filename: "terminal"
+    },
+    {
+      heading: "2. Create a virtual environment and install dependencies",
+      body: "A virtual environment keeps this course's dependencies (pytest, pandas, opencv-python-headless, fastapi, ...) separate from anything else on your machine. Create one, activate it, then install from requirements.txt. You'll need to re-activate it (just the `activate` line) every time you open a new terminal to work on this repo.",
+      code: "python -m venv .venv\nsource .venv/bin/activate        # .venv\\Scripts\\activate on Windows\npip install -r requirements.txt",
+      filename: "terminal"
+    },
+    {
+      heading: "3. Install the git hooks",
+      body: "This points git at the repo's tracked .githooks/ folder, so a pre-commit and a pre-push check run automatically from here on. Both only test the specific exercise(s) you actually touched -- never the whole suite -- so they stay fast enough to run on every commit. See \"Using git hooks\" below for what each one actually does.",
+      code: "sh tools/install-git-hooks.sh    # macOS/Linux\ntools\\install-git-hooks.bat      # Windows",
+      filename: "terminal"
+    },
+    {
+      heading: "4. Take a first look around",
+      body: "exercises/ is where you'll actually work -- one folder per stage, one subfolder per exercise, each with its own README.md (the problem statement) and solution.py (the stub you fill in). reference_solutions/ holds the worked answer key, mirroring the same layout -- it's there for after you've made a real attempt, not instead of one. tests/ is what actually grades you; you generally won't need to read it. This presentation (presentation/) has no graded exercises of its own -- keep it open in a second window while you work through the stages."
+    },
+    {
+      heading: "5. Run your first exercise: tier0_hello_world",
+      body: "Stage 1 (Python Fundamentals) has a tiny Setup exercise whose only job is proving your environment actually works, before you get into any real content. Run its test now -- it will fail, because the stub hasn't been filled in yet:",
+      code: "python tools/cli.py test stage01_tier0_hello_world",
+      filename: "terminal"
+    },
+    {
+      heading: "",
+      body: "Open exercises/stage01/tier0_hello_world/solution.py and exercises/stage01/tier0_hello_world/README.md side by side, follow the README's instructions, save, then run the same command again. Once it passes, you've got your first graded, green checkmark of the course -- and proof your setup is good. Move on to Topic 1 in the sidebar for the rest of Stage 1."
+    },
+    {
+      heading: "Using tools/cli.py",
+      body: "The command-line test runner. Four shapes you'll use constantly:",
+      code: "python tools/cli.py list                        # every stage, its exercises, the challenges, and the exams\npython tools/cli.py test stage01                 # every exercise in one stage\npython tools/cli.py test stage01_tier1_basic01   # just that one exercise\npython tools/cli.py test --all                   # the full suite (stages + challenges + exams)",
+      filename: "terminal"
+    },
+    {
+      heading: "Using tools/gui.py (no command line needed)",
+      body: "If you'd rather not use the terminal for this part, run `python tools/gui.py`. Pick a stage from the first dropdown, then either leave the second dropdown on \"All exercises (whole stage)\" or pick one specific exercise to test just that one, click \"Run Tests\", and read the colored pass/fail output.",
+      code: "python tools/gui.py",
+      filename: "terminal"
+    },
+    {
+      heading: "Using git hooks: committing and pushing your work",
+      body: "With the hooks installed (step 3 above), committing and pushing are self-checking. `git commit` runs a pre-commit check that tests only the exercise(s) you staged -- fast, focused feedback on exactly what you just changed. `git push` runs a pre-push check that re-verifies everything your branch is ahead of the shared remote by (so nothing broken slips through even if you ever use `git commit --no-verify`) -- on your branch's very first push, that means everything since it diverged from the shared history, not your whole repo. Neither hook ever runs the full suite; a commit or push that doesn't touch any exercise file passes straight through untested. You can skip a single check with `git commit --no-verify` / `git push --no-verify` if you genuinely need to, but that should be the exception, not the habit -- and remember, your branch must stay named `training/<your-username>` for your pushed work to be recognized as yours."
+    }
+  ]
+},
+{
   n: 1, title: "Python Fundamentals", sub: "variables, types, operators",
   challenges: [
     {

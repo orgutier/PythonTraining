@@ -22,6 +22,17 @@
 # before it ships. A push that doesn't touch any exercise/exam/challenge
 # file passes through untested (nothing to check).
 #
+# On the very first push of a brand-new branch (e.g. your
+# training/<username> branch), there's no remote state for THIS ref to
+# diff against yet -- but that must NOT be read as "every file in the
+# repo is changed". This still only tests the commits your branch is
+# ahead of the shared default branch by: it finds that branch (whatever
+# origin/HEAD points to as of your last fetch, falling back to
+# origin/main / origin/master) and diffs from git merge-base(local,
+# base) instead, so the untouched exercises/ scaffolding you started
+# from -- already shared with everyone -- never gets re-tested, only
+# whatever your own commits actually changed.
+#
 # Git feeds this hook one line per ref being pushed on stdin:
 #   <local ref> <local sha1> <remote ref> <remote sha1>
 
@@ -48,9 +59,30 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     fi
 
     if [ "$remote_sha" = "$ZERO" ]; then
-        # Brand-new ref on the remote: nothing to diff against, so
-        # every solution.py that exists at this commit counts as "changed".
-        changed=$(git ls-tree -r --name-only "$local_sha")
+        # Brand-new ref on the remote (typically the first push of a new
+        # training/<username> branch): find the shared default branch as
+        # of your last fetch, and diff from where this branch actually
+        # diverged from it -- NOT from nothing, which would make every
+        # file in the repo look "changed".
+        base_ref=""
+        for candidate in "$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null)" origin/main origin/master; do
+            if [ -n "$candidate" ] && git rev-parse --verify -q "$candidate^{commit}" >/dev/null 2>&1; then
+                base_ref="$candidate"
+                break
+            fi
+        done
+
+        merge_base=""
+        if [ -n "$base_ref" ]; then
+            merge_base=$(git merge-base "$local_sha" "$base_ref" 2>/dev/null)
+        fi
+
+        if [ -n "$merge_base" ]; then
+            changed=$(git diff --name-only --diff-filter=ACM "$merge_base" "$local_sha")
+        else
+            echo "pre-push: no origin/main (or origin/master) found locally to diff this new branch against -- falling back to testing every file at $local_sha. Run 'git fetch origin' and push again for a scoped check." >&2
+            changed=$(git ls-tree -r --name-only "$local_sha")
+        fi
     else
         changed=$(git diff --name-only --diff-filter=ACM "$remote_sha" "$local_sha")
     fi

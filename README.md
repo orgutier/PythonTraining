@@ -148,11 +148,24 @@ one more rep of that stage's material, not a detour into new scope.
 
 ## Setup
 
+Before installing anything, create your own branch -- named exactly
+`training/<your-username>` (all lowercase, hyphen-separated, e.g.
+`training/ada-lovelace`) -- and do your work there, not on whatever
+branch you happened to clone with:
+
+```bash
+git checkout -b training/<your-username>
+```
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate        # .venv\Scripts\activate on Windows
 pip install -r requirements.txt
 ```
+
+New here? `presentation/index.html`'s **Setup** page (the first sidebar
+entry) walks through all of this, plus installing the git hooks and
+running your first exercise, in one place -- see "Presentation" below.
 
 ## Running tests
 
@@ -174,10 +187,13 @@ python tools/cli.py test --all              # run everything (stages + challenge
 ```bash
 python tools/gui.py
 ```
-Pick a stage from the dropdown, click "Run Tests", read the colored
-pass/fail output. No command-line knowledge required. The GUI's dropdown
-is stages-only -- run challenge tests from the CLI (`test challengeNN`) or
-let a `test --all` pick them up.
+Pick a stage from the first dropdown, then either leave the second
+dropdown on "All exercises (whole stage)" or pick one specific exercise
+(e.g. `tier1_basic01`) to test just that one, click "Run Tests", read the
+colored pass/fail output. No command-line knowledge required. The GUI's
+dropdowns are stages/exercises-only -- run challenge or exam tests from
+the CLI (`test challengeNN` / `test examNN`) or let a `test --all` pick
+them up.
 
 ### Reading a failure: what's actually missing
 
@@ -305,6 +321,16 @@ concepts, and theory. It intentionally contains no exercises or
 answers -- it's meant to sit open next to your terminal and editor as a
 lookup tool, matching the actual working environment (cmd + VS Code)
 the course is delivered in.
+
+The sidebar's first entry, **Setup**, is a standalone onboarding page
+(not one of the 14 numbered topics -- it's excluded from the "Topic X of
+14" counter) walking through everything in this README's own "Setup" and
+"Running tests" sections in one place, in order: prerequisites, cloning
+the repo and creating your `training/<your-username>` branch, the
+virtual environment, installing the git hooks, a first look around the
+repo, running the `tier0_hello_world` exercise for your first green
+checkmark, and how to use `tools/cli.py`/`tools/gui.py` and the git hooks
+from there on. Point new trainees at it before anything else.
 
 Every tier's explanation (`basic`/`mid`/`advanced` in `presentation/data.js`)
 is written as full explanatory prose, not a bare list of keywords -- each

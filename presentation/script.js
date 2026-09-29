@@ -180,12 +180,55 @@
     return list.map(challengeCard);
   }
 
-  function renderDetail(topic) {
+  function setupSectionBlock(section) {
+    const wrap = document.createElement("div");
+    wrap.className = "setup-section";
+    if (section.heading) {
+      const h2 = document.createElement("h2");
+      h2.textContent = section.heading;
+      wrap.appendChild(h2);
+    }
+    if (section.body) {
+      const p = document.createElement("p");
+      p.textContent = section.body;
+      wrap.appendChild(p);
+    }
+    if (section.code) {
+      wrap.insertAdjacentHTML("beforeend", codeBlockHtml(section.code, section.filename));
+    }
+    return wrap;
+  }
+
+  function renderSetupDetail(topic) {
     detailEl.innerHTML = "";
 
     detailEl.insertAdjacentHTML("beforeend",
       '<div class="topic-head">' +
-      '<div class="num">Topic ' + String(topic.n).padStart(2, "0") + " of " + TOPICS.length + "</div>" +
+      '<div class="num">Start here</div>' +
+      "<h1>" + escapeHtml(topic.title) + "</h1>" +
+      '<div class="sub">' + escapeHtml(topic.sub) + "</div>" +
+      "</div>"
+    );
+
+    const wrap = document.createElement("div");
+    wrap.className = "setup-page";
+    (topic.setupSections || []).forEach((section) => wrap.appendChild(setupSectionBlock(section)));
+    detailEl.appendChild(wrap);
+
+    document.getElementById("main").scrollTop = 0;
+  }
+
+  function renderDetail(topic) {
+    if (topic.isSetupPage) {
+      renderSetupDetail(topic);
+      return;
+    }
+
+    detailEl.innerHTML = "";
+
+    detailEl.insertAdjacentHTML("beforeend",
+      '<div class="topic-head">' +
+      '<div class="num">Topic ' + String(topic.n).padStart(2, "0") + " of " + (TOPICS.length - 1) + "</div>" +
       "<h1>" + escapeHtml(topic.title) + "</h1>" +
       '<div class="sub">' + escapeHtml(topic.sub) + "</div>" +
       "</div>"
