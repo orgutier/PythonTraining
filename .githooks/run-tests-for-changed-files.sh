@@ -3,11 +3,15 @@
 # files named exactly "pre-commit"/"pre-push"/etc., so this is ignored by
 # git and only run when those hooks source/call it).
 #
-# Usage: run-tests-for-changed-files.sh [exercise|stage]
+# Usage: run-tests-for-changed-files.sh [exercise|stage] <treeish>
 #   exercise (default) -- test ONLY the specific exercise(s) that changed
 #   stage               -- test the WHOLE stage for any exercise that
 #                          changed in it (every exercise in that stage,
 #                          not just the one(s) that changed)
+#   treeish             -- required: the git tree/commit to actually run
+#                          pytest against (see below). Callers pass the
+#                          staged index tree (pre-commit) or the commit
+#                          being pushed (pre-push).
 #
 # Either way, a changed exams/examNN/solution.py or
 # challenges/challengeNN/solution.py always tests as just that one exam/
@@ -19,8 +23,23 @@
 # tools/cli.py test <id>" once per unique id found -- never the full
 # suite. Exits non-zero if any of those runs fail; exits 0 (nothing to
 # test) if no matching file appears in the input at all.
+#
+# Whatever's currently sitting in the working directory (unstaged edits,
+# a half-finished change to a DIFFERENT exercise, etc.) must never affect
+# the verdict here -- pre-commit has to judge exactly what's about to be
+# committed (the staged index), and pre-push exactly what's about to be
+# pushed (the commit tip), neither of which is necessarily what's on
+# disk right now. So $treeish gets materialized into a throwaway
+# directory with `git archive`, and pytest runs there instead of in
+# place.
 
 granularity="${1:-exercise}"
+treeish="$2"
+
+if [ -z "$treeish" ]; then
+    echo "run-tests-for-changed-files.sh: missing required <treeish> argument" >&2
+    exit 1
+fi
 
 # An exercise folder is named "exerciseXX" (the Capstone stage) or, on
 # every stage using the tier-named convention, "tierN_<name>XX" -- the
@@ -58,11 +77,19 @@ if [ -z "$ids" ]; then
     exit 0
 fi
 
+workdir=$(mktemp -d) || exit 1
+trap 'rm -rf "$workdir"' EXIT
+
+if ! git archive "$treeish" | tar -x -C "$workdir"; then
+    echo "run-tests-for-changed-files.sh: failed to materialize $treeish for testing" >&2
+    exit 1
+fi
+
 overall_status=0
 for id in $ids; do
     echo ""
     echo "==> python tools/cli.py test $id"
-    python tools/cli.py test "$id"
+    (cd "$workdir" && python tools/cli.py test "$id")
     status=$?
     if [ $status -ne 0 ]; then
         overall_status=1

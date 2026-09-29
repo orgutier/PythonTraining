@@ -274,7 +274,21 @@ A ready-to-run pre-commit + pre-push hook is included:
 Neither hook runs the full suite or `test --all`. A commit or push that
 doesn't touch any exercise/exam/challenge file (docs, tests, the
 presentation, anything else) passes straight through untested, since
-there's nothing new to check. Install it once per local clone:
+there's nothing new to check.
+
+Both hooks test an exact git snapshot, never whatever happens to be
+sitting in your working directory at the time: pre-commit tests the
+*staged* version of each changed file (the index -- what `git commit`
+is actually about to record), and pre-push tests the *HEAD* version of
+each one (what `local_sha` on the pushed ref actually points at). Each
+hook materializes that snapshot into a throwaway directory with `git
+archive` and runs pytest there, so any other unstaged/uncommitted edits
+sitting in your working tree at the same time can't leak into the
+verdict either way. `tools/cli.py`/`tools/gui.py`, by contrast, always
+test whatever is actually on disk in your working directory right now
+-- that's the right behavior for interactively checking your
+in-progress work, as opposed to the hooks' job of gatekeeping a specific
+commit or push. Install the hooks once per local clone:
 
 ```bash
 tools\install-git-hooks.bat     # Windows

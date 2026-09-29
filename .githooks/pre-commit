@@ -11,11 +11,17 @@
 # to check). pre-push runs the exact same per-exercise check again on
 # whatever actually changes on the remote, so nothing that skipped this
 # hook (e.g. a commit made with --no-verify) ships broken.
+#
+# Tests run against the STAGED version of each file (the git index), not
+# whatever's currently sitting in the working directory -- so a partially
+# staged edit (e.g. after "git add -p") is judged on exactly what's about
+# to be committed, not on other, still-unstaged changes on top of it.
 
 HOOK_DIR=$(dirname "$0")
 
 echo "pre-commit: checking staged exercise/exam/challenge files (per-exercise)..."
-git diff --cached --name-only --diff-filter=ACM | sh "$HOOK_DIR/run-tests-for-changed-files.sh"
+index_tree=$(git write-tree)
+git diff --cached --name-only --diff-filter=ACM | sh "$HOOK_DIR/run-tests-for-changed-files.sh" exercise "$index_tree"
 status=$?
 
 if [ $status -ne 0 ]; then

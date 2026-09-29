@@ -22,6 +22,12 @@
 # before it ships. A push that doesn't touch any exercise/exam/challenge
 # file passes through untested (nothing to check).
 #
+# Tests run against the HEAD (commit-tip) version of each file being
+# pushed -- i.e. exactly what "local_sha" points at below -- never
+# whatever's currently sitting in the working directory. Uncommitted
+# edits made after that commit (staged or not) must have no bearing on
+# whether a push that already happened passes.
+#
 # On the very first push of a brand-new branch (e.g. your
 # training/<username> branch), there's no remote state for THIS ref to
 # diff against yet -- but that must NOT be read as "every file in the
@@ -88,7 +94,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     fi
 
     echo "pre-push: checking exercise/exam/challenge files changing on $remote_ref (granularity: $granularity)..."
-    echo "$changed" | sh "$HOOK_DIR/run-tests-for-changed-files.sh" "$granularity"
+    echo "$changed" | sh "$HOOK_DIR/run-tests-for-changed-files.sh" "$granularity" "$local_sha"
     status=$?
     if [ $status -ne 0 ]; then
         overall_status=1
