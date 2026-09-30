@@ -336,6 +336,19 @@ const GLOSSARY = {
 "fastapi": { category: "module", summary: "Third-party web framework for building APIs quickly, using type hints for validation and auto-generated docs.", usage: "Built on Starlette (ASGI) and Pydantic; the framework used in Topic 13's local API endpoints.", related: ["FastAPI()", "ASGI vs WSGI"] },
 "pydantic": { category: "module", summary: "Third-party library for data validation using Python type annotations.", usage: "FastAPI uses Pydantic BaseModel classes to validate request/response bodies automatically.", related: ["BaseModel (pydantic)"] },
 "uvicorn": { category: "module", summary: "Third-party ASGI server used to actually run a FastAPI (or other ASGI) application.", usage: "Run your app with it in development (`uvicorn main:app --reload`) or production.", related: ["uvicorn.run"] },
-"json + your choice of pandas/requests/opencv/FastAPI": { category: "module", summary: "The Capstone stage doesn't introduce a new module — it's an invitation to combine whichever of the earlier topics' libraries fit your own project idea.", usage: "Pick the modules your capstone project actually needs; json is listed as the one near-universal building block for saving/loading results." }
+"json + your choice of pandas/requests/opencv/FastAPI": { category: "module", summary: "The Capstone stage doesn't introduce a new module — it's an invitation to combine whichever of the earlier topics' libraries fit your own project idea.", usage: "Pick the modules your capstone project actually needs; json is listed as the one near-universal building block for saving/loading results." },
+
+/* ---------------------------------------------------------------- */
+/* Stage 1 tier0_hello_world (Setup) -- used only by the review page  */
+/* ---------------------------------------------------------------- */
+"variable assignment": { category: "concept", summary: "Binding a name to an object with `=`, Python's most basic statement.", usage: "The name is just a label pointing at the object; reassigning it points the name somewhere else, it doesn't mutate the old object.", example: "greeting = \"Hello, World!\"" },
+"string concatenation": { category: "concept", summary: "Joining strings end-to-end with `+`.", usage: "Works only string-to-string (`\"a\" + str(5)`, not `\"a\" + 5`); f-strings (Stage 1 Mid tier) are usually the more readable choice once they're available.", example: "print(\"This is \" + name + \"'s program.\")" },
+
+/* ---------------------------------------------------------------- */
+/* Testing tier (tier4_testing, Stages 1-7) -- used only by the review page */
+/* ---------------------------------------------------------------- */
+"manual test verification (no framework)": { category: "concept", summary: "Checking that code behaves correctly using plain comparisons and conditionals, with no assert/pytest/unittest involved.", usage: "The instinct behind every test framework -- practiced here bare-handed before Stage 11 hands you pytest to automate exactly this.", related: ["test oracle", "expected-vs-actual comparison"] },
+"expected-vs-actual comparison": { category: "concept", summary: "Computing what a piece of code actually produced, and comparing it against what it was supposed to produce.", usage: "The core mechanic every assertion (assert, pytest, unittest) automates -- this tier has you write that comparison by hand first.", related: ["manual test verification (no framework)"] },
+"test oracle": { category: "concept", summary: "The known-correct answer a test compares actual output against -- here, the spec each buggy pair is supposed to meet.", usage: "Before you can catch a bug, you need to know what \"correct\" looks like; writing that down explicitly is the oracle.", related: ["manual test verification (no framework)"] }
 
 };

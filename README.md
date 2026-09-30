@@ -421,6 +421,50 @@ CLI+GUI test runner from scratch.
 
 Open `presentation/index.html` directly in any browser.
 
+### New vs Refresh reference (`presentation-review/`)
+
+`presentation-review/index.html` is a second, separate presentation
+answering a narrower question: for a given exercise, tier, interview
+challenge, or exam, which of its keywords/dunders/modules/methods/concepts
+are genuinely **new**, and which are a **refresh** of something an earlier
+exercise already introduced? Same sidebar-plus-drawer shape as the main
+reference, and clicking a badge opens the exact same glossary drawer
+(`presentation/glossary.js` is shared between the two, so a term's
+definition can never drift out of sync between them) -- but the content is
+organized by New/Refresh instead of by Basic/Mid/Advanced tier:
+
+- Each **tier** (Basic/Mid/Advanced, plus a Testing tier for Stages 1-7 and
+  a one-off Setup tier for Stage 1) shows its own New badges with a book/web
+  reference for where to read up on them, followed by a Refresh list of
+  everything it reuses from earlier in the course.
+- Each **exercise** within that tier shows which of the tier's New badges
+  its own reference solution's code actually uses -- so you can see, at a
+  glance, whether a given exercise is ready to be assigned yet or whether an
+  earlier one needs to land first. A badge the tier introduces that neither
+  exercise's code happens to use directly (taught by the lesson rather than
+  exercised by the code) is still shown, just not tied to one specific
+  exercise.
+- Each **interview challenge** shows what it practices from earlier
+  material (challenges are deliberately never a source of new material --
+  see `challenges/README.md`).
+- Each **exam** shows the full Refresh list across the stages it covers,
+  since an exam is pure re-assessment by design.
+
+This page's content (`presentation-review/reviewdata.js`) is generated, not
+hand-written: `tools/review_data_extract.py` walks every
+`generator/stageNN.py`, `exercises/`, `challenges/`, and `exams/` README and
+reference solution, and `tools/review_data_build.js` combines that with
+`presentation/data.js`'s existing tier-level tags to work out New vs Refresh
+by literal presence in each reference solution's actual code (never its
+prose, to avoid false positives like matching the English word "and" inside
+a hand-written summary). Regenerate it after changing an exercise, tier
+tag, or reference solution:
+
+```bash
+python tools/review_data_extract.py /tmp/review_extract
+node tools/review_data_build.js /tmp/review_extract
+```
+
 ## Interview Challenges
 
 `challenges/` holds 26 standalone, interview-style coding problems -- two
