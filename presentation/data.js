@@ -689,5 +689,9 @@ const TOPICS = [
   concepts: ["separating shared logic from each frontend","non-blocking GUI via background threads","exit codes as pass/fail signals","git hooks gating commits on tests"],
   theory: ["ANSI escape codes & isatty() terminal detection","Tkinter's single-threaded event loop model"],
   note: "This topic documents how this repo's own test runner (tools/cli.py, tools/gui.py, tools/core.py) is built — read it end to end and you have everything needed to rebuild a CLI+GUI test runner like this one from scratch."
+},
+{
+  n: 16, title: "Symbols & Syntax Reference", sub: "every operator and punctuation symbol — Python, English, and Spanish",
+  isSymbolsPage: true
 }
 ];

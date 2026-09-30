@@ -419,6 +419,17 @@ environments, and git hooks -- everything used to build `tools/cli.py`,
 through the whole reference has what they need to build a similar
 CLI+GUI test runner from scratch.
 
+A 16th topic, "Symbols & Syntax Reference", is a single page covering
+every operator and punctuation symbol used across the whole course (`+`,
+`==`, `->`, `:=`, `[]`, `@`, and so on), each with its Python spelling,
+its English name, and its Spanish name side by side
+(`presentation/symbols.js`, shared with `presentation-review/` below so
+the two never disagree). Stage 1's own page also gets a compact
+**Operators summary** table right after its schedule -- the arithmetic,
+comparison, assignment, logical, and identity/membership operators it
+specifically introduces -- since Stage 1 previously only covered
+operators in prose, with no quick-reference table of its own.
+
 Open `presentation/index.html` directly in any browser.
 
 ### New vs Refresh reference (`presentation-review/`)
@@ -449,6 +460,11 @@ organized by New/Refresh instead of by Basic/Mid/Advanced tier:
   see `challenges/README.md`).
 - Each **exam** shows the full Refresh list across the stages it covers,
   since an exam is pure re-assessment by design.
+
+It also carries its own copies of the main reference's Symbols & Syntax
+Reference page and Stage 1 Operators summary (both sourced from
+`presentation/symbols.js`, not duplicated content) so either presentation
+works as a standalone reference on its own.
 
 This page's content (`presentation-review/reviewdata.js`) is generated, not
 hand-written: `tools/review_data_extract.py` walks every

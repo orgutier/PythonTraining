@@ -279,6 +279,68 @@ html, body{
 .schedule-tier-badges{
   margin-top: 2px;
 }
+.operators-summary{
+  margin-bottom: 32px;
+}
+.operators-summary h2{
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--amber);
+  margin: 0 0 14px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.operators-group{
+  margin-bottom: 22px;
+}
+.operators-group:last-child{ margin-bottom: 0; }
+.operators-group h3{
+  font-size: 0.92rem;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+.operators-heading-es{
+  font-weight: 400;
+  color: var(--text-faint);
+  font-style: italic;
+}
+.symbols-table{
+  width: 100%;
+  max-width: 900px;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+.symbols-table thead th{
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-faint);
+  padding: 0 12px 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.symbols-table td{
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text);
+}
+.symbols-table tr:last-child td{ border-bottom: none; }
+.symbols-symbol code{
+  font-family: var(--font-mono);
+  color: var(--amber);
+  font-weight: 700;
+  background: none;
+  padding: 0;
+}
+.symbols-example code{
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  background: none;
+  padding: 0;
+  font-size: 0.82rem;
+}
 .schedule-tier-empty{
   margin: 4px 0 0;
   font-size: 0.85rem;

@@ -218,9 +218,60 @@
     document.getElementById("main").scrollTop = 0;
   }
 
+  function operatorsTableHtml(group) {
+    let html = '<div class="operators-group"><h3>' + escapeHtml(group.heading) +
+      ' <span class="operators-heading-es">— ' + escapeHtml(group.headingEs) + '</span></h3>';
+    html += '<table class="symbols-table"><thead><tr>' +
+      '<th scope="col">Python</th><th scope="col">English</th><th scope="col">Español</th><th scope="col">Example</th>' +
+      '</tr></thead><tbody>';
+    group.rows.forEach((row) => {
+      html += '<tr><td class="symbols-symbol"><code>' + escapeHtml(row.symbol) + '</code></td>' +
+        '<td>' + escapeHtml(row.english) + '</td>' +
+        '<td>' + escapeHtml(row.spanish) + '</td>' +
+        '<td class="symbols-example"><code>' + escapeHtml(row.example) + '</code></td></tr>';
+    });
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function operatorsSummaryBlock(title, data) {
+    const wrap = document.createElement("div");
+    wrap.className = "operators-summary";
+    let html = title ? "<h2>" + escapeHtml(title) + "</h2>" : "";
+    (data.groups || []).forEach((g) => (html += operatorsTableHtml(g)));
+    wrap.innerHTML = html;
+    return wrap;
+  }
+
+  function renderSymbolsDetail(topic) {
+    detailEl.innerHTML = "";
+
+    detailEl.insertAdjacentHTML("beforeend",
+      '<div class="topic-head">' +
+      '<div class="num">Reference</div>' +
+      "<h1>" + escapeHtml(topic.title) + "</h1>" +
+      '<div class="sub">' + escapeHtml(topic.sub) + "</div>" +
+      "</div>"
+    );
+
+    if (typeof SYMBOLS_REFERENCE !== "undefined") {
+      detailEl.appendChild(operatorsSummaryBlock("", SYMBOLS_REFERENCE));
+    }
+
+    document.getElementById("main").scrollTop = 0;
+  }
+
+  function realTopicCount() {
+    return TOPICS.filter((t) => !t.isSetupPage && !t.isSymbolsPage).length;
+  }
+
   function renderDetail(topic) {
     if (topic.isSetupPage) {
       renderSetupDetail(topic);
+      return;
+    }
+    if (topic.isSymbolsPage) {
+      renderSymbolsDetail(topic);
       return;
     }
 
@@ -228,7 +279,7 @@
 
     detailEl.insertAdjacentHTML("beforeend",
       '<div class="topic-head">' +
-      '<div class="num">Topic ' + String(topic.n).padStart(2, "0") + " of " + (TOPICS.length - 1) + "</div>" +
+      '<div class="num">Topic ' + String(topic.n).padStart(2, "0") + " of " + realTopicCount() + "</div>" +
       "<h1>" + escapeHtml(topic.title) + "</h1>" +
       '<div class="sub">' + escapeHtml(topic.sub) + "</div>" +
       "</div>"
@@ -236,6 +287,10 @@
 
     const scheduleNode = scheduleBlock(topic.schedule);
     if (scheduleNode) detailEl.appendChild(scheduleNode);
+
+    if (topic.n === 1 && typeof STAGE01_OPERATORS !== "undefined") {
+      detailEl.appendChild(operatorsSummaryBlock("Operators summary", STAGE01_OPERATORS));
+    }
 
     challengeList(topic).forEach((node) => detailEl.appendChild(node));
 

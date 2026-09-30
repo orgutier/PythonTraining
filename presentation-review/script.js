@@ -32,6 +32,9 @@
     if (!e) return;
     ENTRIES.push({ kind: "exam", n: 100 + i, title: "Exam " + (i + 1), sub: "Covers Stages " + e.lo + "-" + e.hi, data: e });
   });
+  if (typeof SYMBOLS_REFERENCE !== "undefined") {
+    ENTRIES.push({ kind: "symbols", n: 200, title: "Symbols & Syntax", sub: "Python, English, and Spanish", data: SYMBOLS_REFERENCE });
+  }
 
   function escapeHtml(str) {
     const div = document.createElement("div");
@@ -74,8 +77,11 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.setAttribute("aria-current", i === currentIndex ? "true" : "false");
+      let numLabel = String(entry.n).padStart(2, "0");
+      if (entry.kind === "exam") numLabel = "Ex";
+      else if (entry.kind === "symbols") numLabel = "§";
       btn.innerHTML =
-        '<span class="num">' + (entry.kind === "exam" ? "Ex" : String(entry.n).padStart(2, "0")) + '</span>' +
+        '<span class="num">' + numLabel + '</span>' +
         '<span class="label"><span class="title">' + escapeHtml(entry.title) +
         '</span><span class="sub">' + escapeHtml(entry.sub) + '</span></span>';
       btn.addEventListener("click", () => selectTopic(i));
@@ -234,6 +240,10 @@
       '</div>'
     );
 
+    if (stage.n === 1 && typeof STAGE01_OPERATORS !== "undefined") {
+      detailEl.appendChild(operatorsSummaryBlock("Operators summary", STAGE01_OPERATORS));
+    }
+
     if (stage.isCapstone) {
       detailEl.appendChild(capstoneNode(stage));
     } else {
@@ -275,8 +285,47 @@
     document.getElementById("main").scrollTop = 0;
   }
 
+  function operatorsTableHtml(group) {
+    let html = '<div class="operators-group"><h3>' + escapeHtml(group.heading) +
+      ' <span class="operators-heading-es">— ' + escapeHtml(group.headingEs) + '</span></h3>';
+    html += '<table class="symbols-table"><thead><tr>' +
+      '<th scope="col">Python</th><th scope="col">English</th><th scope="col">Español</th><th scope="col">Example</th>' +
+      '</tr></thead><tbody>';
+    group.rows.forEach((row) => {
+      html += '<tr><td class="symbols-symbol"><code>' + escapeHtml(row.symbol) + '</code></td>' +
+        '<td>' + escapeHtml(row.english) + '</td>' +
+        '<td>' + escapeHtml(row.spanish) + '</td>' +
+        '<td class="symbols-example"><code>' + escapeHtml(row.example) + '</code></td></tr>';
+    });
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function operatorsSummaryBlock(title, data) {
+    const wrap = document.createElement("div");
+    wrap.className = "operators-summary";
+    let html = title ? "<h2>" + escapeHtml(title) + "</h2>" : "";
+    (data.groups || []).forEach((g) => (html += operatorsTableHtml(g)));
+    wrap.innerHTML = html;
+    return wrap;
+  }
+
+  function renderSymbolsDetail(entry) {
+    detailEl.innerHTML = "";
+    detailEl.insertAdjacentHTML("beforeend",
+      '<div class="topic-head">' +
+      '<div class="num">Reference</div>' +
+      '<h1>' + escapeHtml(entry.title) + '</h1>' +
+      '<div class="sub">' + escapeHtml(entry.sub) + '</div>' +
+      '</div>'
+    );
+    detailEl.appendChild(operatorsSummaryBlock("", entry.data));
+    document.getElementById("main").scrollTop = 0;
+  }
+
   function renderDetail(entry) {
     if (entry.kind === "exam") renderExamDetail(entry);
+    else if (entry.kind === "symbols") renderSymbolsDetail(entry);
     else renderStageDetail(entry);
   }
 
