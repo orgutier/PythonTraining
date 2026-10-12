@@ -15,8 +15,16 @@ stay the entry point these tests import from.
 total_seconds_text = "9384"
 is_daylight_saving_text = "False"
 
-raise NotImplementedError  # delete this line once you've written the code below
+total_seconds = int(total_seconds_text)
 
+hours = total_seconds // 3600
+rem_seconds = total_seconds % 3600
+minutes = rem_seconds // 60 
+seconds = rem_seconds % 60
+
+is_daylight_saving = str(is_daylight_saving_text) == "True"
+
+print("9384s = " + str(hours) + "h " + str(minutes) + "m " + str(seconds) + "s")
 # Write your code here: cast total_seconds, decompose it into
 # hours/minutes/seconds with // and %, correctly derive is_daylight_saving
 # (watch the bool("False") trap!), and print a summary. See README.md.
