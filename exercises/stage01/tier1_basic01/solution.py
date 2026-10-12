@@ -17,8 +17,14 @@ fuel_efficiency_l_per_100km_text = "6.8"
 fuel_price_per_liter_text = "1.53"
 passengers_text = "3"
 
-raise NotImplementedError  # delete this line once you've written the code below
+distance_km: float = float(distance_km_text)
+fuel_efficiency_l_per_100km: float = float(fuel_efficiency_l_per_100km_text)
+fuel_price_per_liter: float = float(fuel_price_per_liter_text)
+passengers: int = int(passengers_text)
 
-# Write your code here: cast the four values above, compute
-# is_price_a_float/total_fuel_liters/total_cost/cost_per_passenger, and
-# print a one-line summary. See README.md for the exact requirements.
+is_price_a_float: bool = isinstance(fuel_price_per_liter, float)
+total_fuel_liters: float = distance_km * fuel_efficiency_l_per_100km / 100
+total_cost: float = total_fuel_liters * fuel_price_per_liter
+cost_per_passenger: float = total_cost / passengers
+
+print("Total cost: " + str(total_cost) + ", Cost per passenger: " + str(cost_per_passenger))

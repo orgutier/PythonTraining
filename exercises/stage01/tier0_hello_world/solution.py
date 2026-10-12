@@ -8,11 +8,12 @@ tests/test_stage01_tier0_hello_world.py imports directly from here. Need a helpe
 function or class of your own? Add another .py file next to this one inside
 exercises/stage01/tier0_hello_world/ and import it as a submodule (e.g.
 `from exercises.stage01.tier0_hello_world import helpers`) -- solution.py just has to
-stay the entry point these tests import from.
-"""
-
-
-raise NotImplementedError  # delete this line once you've written the two lines below
+stay the entry point these tests import from."""
 
 # Write your code here: assign `greeting` and `author_name`, and print both
 # lines exactly as described in README.md.
+
+greeting: str = "Hello, World!"
+print(greeting)
+author_name: str = "Jorge Lopez"
+print("This is " + author_name + "'s first Python program.")
