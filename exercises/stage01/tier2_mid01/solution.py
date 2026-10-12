@@ -16,7 +16,21 @@ price_a_text = "19.99"
 price_b_text = "18.995"
 quantity_text = "4"
 
-raise NotImplementedError  # delete this line once you've written the code below
+
+price_a = float(price_a_text)
+price_b = float(price_b_text)
+quantity = int(quantity_text)
+
+savings_message = f"{(savings := abs(price_a - price_b) * quantity):.2f}."
+both_under_20 = 0 <= price_a <20 and 0<=price_b < 20
+
+total_cost = 0
+total_cost += price_a * quantity
+total_cost += price_b * quantity
+
+weighted_score = 2 + 3* price_a ** 2
+
+print(savings_message)
 
 # Write your code here: cast the three values above, then compute
 # savings_message (walrus + f-string), both_under_20 (chained comparison),
