@@ -16,9 +16,27 @@ race_distance_km_text = "42.195"
 elapsed_minutes_text = "255"
 target_minutes_text = "240"
 
-raise NotImplementedError  # delete this line once you've written the code below
-
 # Write your code here: cast the three values above, then compute
 # pace_min_per_km, pace_report (walrus + f-string), minutes_over_per_km,
 # on_pace (chained comparison), total_penalty_seconds (+=, twice), and
 # fatigue_index (precedence-sensitive). See README.md.
+
+
+race_distance_km: float = float(race_distance_km_text)
+elapsed_minutes: int = int(elapsed_minutes_text)
+target_minutes: int = int(target_minutes_text)
+
+pace_min_per_km: float = elapsed_minutes / race_distance_km
+
+pace_report: str  = f"...{(minutes_over := elapsed_minutes - target_minutes)}...{pace_min_per_km:.2f}..."
+
+minutes_over_per_km: float = minutes_over / race_distance_km
+on_pace = 0 < pace_min_per_km <= 6.5 
+
+total_penalty_seconds = 0
+total_penalty_seconds += 30
+total_penalty_seconds += minutes_over*2
+
+fatigue_index = 2+ 3 * pace_min_per_km ** 2
+
+print(pace_report)
