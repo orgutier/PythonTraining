@@ -1,6 +1,6 @@
 # Challenge 01 — Typed Config Loader
 
-**Do this after:** Week 01 (Python Fundamentals)
+**Do this after:** Stage 01 (Python Fundamentals)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge01` (or `pytest tests/test_challenge01.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -9,8 +9,8 @@ Config files are almost always just text -- `KEY=value` lines -- but every
 value on the right of the `=` needs to become an actual Python `int`,
 `float`, `bool`, `None`, or `str` before your program can use it. This is
 the "parse untyped input into typed data" problem every backend engineer
-hits in their first week on any real codebase, and it's a natural fit for
-everything Week 1 covers: `int`/`float`/`str`/`bool`/`None`/`True`/`False`,
+hits in their first stage on any real codebase, and it's a natural fit for
+everything Stage 1 covers: `int`/`float`/`str`/`bool`/`None`/`True`/`False`,
 `type()`, `isinstance()`, `and`/`or`/`not`/`is`/`in`, and mutability.
 
 Implement four functions:

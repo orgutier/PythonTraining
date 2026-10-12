@@ -1,6 +1,6 @@
 # Challenge 05 — Pluggable Event Pipeline
 
-**Do this after:** Week 03 (Functions)
+**Do this after:** Stage 03 (Functions)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge05` (or `pytest tests/test_challenge05.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -8,7 +8,7 @@
 Plugin/handler registries built from closures and decorators are
 everywhere in real Python codebases (web framework routes, CLI
 subcommands, event buses). This challenge builds a tiny one, plus two
-flavors of caching decorator, to pull together most of Week 3's function
+flavors of caching decorator, to pull together most of Stage 3's function
 toolkit in one place.
 
 Implement:

@@ -1,6 +1,6 @@
 # Challenge 17 — Directory Report Builder
 
-**Do this after:** Week 09 (OS, JSON, Datetime, XML)
+**Do this after:** Stage 09 (OS, JSON, Datetime, XML)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge17` (or `pytest tests/test_challenge17.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem

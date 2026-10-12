@@ -1,6 +1,6 @@
 # Challenge 07 — Anagram Groups with Records
 
-**Do this after:** Week 04 (Data Structures)
+**Do this after:** Stage 04 (Data Structures)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge07` (or `pytest tests/test_challenge07.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -9,7 +9,7 @@ Group Anagrams (LeetCode #49) is a real, frequently-asked interview
 question: group every string in a list with its anagrams. This version
 asks for it the way you'd actually build it in a real codebase -- returning
 proper records instead of bare lists, and built with the container tools
-Week 4 is about, not around them.
+Stage 4 is about, not around them.
 
 Implement:
 
@@ -51,7 +51,7 @@ label_groups(groups)[0]   # -> "0: abt (1 words)"
 1. **`build_signature` must be `"".join(sorted(word))`** -- one line, no
    manual sorting loop.
 2. **`group_anagrams` must use `collections.defaultdict(list)`** to
-   accumulate words per signature (this is exactly the tool Week 4
+   accumulate words per signature (this is exactly the tool Stage 4
    introduces for this), then convert each bucket into a **frozen**
    `AnagramGroup` (`words` as a `tuple`, not a `list` -- frozen dataclasses
    need hashable fields to actually be hashable themselves), and return

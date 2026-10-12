@@ -92,46 +92,67 @@
     return row;
   }
 
+  function scheduleTierBlock(tier) {
+    const wrap = document.createElement("div");
+    wrap.className = "schedule-tier";
+
+    const link = document.createElement("button");
+    link.type = "button";
+    link.className = "badge schedule-tier-link";
+    link.textContent = tier.label;
+    link.title = "Open a deep-dive with runnable examples";
+    link.addEventListener("click", () => openDayGuide(tier.guideKey, link));
+    wrap.appendChild(link);
+
+    const groupsWithContent = META_GROUPS.filter((g) => tier[g.key] && tier[g.key].length);
+    if (groupsWithContent.length === 0) {
+      wrap.insertAdjacentHTML("beforeend", '<p class="schedule-tier-empty">No tagged keywords/dunders/modules/concepts for this tier yet.</p>');
+      return wrap;
+    }
+
+    const badges = document.createElement("div");
+    badges.className = "badges schedule-tier-badges";
+    groupsWithContent.forEach((g) => {
+      tier[g.key].forEach((term) => badges.appendChild(makeBadge(term, g.badgeClass)));
+    });
+    wrap.appendChild(badges);
+
+    return wrap;
+  }
+
   function scheduleBlock(schedule) {
     if (!schedule || !schedule.length) return null;
     const wrap = document.createElement("div");
     wrap.className = "schedule";
 
     const h2 = document.createElement("h2");
-    h2.textContent = "Week schedule";
+    h2.textContent = "Stage schedule";
     wrap.appendChild(h2);
 
     const table = document.createElement("table");
     table.className = "schedule-table";
     table.insertAdjacentHTML("beforeend",
-      '<thead><tr><th scope="col">Day</th><th scope="col">Focus</th><th scope="col">What to cover</th></tr></thead>');
+      '<thead><tr><th scope="col">Step</th><th scope="col">Sub-stage</th><th scope="col">What to cover</th></tr></thead>');
     const tbody = document.createElement("tbody");
 
     schedule.forEach((row) => {
       const tr = document.createElement("tr");
 
-      const tdDay = document.createElement("td");
-      tdDay.className = "schedule-day";
-      tdDay.textContent = row.day;
-      tr.appendChild(tdDay);
+      const tdStep = document.createElement("td");
+      tdStep.className = "schedule-day";
+      tdStep.textContent = row.step;
+      tr.appendChild(tdStep);
 
       const tdTitle = document.createElement("td");
       tdTitle.className = "schedule-title";
-      if (row.guideKey) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "schedule-title-btn";
-        btn.textContent = row.title;
-        btn.title = "Click for a deep-dive with runnable examples";
-        btn.addEventListener("click", () => openDayGuide(row.guideKey, btn));
-        tdTitle.appendChild(btn);
-      } else {
-        tdTitle.textContent = row.title;
-      }
+      tdTitle.textContent = row.title;
       tr.appendChild(tdTitle);
 
       const tdDetails = document.createElement("td");
-      tdDetails.textContent = row.details;
+      tdDetails.appendChild(document.createTextNode(row.details));
+      if (row.tiers && row.tiers.length) {
+        row.tiers.forEach((tier) => tdDetails.appendChild(scheduleTierBlock(tier)));
+      }
       tr.appendChild(tdDetails);
 
       tbody.appendChild(tr);
@@ -159,12 +180,106 @@
     return list.map(challengeCard);
   }
 
-  function renderDetail(topic) {
+  function setupSectionBlock(section) {
+    const wrap = document.createElement("div");
+    wrap.className = "setup-section";
+    if (section.heading) {
+      const h2 = document.createElement("h2");
+      h2.textContent = section.heading;
+      wrap.appendChild(h2);
+    }
+    if (section.body) {
+      const p = document.createElement("p");
+      p.textContent = section.body;
+      wrap.appendChild(p);
+    }
+    if (section.code) {
+      wrap.insertAdjacentHTML("beforeend", codeBlockHtml(section.code, section.filename));
+    }
+    return wrap;
+  }
+
+  function renderSetupDetail(topic) {
     detailEl.innerHTML = "";
 
     detailEl.insertAdjacentHTML("beforeend",
       '<div class="topic-head">' +
-      '<div class="num">Topic ' + String(topic.n).padStart(2, "0") + " of " + TOPICS.length + "</div>" +
+      '<div class="num">Start here</div>' +
+      "<h1>" + escapeHtml(topic.title) + "</h1>" +
+      '<div class="sub">' + escapeHtml(topic.sub) + "</div>" +
+      "</div>"
+    );
+
+    const wrap = document.createElement("div");
+    wrap.className = "setup-page";
+    (topic.setupSections || []).forEach((section) => wrap.appendChild(setupSectionBlock(section)));
+    detailEl.appendChild(wrap);
+
+    document.getElementById("main").scrollTop = 0;
+  }
+
+  function operatorsTableHtml(group) {
+    let html = '<div class="operators-group"><h3>' + escapeHtml(group.heading) +
+      ' <span class="operators-heading-es">— ' + escapeHtml(group.headingEs) + '</span></h3>';
+    html += '<table class="symbols-table"><thead><tr>' +
+      '<th scope="col">Python</th><th scope="col">English</th><th scope="col">Español</th><th scope="col">Example</th>' +
+      '</tr></thead><tbody>';
+    group.rows.forEach((row) => {
+      html += '<tr><td class="symbols-symbol"><code>' + escapeHtml(row.symbol) + '</code></td>' +
+        '<td>' + escapeHtml(row.english) + '</td>' +
+        '<td>' + escapeHtml(row.spanish) + '</td>' +
+        '<td class="symbols-example"><code>' + escapeHtml(row.example) + '</code></td></tr>';
+    });
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function operatorsSummaryBlock(title, data) {
+    const wrap = document.createElement("div");
+    wrap.className = "operators-summary";
+    let html = title ? "<h2>" + escapeHtml(title) + "</h2>" : "";
+    (data.groups || []).forEach((g) => (html += operatorsTableHtml(g)));
+    wrap.innerHTML = html;
+    return wrap;
+  }
+
+  function renderSymbolsDetail(topic) {
+    detailEl.innerHTML = "";
+
+    detailEl.insertAdjacentHTML("beforeend",
+      '<div class="topic-head">' +
+      '<div class="num">Reference</div>' +
+      "<h1>" + escapeHtml(topic.title) + "</h1>" +
+      '<div class="sub">' + escapeHtml(topic.sub) + "</div>" +
+      "</div>"
+    );
+
+    if (typeof SYMBOLS_REFERENCE !== "undefined") {
+      detailEl.appendChild(operatorsSummaryBlock("", SYMBOLS_REFERENCE));
+    }
+
+    document.getElementById("main").scrollTop = 0;
+  }
+
+  function realTopicCount() {
+    return TOPICS.filter((t) => !t.isSetupPage && !t.isSymbolsPage).length;
+  }
+
+  function renderDetail(topic) {
+    if (topic.isSetupPage) {
+      renderSetupDetail(topic);
+      return;
+    }
+    if (topic.isSymbolsPage) {
+      renderSymbolsDetail(topic);
+      return;
+    }
+
+    detailEl.innerHTML = "";
+
+    detailEl.insertAdjacentHTML("beforeend",
+      '<div class="topic-head">' +
+      '<div class="num">Topic ' + String(topic.n).padStart(2, "0") + " of " + realTopicCount() + "</div>" +
       "<h1>" + escapeHtml(topic.title) + "</h1>" +
       '<div class="sub">' + escapeHtml(topic.sub) + "</div>" +
       "</div>"
@@ -172,6 +287,10 @@
 
     const scheduleNode = scheduleBlock(topic.schedule);
     if (scheduleNode) detailEl.appendChild(scheduleNode);
+
+    if (topic.n === 1 && typeof STAGE01_OPERATORS !== "undefined") {
+      detailEl.appendChild(operatorsSummaryBlock("Operators summary", STAGE01_OPERATORS));
+    }
 
     challengeList(topic).forEach((node) => detailEl.appendChild(node));
 
@@ -311,7 +430,7 @@
     let html = "<p class='drawer-summary'>" + escapeHtml(guide.summary) + "</p>";
     guide.examples.forEach((ex, i) => {
       html += "<div class='example-caption'>Example " + (i + 1) + ": " + escapeHtml(ex.caption) + "</div>";
-      html += codeBlockHtml(ex.code, guide.week ? ("week" + String(guide.week).padStart(2, "0") + "_example" + (i + 1) + ".py") : undefined);
+      html += codeBlockHtml(ex.code, guide.stage ? ("stage" + String(guide.stage).padStart(2, "0") + "_example" + (i + 1) + ".py") : undefined);
       html += outputBlockHtml(ex.output);
     });
     drawerBodyEl.innerHTML = html;

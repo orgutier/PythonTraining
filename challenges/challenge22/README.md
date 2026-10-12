@@ -1,6 +1,6 @@
 # Challenge 22 — Face-Region Redactor
 
-**Do this after:** Week 11 (OpenCV)
+**Do this after:** Stage 11 (OpenCV)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge22` (or `pytest tests/test_challenge22.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -8,7 +8,7 @@
 A companion to Challenge 21: a small privacy tool that detects faces with
 a Haar cascade classifier and blacks them out, plus a thresholded
 "redaction-ready" binary version of the image -- the file I/O and
-thresholding half of Week 11 that Challenge 21 didn't need.
+thresholding half of Stage 11 that Challenge 21 didn't need.
 
 Implement:
 

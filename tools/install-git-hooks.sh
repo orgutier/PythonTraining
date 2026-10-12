@@ -3,11 +3,10 @@
 # Run this once after cloning: sh tools/install-git-hooks.sh
 #
 # It points git at the tracked .githooks/ folder (git config
-# core.hooksPath), so pre-commit and pre-push both run the full test
-# suite -- every week's exercise tests AND every interview challenge's
-# tests -- via "python tools/cli.py test --all". See README.md, section
-# "Git hook integration". Windows trainees should run
-# tools\install-git-hooks.bat instead.
+# core.hooksPath), so pre-commit and pre-push each test only the specific
+# exercise/challenge/exam file(s) that changed -- never the full suite.
+# See README.md, section "Git hook integration". Windows trainees should
+# run tools\install-git-hooks.bat instead.
 
 set -e
 
@@ -31,7 +30,7 @@ git config core.hooksPath .githooks
 echo ""
 echo "Git hooks installed."
 echo "  core.hooksPath = .githooks"
-echo "  pre-commit and pre-push will now run: python tools/cli.py test --all"
+echo "  pre-commit and pre-push will now test only the exercise/challenge/exam that changed"
 echo ""
 echo "Skip a single check when you really need to with:"
 echo "  git commit --no-verify"

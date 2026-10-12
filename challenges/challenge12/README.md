@@ -1,6 +1,6 @@
 # Challenge 12 — Min Stack with Class-Level Push Stats
 
-**Do this after:** Week 06 (OOP I)
+**Do this after:** Stage 06 (OOP I)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge12` (or `pytest tests/test_challenge12.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem

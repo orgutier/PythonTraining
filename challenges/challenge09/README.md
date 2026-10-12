@@ -1,6 +1,6 @@
 # Challenge 09 — Log File Parser with a Custom Exception Chain
 
-**Do this after:** Week 05 (Files, Exceptions, Regex)
+**Do this after:** Stage 05 (Files, Exceptions, Regex)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge09` (or `pytest tests/test_challenge09.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem

@@ -1,0 +1,92 @@
+/* Additions on top of ../presentation/style.css for this page's own
+   New-vs-Refresh layout. Badge/drawer/tier styling is inherited as-is
+   so both presentations look and behave identically for shared UI. */
+
+.review-tier{
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+.review-tier h2{
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+.review-section{ margin-bottom: 14px; }
+.review-section:last-child{ margin-bottom: 0; }
+.review-label{
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+.review-label.new-label{ color: var(--sage); }
+.review-label.refresh-label{ color: var(--text-dim); }
+.review-section.tier-only .review-label{ color: var(--text-faint); }
+.review-section .ref{
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.review-exercises{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+.exercise-card{
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  padding: 12px 14px;
+}
+.exercise-card .exercise-id{
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+.exercise-card h4{
+  margin: 4px 0 6px;
+  font-size: 0.94rem;
+  color: var(--text);
+}
+.exercise-card .exercise-summary{
+  margin: 0 0 8px;
+  font-size: 0.84rem;
+  color: var(--text-dim);
+}
+.exercise-card .exercise-new-label{
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sage);
+  margin-bottom: 6px;
+}
+.exercise-card .exercise-none{
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.challenges-heading{
+  margin: 24px 0 12px;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+.challenge .challenge-note{
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.capstone-refresh-note{
+  margin: 0;
+  color: var(--text-dim);
+}

@@ -7,7 +7,7 @@ your solution must follow (explicit `is`/`is not` for identity, `is None` (not t
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module, matching the convention used by
-exercises/weekNN/solution.py.
+exercises/stageNN/solution.py.
 """
 
 

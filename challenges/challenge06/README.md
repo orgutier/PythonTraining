@@ -1,6 +1,6 @@
 # Challenge 06 — Streaming Metrics Aggregator
 
-**Do this after:** Week 03 (Functions)
+**Do this after:** Stage 03 (Functions)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge06` (or `pytest tests/test_challenge06.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem

@@ -1,13 +1,13 @@
 # Challenge 13 — Notification System with Mixins and ABCs
 
-**Do this after:** Week 07 (OOP II)
+**Do this after:** Stage 07 (OOP II)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge13` (or `pytest tests/test_challenge13.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
 
 "Design a notification system that can email or text people, and retry
 flaky ones" is a realistic system-design-flavored coding interview
-prompt. It's also a natural fit for almost everything Week 7 covers:
+prompt. It's also a natural fit for almost everything Stage 7 covers:
 an abstract base class, mixins layered in via multiple inheritance,
 `super()` cooperating through that chain, and a dispatcher that uses both
 `isinstance()` and duck typing.

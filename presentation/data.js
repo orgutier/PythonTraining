@@ -1,7 +1,65 @@
-// Data for the Python Training reference. One entry per week/topic.
+// Data for the Python Training reference. One entry per stage/topic.
 // Mirrors the "Study Reference - All Topics" sheet in the planning workbook.
 
 const TOPICS = [
+{
+  n: 0, title: "Setup", sub: "configure your environment, get your first green checkmark",
+  isSetupPage: true,
+  setupSections: [
+    {
+      heading: "Prerequisites",
+      body: "Python 3.11 or newer, Git, a code editor (VS Code is a reasonable default if you don't already have a preference), and a terminal. If you can run `python --version` and `git --version` and both print something, you're ready to start."
+    },
+    {
+      heading: "1. Clone the repo and create your branch",
+      body: "Before you touch anything else: create your own branch, named exactly `training/<your-username>` (replace `<your-username>` with your own name or handle -- all lowercase, no spaces; use a hyphen if you need one, e.g. `training/ada-lovelace`). This is how your work gets identified once you push it -- do this first, not after you've already started editing exercises on whatever branch you happened to be on.",
+      code: "git clone https://github.com/orgutier/PythonTraining.git\ncd PythonTraining\ngit checkout -b training/<your-username>",
+      filename: "terminal"
+    },
+    {
+      heading: "2. Create a virtual environment and install dependencies",
+      body: "A virtual environment keeps this course's dependencies (pytest, pandas, opencv-python-headless, fastapi, ...) separate from anything else on your machine. Create one, activate it, then install from requirements.txt. You'll need to re-activate it (just the `activate` line) every time you open a new terminal to work on this repo.",
+      code: "python -m venv .venv\nsource .venv/bin/activate        # .venv\\Scripts\\activate on Windows\npip install -r requirements.txt",
+      filename: "terminal"
+    },
+    {
+      heading: "3. Install the git hooks",
+      body: "This points git at the repo's tracked .githooks/ folder, so a pre-commit and a pre-push check run automatically from here on. Both only test the specific exercise(s) you actually touched -- never the whole suite -- so they stay fast enough to run on every commit. See \"Using git hooks\" below for what each one actually does.",
+      code: "sh tools/install-git-hooks.sh    # macOS/Linux\ntools\\install-git-hooks.bat      # Windows",
+      filename: "terminal"
+    },
+    {
+      heading: "4. Take a first look around",
+      body: "exercises/ is where you'll actually work -- one folder per stage, one subfolder per exercise, each with its own README.md (the problem statement) and solution.py (the stub you fill in). reference_solutions/ holds the worked answer key, mirroring the same layout -- it's there for after you've made a real attempt, not instead of one. tests/ is what actually grades you; you generally won't need to read it. This presentation (presentation/) has no graded exercises of its own -- keep it open in a second window while you work through the stages."
+    },
+    {
+      heading: "5. Run your first exercise: tier0_hello_world",
+      body: "Stage 1 (Python Fundamentals) has a tiny Setup exercise whose only job is proving your environment actually works, before you get into any real content. Run its test now -- it will fail, because the stub hasn't been filled in yet:",
+      code: "python tools/cli.py test stage01_tier0_hello_world",
+      filename: "terminal"
+    },
+    {
+      heading: "",
+      body: "Open exercises/stage01/tier0_hello_world/solution.py and exercises/stage01/tier0_hello_world/README.md side by side, follow the README's instructions, save, then run the same command again. Once it passes, you've got your first graded, green checkmark of the course -- and proof your setup is good. Move on to Topic 1 in the sidebar for the rest of Stage 1."
+    },
+    {
+      heading: "Using tools/cli.py",
+      body: "The command-line test runner. Four shapes you'll use constantly:",
+      code: "python tools/cli.py list                        # every stage, its exercises, the challenges, and the exams\npython tools/cli.py test stage01                 # every exercise in one stage\npython tools/cli.py test stage01_tier1_basic01   # just that one exercise\npython tools/cli.py test --all                   # the full suite (stages + challenges + exams)",
+      filename: "terminal"
+    },
+    {
+      heading: "Using tools/gui.py (no command line needed)",
+      body: "If you'd rather not use the terminal for this part, run `python tools/gui.py`. Pick a stage from the first dropdown, then either leave the second dropdown on \"All exercises (whole stage)\" or pick one specific exercise to test just that one, click \"Run Tests\", and read the colored pass/fail output.",
+      code: "python tools/gui.py",
+      filename: "terminal"
+    },
+    {
+      heading: "Using git hooks: committing and pushing your work",
+      body: "With the hooks installed (step 3 above), committing and pushing are self-checking. `git commit` runs a pre-commit check that tests only the exercise(s) you staged -- fast, focused feedback on exactly what you just changed, testing exactly the staged version of the file (so an unstaged edit made after `git add` never affects the result). `git push` runs a pre-push check that re-verifies everything your branch is ahead of the shared remote by (so nothing broken slips through even if you ever use `git commit --no-verify`), testing exactly the committed (HEAD) version of each file -- on your branch's very first push, that means everything since it diverged from the shared history, not your whole repo. Neither hook is affected by whatever's currently sitting unstaged/uncommitted in your working directory, and neither ever runs the full suite; a commit or push that doesn't touch any exercise file passes straight through untested. You can skip a single check with `git commit --no-verify` / `git push --no-verify` if you genuinely need to, but that should be the exception, not the habit -- and remember, your branch must stay named `training/<your-username>` for your pushed work to be recognized as yours."
+    }
+  ]
+},
 {
   n: 1, title: "Python Fundamentals", sub: "variables, types, operators",
   challenges: [
@@ -19,11 +77,14 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Environment & tooling setup", details: "Install Python 3.11+, create and activate a virtual environment (python -m venv .venv), pip install -r requirements.txt, and open the repo in VS Code. Run python tools/cli.py list and python tools/cli.py test week01 to see the starter tests fail, try tools/gui.py, and do a git basics pass (status/add/commit). Tour exercises/, reference_solutions/, tests/, and open presentation/index.html to keep alongside the editor all course long." },
-    { day: "Day 2", title: "Basic tier", guideKey: "week01-basic", details: "Variables & assignment; int/float/str/bool/None; arithmetic & comparison operators; print()/input(); basic type casting; type hints for variables." },
-    { day: "Day 3", title: "Mid tier", guideKey: "week01-mid", details: "Operator precedence & chained comparisons; f-strings; // vs / and float imprecision; the walrus operator (:=); augmented assignment. Start working through exercises/week01/ (see its README for the exercise list)." },
-    { day: "Day 4", title: "Advanced tier & internals", guideKey: "week01-advanced", details: "Arbitrary-precision integers; IEEE-754 float caveats; string interning; identity vs equality; Decimal/Fraction. Cover the PyObject / small-integer-caching internals note." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week01/, run python tools/cli.py test week01 until it's green, and review anything the group is still shaky on." }
+    { step: "1", title: "Setup", details: "Install Python 3.11+, create and activate a virtual environment (python -m venv .venv), pip install -r requirements.txt, and open the repo in VS Code. Run python tools/cli.py list, try tools/gui.py, and do a git basics pass (status/add/commit). Tour exercises/, reference_solutions/, tests/, and open presentation/index.html to keep alongside the editor all course long. Finish with exercises/stage01/tier0_hello_world/ -- python tools/cli.py test stage01_tier0_hello_world -- the first graded, green checkmark of the course." },
+    { step: "2", title: "Learn", details: "Variables, Python's five foundational types, and operators, building up through precedence, f-strings, and the walrus operator to arbitrary-precision integers and IEEE-754 float internals.", tiers: [
+      { label: "Basic tier", guideKey: "stage01-basic", keywords: ["int", "float", "str", "bool", "None", "True", "False", "print()", "input()", "type()", "isinstance()", "and", "or", "not", "is", "in", "x: int = 5"], concepts: ["type hints"] },
+      { label: "Mid tier", guideKey: "stage01-mid" },
+      { label: "Advanced tier & internals", guideKey: "stage01-advanced", concepts: ["mutability vs immutability", "identity vs equality"], theory: ["small-integer caching", "string interning", "IEEE-754 floating point"] }
+    ] },
+    { step: "3", title: "Practice", details: "Work through the exercises in exercises/stage01/ (see its README for the full list), running \`python tools/cli.py test stage01\` as you go." },
+    { step: "4", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage01\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "Python variables are just names bound to objects — assignment (x = 5) creates that binding, it doesn't copy a value into a box. The five foundational built-in types are int, float, str, bool, and None: integers are whole numbers with no size limit, floats are decimal numbers stored in IEEE-754 double precision, strings are immutable text, booleans are True/False, and None represents \"no value\". Arithmetic operators (+ - * / // % **) and comparison operators (== != < > <= >=) work across these types, with / always returning a float and // performing integer (floor) division. print() writes to the console and input() reads a line of text (always as a str, so cast it with int()/float() when you need a number). Basic type casting (int(\"5\"), str(5), float(\"3.14\")) converts between these types explicitly, and a variable annotation like x: int = 5 documents the intended type for readers and tools without Python enforcing it at runtime.",
@@ -51,7 +112,7 @@ const TOPICS = [
     {
       id: "challenge03",
       title: "Log Stream Parser and Scanner",
-      blurb: "Parse and scan a stream of log lines using a for...else search, enumerate()/zip() for labeling and pairing, and one and/not expression for a health check -- most of Week 2's control-flow toolkit in one pipeline.",
+      blurb: "Parse and scan a stream of log lines using a for...else search, enumerate()/zip() for labeling and pairing, and one and/not expression for a health check -- most of Stage 2's control-flow toolkit in one pipeline.",
       path: "challenges/challenge03/"
     },
     {
@@ -62,11 +123,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week02-basic", details: "if/elif/else; while; for + range(); break/continue/pass; nested loops." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week02-mid", details: "for...else / while...else; short-circuit and/or; ternary expressions; zip() for parallel iteration." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week02-advanced", details: "Writing a custom iterable/iterator class; itertools patterns; loop-style performance. Cover the iterator protocol (iter/next/StopIteration)." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week02/, applying this week's conditionals and loop constructs." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week02/, run python tools/cli.py test week02 until green, and review." }
+    { step: "1", title: "Learn", details: "Conditionals and loops, building up through for...else, ternaries, and zip() to writing a custom iterator and the iterator protocol.", tiers: [
+      { label: "Basic tier", guideKey: "stage02-basic", keywords: ["if", "elif", "else", "while", "for", "in", "range()", "break", "continue", "pass"], methods: ["enumerate()"] },
+      { label: "Mid tier", guideKey: "stage02-mid", methods: ["zip()"], concepts: ["short-circuit evaluation", "ternary expression", "for...else / while...else"] },
+      { label: "Advanced tier & internals", guideKey: "stage02-advanced", modules: ["itertools"], concepts: ["truthiness"], theory: ["iterator protocol (iter/next)", "StopIteration"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage02/ (see its README for the full list), running \`python tools/cli.py test stage02\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage02\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "if/elif/else branch on truthy conditions, with elif chaining as many additional conditions as needed and else catching everything unhandled. while repeats its block as long as its condition stays true — use it when the number of iterations isn't known ahead of time. for x in iterable: is the idiomatic way to loop in Python, most often paired with range(stop) / range(start, stop, step) to iterate a fixed number of times without building an actual list. break exits a loop immediately, continue skips to the next iteration, and pass is a no-op placeholder wherever a statement is syntactically required. Loops can nest freely, but watch for quadratic (O(n*n)) behavior when a loop runs inside another loop over the same size of data.",
@@ -105,11 +168,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week03-basic", details: "def, parameters, return, default args, *args/**kwargs, return type hints, basic recursion, lambda." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week03-mid", details: "Keyword-only and positional-only arguments; docstrings & introspection; closures; writing a simple decorator." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week03-advanced", details: "functools (wraps, lru_cache, partial); generator functions (yield); recursion limits. Cover LEGB scoping and the mutable-default-argument bug." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week03/." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week03/, run python tools/cli.py test week03 until green, and review." }
+    { step: "1", title: "Learn", details: "Defining and calling functions, building up through closures and decorators to generator functions and Python's LEGB scoping rules.", tiers: [
+      { label: "Basic tier", guideKey: "stage03-basic", keywords: ["def", "return", "->", "*args", "**kwargs", "lambda"] },
+      { label: "Mid tier", guideKey: "stage03-mid", keywords: ["nonlocal"], concepts: ["decorators", "keyword-only arguments", "positional-only parameters"] },
+      { label: "Advanced tier & internals", guideKey: "stage03-advanced", keywords: ["global", "yield"], methods: ["functools.wraps()", "functools.lru_cache()", "functools.partial()"], modules: ["functools"], concepts: ["closures"], theory: ["LEGB scope resolution", "mutable default argument bug", "no tail-call optimization"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage03/ (see its README for the full list), running \`python tools/cli.py test stage03\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage03\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "def name(params): defines a function; return value sends a result back to the caller (a function with no return, or a bare return, implicitly returns None). Default arguments (def f(x=10):) make a parameter optional, *args collects any extra positional arguments into a tuple, and **kwargs collects any extra keyword arguments into a dict — both are used when a function needs to accept a variable number of inputs. A return type hint (def f() -> int:) documents what the function produces, purely for readers and tools; Python does not enforce it. Recursion (a function calling itself) needs a base case to terminate, and lambda args: expr creates a small anonymous function limited to a single expression, most useful as a short inline callback like a sort key.",
@@ -148,11 +213,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week04-basic", details: "list/tuple/dict/set creation, indexing, slicing, common methods; list & dict comprehensions." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week04-mid", details: "Nested structures; sorting with key=; set operations; namedtuple/dataclasses as lightweight records." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week04-advanced", details: "collections (defaultdict, Counter, deque, OrderedDict); array/deque vs list performance; frozenset/tuple as keys. Cover dynamic-array and hash-table internals." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week04/." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week04/, run python tools/cli.py test week04 until green, and review." }
+    { step: "1", title: "Learn", details: "The four built-in collections and comprehensions, building up through sorting and set operations to collections' specialized containers and the hash-table/dynamic-array internals behind them.", tiers: [
+      { label: "Basic tier", guideKey: "stage04-basic", keywords: ["list", "tuple", "dict", "set", "append()", "sort()/sorted()", "len()", "zip()", "enumerate()", "[x for x in ...]", "{k:v for ...}"] },
+      { label: "Mid tier", guideKey: "stage04-mid", methods: ["dataclasses.dataclass"], dunders: ["__eq__"], modules: ["collections", "dataclasses"], concepts: ["namedtuple / dataclass records", "set operations (union/intersection/difference)"] },
+      { label: "Advanced tier & internals", guideKey: "stage04-advanced", methods: ["collections.defaultdict()", "collections.Counter()", "collections.deque()"], dunders: ["__hash__"], concepts: ["hashability"], theory: ["dynamic array amortized growth", "hash table internals", "insertion-ordered dicts (3.7+)"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage04/ (see its README for the full list), running \`python tools/cli.py test stage04\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage04\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "list (ordered, mutable), tuple (ordered, immutable), dict (key→value mapping, insertion-ordered since 3.7), and set (unordered, unique elements) are Python's four core built-in containers. All of them support indexing/slicing where applicable (seq[0], seq[1:3]) and each has its own common methods (list.append(), dict.get(), set.add(), and so on). List and dict comprehensions ([x*x for x in range(5)], {k: v for k, v in pairs}) build a new collection from an existing iterable in a single, usually faster and more readable expression than an equivalent append-loop.",
@@ -191,11 +258,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week05-basic", details: "open/with/read/write; try/except/finally/raise; custom exception classes; re.search/match/findall/sub." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week05-mid", details: "Exception chaining (raise ... from ...); exception hierarchies; contextlib beyond files; regex groups, named groups, re.compile." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week05-advanced", details: "Custom context managers; regex lookahead/lookbehind; catastrophic-backtracking traps. Cover traceback propagation and the backtracking regex engine." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week05/." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week05/, run python tools/cli.py test week05 until green, and review." }
+    { step: "1", title: "Learn", details: "Reading/writing files, exceptions, and regex basics, building up through exception chaining and named groups to custom context managers and the regex engine's backtracking behavior.", tiers: [
+      { label: "Basic tier", guideKey: "stage05-basic", keywords: ["open()", "with", "as", "try", "except", "finally", "raise", "Exception", "re.search()", "re.findall()"], methods: ["re.match()", "re.sub()"], modules: ["re"] },
+      { label: "Mid tier", guideKey: "stage05-mid", keywords: ["re.compile()"], modules: ["contextlib"], concepts: ["exception chaining (raise ... from ...)", "exception hierarchies", "regex named groups"] },
+      { label: "Advanced tier & internals", guideKey: "stage05-advanced", methods: ["contextlib.contextmanager"], dunders: ["__enter__", "__exit__"], concepts: ["custom context managers"], theory: ["traceback propagation up the call stack", "backtracking regex engine", "catastrophic backtracking"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage05/ (see its README for the full list), running \`python tools/cli.py test stage05\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage05\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "open(path, mode) opens a file and returns a file object; always pair it with a with block (with open(path) as f:) so the file is closed automatically even if an error occurs partway through. try/except/finally/raise are Python's error-handling primitives: code that might fail goes in try, except ExceptionType: catches and handles a specific failure, finally always runs for cleanup, and raise SomeError(\"message\") throws an exception (write your own exception classes by subclassing Exception when the built-in types don't fit). The re module handles pattern matching over text: re.search() finds the first match anywhere in a string, re.match() only matches at the start, re.findall() returns every match, and re.sub() performs regex-based find-and-replace.",
@@ -234,11 +303,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week06-basic", details: "class/__init__/self; instance vs class attributes; _protected/__private convention; @property/@staticmethod/@classmethod." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week06-mid", details: "__slots__ for memory savings; property with computed/cached values; cls vs self in practice." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week06-advanced", details: "Writing a custom descriptor; metaclass basics; __init_subclass__ hook. Cover attribute lookup order and the descriptor protocol." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week06/." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week06/, run python tools/cli.py test week06 until green, and review." }
+    { step: "1", title: "Learn", details: "Classes, __init__, and encapsulation conventions, building up through __slots__ and computed properties to writing a custom descriptor and Python's attribute lookup order.", tiers: [
+      { label: "Basic tier", guideKey: "stage06-basic", keywords: ["class", "self", "__init__", "@property", "@x.setter", "@staticmethod", "@classmethod", "cls"], dunders: ["__init__"], concepts: ["encapsulation", "instance vs class attributes"] },
+      { label: "Mid tier", guideKey: "stage06-mid", concepts: ["__slots__ memory savings"] },
+      { label: "Advanced tier & internals", guideKey: "stage06-advanced", dunders: ["__get__/__set__ (preview)"], concepts: ["descriptors"], theory: ["attribute lookup order (instance \u2192 class \u2192 MRO)", "descriptor protocol (__get__/__set__)"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage06/ (see its README for the full list), running \`python tools/cli.py test stage06\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage06\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "class Name: defines a class; __init__(self, ...) is the initializer that runs automatically right after a new instance is created, typically used to set up instance attributes on self. Instance attributes (self.x = ...) belong to one object; class attributes (defined directly in the class body) are shared by every instance unless an instance attribute of the same name shadows them. A leading underscore (_protected) is Python's convention for \"internal use, please don't touch\" and a leading double-underscore (__private) triggers name mangling to discourage accidental access from subclasses — neither is true enforced privacy. @property turns a method into a read-only computed attribute (accessed without parentheses); @staticmethod marks a method that needs neither self nor cls (just a function namespaced inside the class); @classmethod marks a method that receives the class itself as cls, commonly used for alternative constructors.",
@@ -277,11 +348,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week07-basic", details: "class Child(Parent), super(), method overriding, duck typing." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week07-mid", details: "Multiple inheritance basics; composition-vs-inheritance judgment; the abc module, @abstractmethod." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week07-advanced", details: "Method Resolution Order & diamond inheritance; mixins; typing.Protocol for structural typing. Cover C3 linearization." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week07/." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week07/, run python tools/cli.py test week07 until green, and review." }
+    { step: "1", title: "Learn", details: "Inheritance, super(), and duck typing, building up through multiple inheritance and the abc module to Method Resolution Order, mixins, and structural typing with Protocol.", tiers: [
+      { label: "Basic tier", guideKey: "stage07-basic", keywords: ["class Child(Parent)", "super()", "isinstance()"], modules: ["typing"], concepts: ["polymorphism", "duck typing"] },
+      { label: "Mid tier", guideKey: "stage07-mid", keywords: ["abc", "ABC", "@abstractmethod"], modules: ["abc"], concepts: ["composition vs inheritance"] },
+      { label: "Advanced tier & internals", guideKey: "stage07-advanced", concepts: ["mixins", "Protocol structural typing"], theory: ["Method Resolution Order (C3 linearization)", "diamond inheritance"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage07/ (see its README for the full list), running \`python tools/cli.py test stage07\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage07\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "class Child(Parent): makes Child inherit every attribute and method Parent defines; use inheritance when Child genuinely \"is a\" Parent, not just for code reuse. super() returns a proxy that forwards calls to the parent class, most commonly used inside __init__ to run the parent's setup before adding the child's own. Overriding a method means redefining it in the child class with the same name — Python resolves which version runs based on the actual object's type, not the variable's declared type. Duck typing (\"if it walks like a duck and quacks like a duck\") means Python cares about what methods/attributes an object actually has, not its declared type or class hierarchy — this is why explicit interfaces are optional in everyday Python code.",
@@ -320,11 +393,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week08-basic", details: "__init__, __repr__, __str__, __eq__." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week08-mid", details: "__add__ and other operator dunders; __len__/__getitem__/__iter__/__contains__; __call__; __bool__." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week08-advanced", details: "__enter__/__exit__ context managers; reflected operators (__radd__) and NotImplemented; __hash__'s relationship to __eq__. Cover why dunder lookup happens on the type, not the instance." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week08/." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week08/, run python tools/cli.py test week08 until green, and review." }
+    { step: "1", title: "Learn", details: "The core object dunders (__init__/__repr__/__eq__), building up through operator overloading and container/callable protocols to context managers and how dunder lookup actually happens on the type.", tiers: [
+      { label: "Basic tier", guideKey: "stage08-basic", dunders: ["__repr__", "__str__", "__eq__"] },
+      { label: "Mid tier", guideKey: "stage08-mid", dunders: ["__add__", "__len__", "__getitem__", "__iter__", "__contains__", "__call__", "__bool__"], concepts: ["operator overloading", "protocols vs explicit inheritance"] },
+      { label: "Advanced tier & internals", guideKey: "stage08-advanced", dunders: ["__enter__", "__exit__", "__hash__", "__radd__"], theory: ["dunder lookup happens on the type, not the instance", "reflected operators & NotImplemented", "iterator protocol requires StopIteration"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage08/ (see its README for the full list), running \`python tools/cli.py test stage08\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage08\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "__init__ initializes a new instance; __repr__ should return an unambiguous, developer-facing string (ideally one that could recreate the object, e.g. Point(x=1, y=2)) and is what you see in the REPL or in repr(obj); __str__ returns a more human-readable string for print(obj)/str(obj) and falls back to __repr__ if not defined; __eq__ defines what == means for your objects (by default, objects compare by identity, not by their contents).",
@@ -363,11 +438,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week09-basic", details: "os.listdir/os.path; json.load/dump; datetime.now(); basic XML parsing with ElementTree." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week09-mid", details: "pathlib as the modern os.path alternative; json custom encoders (default=); timezone-aware vs naive datetimes; ElementTree.findall()." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week09-advanced", details: "os.walk for recursive traversal; datetime arithmetic & timedelta/DST edge cases; building/modifying XML trees. Cover JSON's recursive-descent parser and DOM-style XML parsing." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week09/." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week09/, run python tools/cli.py test week09 until green, and review." }
+    { step: "1", title: "Learn", details: "Everyday stdlib modules for files, JSON, dates, and XML, building up through pathlib and timezone-aware datetimes to recursive directory walks and building XML trees from scratch.", tiers: [
+      { label: "Basic tier", guideKey: "stage09-basic", keywords: ["os.listdir", "os.path", "json.load/dump", "datetime.now/isoformat", "ElementTree.parse/findall"], modules: ["os", "json", "datetime", "xml.etree.ElementTree"] },
+      { label: "Mid tier", guideKey: "stage09-mid", methods: ["pathlib.Path", "json.dumps(default=...)"], modules: ["pathlib"], concepts: ["pathlib as the modern os.path alternative", "timezone-aware vs naive datetimes"] },
+      { label: "Advanced tier & internals", guideKey: "stage09-advanced", methods: ["os.walk()"], theory: ["JSON recursive-descent parsing", "DOM-style (ElementTree) vs streaming (SAX) XML parsing"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage09/ (see its README for the full list), running \`python tools/cli.py test stage09\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage09\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "os.listdir(path) returns the entry names in a directory, and os.path provides functions like os.path.join()/os.path.exists() for building and checking paths as plain strings. json.load(file)/json.dump(obj, file) read and write JSON to/from an open file (use the s-suffixed loads/dumps for strings instead of files) — JSON objects map directly onto Python dicts, arrays onto lists, and so on. datetime.now() gets the current local date and time as a datetime object. xml.etree.ElementTree provides basic XML parsing: ET.parse(file) reads a file into an in-memory element tree you can then search.",
@@ -406,11 +483,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week10-basic", details: "DataFrame/Series basics; read_csv; .head()/.info()/.describe()." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week10-mid", details: "Boolean-indexing filters; groupby + aggregation; sorting; merging/joining DataFrames." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week10-advanced", details: "Vectorized operations vs .apply() performance; multi-indexing; dtype-based memory optimization; pivot tables. Cover columnar NumPy-backed storage." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week10/." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week10/, run python tools/cli.py test week10 until green, and review." }
+    { step: "1", title: "Learn", details: "DataFrame/Series basics and reading data, building up through filtering, grouping, and merging to vectorized operations, multi-indexing, and pandas' columnar NumPy-backed storage.", tiers: [
+      { label: "Basic tier", guideKey: "stage10-basic", keywords: ["pd.read_csv", "df.head()"], methods: ["df.describe()"], modules: ["pandas"] },
+      { label: "Mid tier", guideKey: "stage10-mid", keywords: ["df.groupby()", "df.sort_values()", "df.merge()"], concepts: ["boolean indexing"] },
+      { label: "Advanced tier & internals", guideKey: "stage10-advanced", methods: ["df.info()", "df.apply()", "df.pivot_table()"], concepts: ["multi-indexing", "dtype-based memory optimization"], theory: ["columnar storage backed by NumPy arrays", "vectorization vs per-row Python loops"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage10/ (see its README for the full list), running \`python tools/cli.py test stage10\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage10\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "A DataFrame is pandas' 2-D labeled table (rows and named columns); a Series is a single labeled column. pd.read_csv(path) loads a CSV file straight into a DataFrame. .head(n) shows the first n rows for a quick sanity check, .info() summarizes column names/dtypes/non-null counts, and .describe() gives summary statistics for numeric columns — run all three immediately after loading any new dataset.",
@@ -434,7 +513,7 @@ const TOPICS = [
   note: "Optional deeper book (not required): \u201cPython for Data Analysis\u201d by Wes McKinney — see repo README for why this is optional."
 },
 {
-  n: 11, title: "OpenCV", sub: "images as arrays",
+  n: 11, title: "OpenCV", sub: "hand posture & face gesture recognition",
   challenges: [
     {
       id: "challenge21",
@@ -450,11 +529,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week11-basic", details: "cv2.imread/imwrite; cv2.cvtColor (color conversion); cv2.resize; basic drawing (rectangle/circle/line)." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week11-mid", details: "Thresholding; simple edge detection (Canny); cropping via array slicing; video capture from a file/webcam." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week11-advanced", details: "Contour detection; blur/sharpen filtering (convolution); Haar cascades. Cover images-as-NumPy-arrays and BGR vs RGB channel order." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week11/." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week11/, run python tools/cli.py test week11 until green, and review." }
+    { step: "1", title: "Learn", details: "Building a hand-posture and face-gesture recognition pipeline: reading/prepping camera frames, skin-tone thresholding and edge detection for the hand side, then counting extended fingers via contours and convexity defects (no trained model file needed) and detecting faces/smiles/gaze direction via OpenCV's own bundled Haar cascade files -- genuinely trained, fully local, no download required.", tiers: [
+      { label: "Basic tier", guideKey: "stage11-basic", keywords: ["cv2.imread", "cv2.imwrite", "cv2.cvtColor", "cv2.resize", "cv2.rectangle", "image.shape"], modules: ["opencv-python (cv2)", "numpy"] },
+      { label: "Mid tier", guideKey: "stage11-mid", methods: ["cv2.Canny()"], concepts: ["thresholding"] },
+      { label: "Advanced tier & internals", guideKey: "stage11-advanced", methods: ["cv2.findContours()", "cv2.GaussianBlur()", "cv2.CascadeClassifier"], concepts: ["convolution filtering"], theory: ["images as NumPy arrays (height \u00d7 width \u00d7 channels)", "BGR vs RGB channel order"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage11/ (see its README for the full list), running \`python tools/cli.py test stage11\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage11\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "cv2.imread(path) reads an image file into a NumPy array in BGR channel order (not RGB — a very common source of bugs) and cv2.imwrite(path, img) writes an array back out, inferring the format from the file extension; cv2.imread fails silently by returning None on a bad path, so always check the result. cv2.cvtColor(img, code) converts between color spaces, most often BGR↔grayscale or BGR↔RGB. cv2.resize(img, (w, h)) resizes an image. Basic drawing functions (cv2.rectangle, cv2.circle, cv2.line) draw shapes directly onto an image array in place.",
@@ -494,11 +575,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week12-basic", details: "requests.get/post; response.json()/.status_code; threading.Thread — create/start/join." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week12-mid", details: "Headers/auth/query params/timeouts; raise_for_status(); Lock for protecting shared state between threads." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week12-advanced", details: "requests.Session for connection reuse; retry/backoff strategies; ThreadPoolExecutor; race conditions and deadlocks. Cover the GIL and I/O-bound vs CPU-bound concurrency." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week12/. The tests mock requests.get — never point them at a live endpoint." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week12/, run python tools/cli.py test week12 until green, and review." }
+    { step: "1", title: "Learn", details: "Making HTTP requests and basic threading, building up through auth/timeouts and locking shared state to connection pooling, ThreadPoolExecutor, and the GIL.", tiers: [
+      { label: "Basic tier", guideKey: "stage12-basic", keywords: ["requests.get()", "response.json()", "threading.Thread", ".start()", ".join()"], methods: ["requests.post()"], modules: ["requests", "threading"] },
+      { label: "Mid tier", guideKey: "stage12-mid", keywords: ["threading.Lock"], methods: ["response.raise_for_status()"] },
+      { label: "Advanced tier & internals", guideKey: "stage12-advanced", methods: ["requests.Session()", "concurrent.futures.ThreadPoolExecutor"], concepts: ["sessions & connection reuse", "retry/backoff strategies", "race conditions & deadlocks"], theory: ["Global Interpreter Lock (GIL)", "I/O-bound vs CPU-bound concurrency"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage12/ (see its README for the full list), running \`python tools/cli.py test stage12\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage12\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "requests.get(url)/requests.post(url, ...) send HTTP requests and return a Response object; response.json() parses the body as JSON and response.status_code gives the numeric HTTP status. threading.Thread(target=fn) represents a separate thread of execution: construct it, call .start() to begin running the target function concurrently, and call .join() to block until that thread finishes — useful when the main program needs to wait for background work to complete.",
@@ -537,11 +620,13 @@ const TOPICS = [
     }
   ],
   schedule: [
-    { day: "Day 1", title: "Basic tier", guideKey: "week13-basic", details: "FastAPI app instance; @app.get()/@app.post() routes; path & query parameters; returning a dict (auto-serialized to JSON)." },
-    { day: "Day 2", title: "Mid tier", guideKey: "week13-mid", details: "Pydantic models for request/response validation; automatic interactive docs (/docs); status codes; basic dependency injection (Depends)." },
-    { day: "Day 3", title: "Advanced tier & internals", guideKey: "week13-advanced", details: "async def endpoints; middleware; background tasks; testing with TestClient. Cover ASGI vs WSGI." },
-    { day: "Day 4", title: "Exercises", details: "Work through the exercises in exercises/week13/. Tests use TestClient in-process — no real server or port needed." },
-    { day: "Day 5", title: "Practice & review", details: "Finish the exercises in exercises/week13/, run python tools/cli.py test week13 until green, and review." }
+    { step: "1", title: "Learn", details: "Building routes that return JSON, building up through Pydantic validation and dependency injection to async endpoints, middleware, and ASGI.", tiers: [
+      { label: "Basic tier", guideKey: "stage13-basic", keywords: ["FastAPI()", "@app.get", "@app.post", "uvicorn.run"], modules: ["fastapi", "uvicorn"], concepts: ["path & query parameters"] },
+      { label: "Mid tier", guideKey: "stage13-mid", keywords: ["Depends"], methods: ["BaseModel (pydantic)"], modules: ["pydantic"], concepts: ["dependency injection", "automatic interactive docs (/docs)"] },
+      { label: "Advanced tier & internals", guideKey: "stage13-advanced", methods: ["TestClient()"], concepts: ["async def endpoints"], theory: ["ASGI vs WSGI", "type-hint-driven runtime validation"] }
+    ] },
+    { step: "2", title: "Practice", details: "Work through the exercises in exercises/stage13/ (see its README for the full list), running \`python tools/cli.py test stage13\` as you go." },
+    { step: "3", title: "Review", details: "Finish any remaining exercises, get \`python tools/cli.py test stage13\` fully green, and review anything the group is still shaky on before moving on." }
   ],
   basic: {
     text: "app = FastAPI() creates the application instance that routes are registered on. @app.get(\"/path\")/@app.post(\"/path\") register a function as the handler for GET/POST requests to that path; path parameters ({item_id}) and query parameters are declared simply as ordinary Python function parameters with type hints. Returning a plain dict from a route handler is automatically serialized to a JSON response — no manual serialization step needed.",
@@ -566,13 +651,12 @@ const TOPICS = [
 {
   n: 14, title: "Capstone", sub: "putting it all together",
   schedule: [
-    { day: "Day 1", title: "Project kickoff", details: "Pick a capstone idea that combines two or more earlier topics (e.g. pandas + requests, or OpenCV + FastAPI); scope it down to something finishable in four days and sketch a short plan." },
-    { day: "Day 2", title: "Build — core logic", details: "Implement the core data handling / processing logic for the chosen idea." },
-    { day: "Day 3", title: "Build — integration", details: "Wire in the second module (API, GUI, file I/O, etc.) and start adding basic tests or sanity checks." },
-    { day: "Day 4", title: "Polish", details: "Add error handling, write a short README for the capstone, and run python tools/cli.py test --all as a full sanity check across every week." },
-    { day: "Day 5", title: "Demo & review", details: "Present the capstone to the group, retro on the course, and point interested trainees at the optional deeper books noted in the main README." }
+    { step: "1", title: "Kickoff", details: "Pick a capstone idea that combines two or more earlier topics (e.g. pandas + requests, or OpenCV + FastAPI); scope it down to something finishable in the time available and sketch a short plan." },
+    { step: "2", title: "Build", details: "Implement the core data handling/processing logic first, then wire in the second module (API, GUI, file I/O, etc.) and start adding basic tests or sanity checks." },
+    { step: "3", title: "Polish", details: "Add error handling, write a short README for the capstone, and run python tools/cli.py test --all as a full sanity check across every stage." },
+    { step: "4", title: "Demo & Review", details: "Present the capstone to the group, retro on the course, and point interested trainees at the optional deeper books noted in the main README." }
   ],
-  basic: { text: "This week has no new material — it is a synthesis week. Pick a small project that combines two or more of Topics 1-13 (for example: pull data with requests, analyze it with pandas, and serve results through a small FastAPI app), scope it down to something finishable in the days available, and apply everything learned so far: clean functions, appropriate data structures, error handling, and a few classes where they genuinely help. Treat it as the first real test of whether the pieces fit together, not just whether each piece works in isolation.", ref: "" },
+  basic: { text: "This stage has no new material — it is a synthesis stage. Pick a small project that combines two or more of Topics 1-13 (for example: pull data with requests, analyze it with pandas, and serve results through a small FastAPI app), scope it down to something finishable in the days available, and apply everything learned so far: clean functions, appropriate data structures, error handling, and a few classes where they genuinely help. Treat it as the first real test of whether the pieces fit together, not just whether each piece works in isolation.", ref: "" },
   mid: { text: "", ref: "" },
   advanced: { text: "", ref: "" },
   internals: "",
@@ -597,7 +681,7 @@ const TOPICS = [
     text: "Gating a git commit on a test's exit code via a pre-commit hook; structuring a repo so pytest can discover tests via conftest.py without installing the project as a package; propagating a subprocess's returncode out through sys.exit() so shell scripts and CI can check success/failure.",
     ref: "Web — Python docs, pytest docs “Good Integration Practices” (docs.pytest.org/en/stable/explanation/goodpractices.html)"
   },
-  internals: "cli.py and gui.py are both thin presentation layers over the same core.py functions (run_week_tests/run_all_tests) — neither talks to pytest directly, which is what keeps their behavior identical. subprocess.run() forks a child process, waits for it to exit, and hands back a CompletedProcess with .stdout/.stderr/.returncode; sys.exit(result.returncode) then makes the CLI's own exit code mirror pytest's, so shell `&&` chains and git hooks can react to it. Tkinter runs a single-threaded event loop (mainloop()) — blocking it with a slow subprocess call would freeze the window, which is exactly why gui.py hands the subprocess call to a background thread and marshals the result back with self.after(0, ...).",
+  internals: "cli.py and gui.py are both thin presentation layers over the same core.py functions (run_stage_tests/run_all_tests) — neither talks to pytest directly, which is what keeps their behavior identical. subprocess.run() forks a child process, waits for it to exit, and hands back a CompletedProcess with .stdout/.stderr/.returncode; sys.exit(result.returncode) then makes the CLI's own exit code mirror pytest's, so shell `&&` chains and git hooks can react to it. Tkinter runs a single-threaded event loop (mainloop()) — blocking it with a slow subprocess call would freeze the window, which is exactly why gui.py hands the subprocess call to a background thread and marshals the result back with self.after(0, ...).",
   keywords: ["argparse.ArgumentParser","add_subparsers()","sys.exit()","if __name__ == \"__main__\":"],
   dunders: ["__main__"],
   modules: ["argparse","subprocess","tkinter","threading","venv"],
@@ -605,5 +689,9 @@ const TOPICS = [
   concepts: ["separating shared logic from each frontend","non-blocking GUI via background threads","exit codes as pass/fail signals","git hooks gating commits on tests"],
   theory: ["ANSI escape codes & isatty() terminal detection","Tkinter's single-threaded event loop model"],
   note: "This topic documents how this repo's own test runner (tools/cli.py, tools/gui.py, tools/core.py) is built — read it end to end and you have everything needed to rebuild a CLI+GUI test runner like this one from scratch."
+},
+{
+  n: 16, title: "Symbols & Syntax Reference", sub: "every operator and punctuation symbol — Python, English, and Spanish",
+  isSymbolsPage: true
 }
 ];

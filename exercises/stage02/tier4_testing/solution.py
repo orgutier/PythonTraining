@@ -1,0 +1,44 @@
+"""
+Control Flow -- Testing Without a Framework: Catch the Bug
+Write plain top-level code below -- no function/class wrapper needed (or expected) for this one. Assign your answers to the exact variable names named in README.md; the tests import this module and read those variables directly.
+
+IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
+It must stay a plain importable module -- the test suite in
+tests/test_stage02_tier4_testing.py imports directly from here. Need a helper
+function or class of your own? Add another .py file next to this one inside
+exercises/stage02/tier4_testing/ and import it as a submodule (e.g.
+`from exercises.stage02.tier4_testing import helpers`) -- solution.py just has to
+stay the entry point these tests import from.
+"""
+
+
+numbers = [4, 7, 2, 9, 3, 5, 8]
+threshold = 5
+
+target_count_v1 = 0
+for n in numbers:
+    if n > threshold:
+        target_count_v1 += 1
+
+target_count_v2 = 0
+for n in numbers:
+    if n >= threshold:
+        target_count_v2 += 1
+
+target_first_over_v1 = None
+for n in numbers:
+    if n > threshold:
+        target_first_over_v1 = n
+        break
+
+target_first_over_v2 = None
+for n in numbers:
+    if n > threshold:
+        target_first_over_v2 = n
+
+raise NotImplementedError  # delete this line once you've written the code below
+
+# Write your code here: build check_results (a list of (description, bool)
+# tuples) using plain comparisons against the spec in README.md -- no
+# assert, no test framework -- then compute total_checks/passed_checks/
+# failed_descriptions from check_results.

@@ -1,6 +1,6 @@
 # Challenge 16 — Transaction Ledger: Callable and Context Manager
 
-**Do this after:** Week 08 (The Python Data Model)
+**Do this after:** Stage 08 (The Python Data Model)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge16` (or `pytest tests/test_challenge16.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -11,7 +11,7 @@ batch several entries together with commit-or-rollback semantics -- two
 dunders Challenge 15 didn't need. `Ledger` never inherits from any special
 base class for either behavior to work; Python finds `__call__`/
 `__enter__`/`__exit__` by looking at the object itself. That's the
-**protocol vs. explicit inheritance** idea from this week made concrete.
+**protocol vs. explicit inheritance** idea from this stage made concrete.
 
 Implement:
 

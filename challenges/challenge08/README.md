@@ -1,6 +1,6 @@
 # Challenge 08 — Longest Consecutive Run of Records
 
-**Do this after:** Week 04 (Data Structures)
+**Do this after:** Stage 04 (Data Structures)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge08` (or `pytest tests/test_challenge08.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem

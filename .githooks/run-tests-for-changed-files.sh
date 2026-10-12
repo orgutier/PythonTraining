@@ -3,55 +3,93 @@
 # files named exactly "pre-commit"/"pre-push"/etc., so this is ignored by
 # git and only run when those hooks source/call it).
 #
-# Usage: run-tests-for-changed-files.sh <exercise|week>
-#   exercise -- test ONLY the specific exercise(s) that changed (used by
-#               pre-commit, for atomic per-exercise feedback on every commit)
-#   week     -- test the WHOLE week for any exercise that changed in it
-#               (used by pre-push, so nothing in a week you touched ships
-#               broken even if you only ran the one exercise locally)
+# Usage: run-tests-for-changed-files.sh [exercise|stage] <treeish>
+#   exercise (default) -- test ONLY the specific exercise(s) that changed
+#   stage               -- test the WHOLE stage for any exercise that
+#                          changed in it (every exercise in that stage,
+#                          not just the one(s) that changed)
+#   treeish             -- required: the git tree/commit to actually run
+#                          pytest against (see below). Callers pass the
+#                          staged index tree (pre-commit) or the commit
+#                          being pushed (pre-push).
 #
-# Reads a list of changed file paths (one per line) on stdin, maps any
-# exercises/weekNN/exerciseXX/*.py (including solution.py itself and any
-# helper submodule next to it) or challenges/challengeNN/solution.py to its
-# test id at the requested granularity, and runs "python tools/cli.py test
-# <id>" once per unique id found -- not the full suite. Exits non-zero if
-# any of those runs fail; exits 0 (nothing to test) if no matching file
-# appears in the input at all.
+# Either way, a changed exams/examNN/solution.py or
+# challenges/challengeNN/solution.py always tests as just that one exam/
+# challenge -- neither is split into smaller units, so there's no wider
+# target for "stage" granularity to expand it to.
+#
+# Reads a list of changed file paths (one per line) on stdin, maps each
+# one to its test id at the requested granularity, and runs "python
+# tools/cli.py test <id>" once per unique id found -- never the full
+# suite. Exits non-zero if any of those runs fail; exits 0 (nothing to
+# test) if no matching file appears in the input at all.
+#
+# Whatever's currently sitting in the working directory (unstaged edits,
+# a half-finished change to a DIFFERENT exercise, etc.) must never affect
+# the verdict here -- pre-commit has to judge exactly what's about to be
+# committed (the staged index), and pre-push exactly what's about to be
+# pushed (the commit tip), neither of which is necessarily what's on
+# disk right now. So $treeish gets materialized into a throwaway
+# directory with `git archive`, and pytest runs there instead of in
+# place.
 
-granularity="$1"
+granularity="${1:-exercise}"
+treeish="$2"
+
+if [ -z "$treeish" ]; then
+    echo "run-tests-for-changed-files.sh: missing required <treeish> argument" >&2
+    exit 1
+fi
+
+# An exercise folder is named "exerciseXX" (the Capstone stage) or, on
+# every stage using the tier-named convention, "tierN_<name>XX" -- the
+# tier number prefix keeps a plain directory listing sorted in learning
+# order: tier0_hello_world (Setup, stage01 only), tier1_basicXX,
+# tier2_midXX, tier3_advancedXX, tier4_testing (stages 1-7 only).
+EX_NAME='exercise[0-9][0-9]\|tier[0-9]_[a-z_]*[0-9]*'
 
 case "$granularity" in
     exercise)
-        # week01/exercise03/whatever.py -> week01_exercise03
+        # stage01/exercise03/whatever.py -> stage01_exercise03
+        # stage01/basic01/whatever.py -> stage01_basic01
         ids=$(sed -n \
-            -e 's#^exercises/\(week[0-9][0-9]\)/\(exercise[0-9][0-9]\)/.*\.py$#\1_\2#p' \
+            -e "s#^exercises/\\(stage[0-9][0-9]\\)/\\($EX_NAME\\)/.*\\.py\$#\\1_\\2#p" \
+            -e 's#^exams/\(exam[0-9][0-9]\)/solution\.py$#\1#p' \
             -e 's#^challenges/\(challenge[0-9][0-9]\)/solution\.py$#\1#p' \
             | sort -u)
         ;;
-    week)
-        # week01/exercise03/whatever.py -> week01 (every exercise in it)
+    stage)
+        # stage01/exercise03/whatever.py -> stage01 (every exercise in it)
         ids=$(sed -n \
-            -e 's#^exercises/\(week[0-9][0-9]\)/exercise[0-9][0-9]/.*\.py$#\1#p' \
-            -e 's#^exercises/\(week[0-9][0-9]\)/solution\.py$#\1#p' \
+            -e "s#^exercises/\\(stage[0-9][0-9]\\)/\\($EX_NAME\\)/.*\\.py\$#\\1#p" \
+            -e 's#^exams/\(exam[0-9][0-9]\)/solution\.py$#\1#p' \
             -e 's#^challenges/\(challenge[0-9][0-9]\)/solution\.py$#\1#p' \
             | sort -u)
         ;;
     *)
-        echo "run-tests-for-changed-files.sh: missing/unknown granularity '$granularity' (expected 'exercise' or 'week')" >&2
+        echo "run-tests-for-changed-files.sh: unknown granularity '$granularity' (expected 'exercise' or 'stage')" >&2
         exit 1
         ;;
 esac
 
 if [ -z "$ids" ]; then
-    echo "No exercises/weekNN/exerciseXX/*.py or challenges/challengeNN/solution.py changed -- nothing to test."
+    echo "No exercises/stageNN/exerciseXX/*.py, exams/examNN/solution.py, or challenges/challengeNN/solution.py changed -- nothing to test."
     exit 0
+fi
+
+workdir=$(mktemp -d) || exit 1
+trap 'rm -rf "$workdir"' EXIT
+
+if ! git archive "$treeish" | tar -x -C "$workdir"; then
+    echo "run-tests-for-changed-files.sh: failed to materialize $treeish for testing" >&2
+    exit 1
 fi
 
 overall_status=0
 for id in $ids; do
     echo ""
     echo "==> python tools/cli.py test $id"
-    python tools/cli.py test "$id"
+    (cd "$workdir" && python tools/cli.py test "$id")
     status=$?
     if [ $status -ne 0 ]; then
         overall_status=1

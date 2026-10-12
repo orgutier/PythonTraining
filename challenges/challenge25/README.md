@@ -1,6 +1,6 @@
 # Challenge 25 — URL Shortener API with Dependency-Injected Auth
 
-**Do this after:** Week 13 (FastAPI)
+**Do this after:** Stage 13 (FastAPI)
 **Correctness is pytest-tested:** `python tools/cli.py test challenge25` (or `pytest tests/test_challenge25.py`). The constraints below on *how* you write it are not something pytest can check -- grade those yourself.
 
 ## Problem
@@ -8,7 +8,7 @@
 "Write me a URL shortener" is one of the most common "design + code it
 live" interview exercises. This version adds an API-key check via
 `Depends()`, a validated query parameter, and an `async def` route, so
-the exercise covers the rest of Week 13 alongside the routing and
+the exercise covers the rest of Stage 13 alongside the routing and
 Pydantic models the original problem is about.
 
 Implement:

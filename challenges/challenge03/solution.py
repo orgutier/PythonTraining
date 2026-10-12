@@ -7,7 +7,7 @@ your solution must follow (for...else for the scan, enumerate()/zip() where spec
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module, matching the convention used by
-exercises/weekNN/solution.py.
+exercises/stageNN/solution.py.
 """
 
 

@@ -7,7 +7,7 @@ your solution must follow (O(1) push/pop/top/minimum without min(), __slots__, a
 
 IMPORTANT: do not add an `if __name__ == "__main__":` block to this file.
 It must stay a plain importable module, matching the convention used by
-exercises/weekNN/solution.py.
+exercises/stageNN/solution.py.
 """
 
 
