@@ -26,6 +26,9 @@ quantity= int(quantity_text)
 
 savings_message = f"{(savings := abs(price_a - price_b)*quantity):.2f}."
 
+print(savings)
+
+
 both_under_20 = 0 <= price_a < 20 and 0 <= price_b < 20
 
 total_cost = 0
