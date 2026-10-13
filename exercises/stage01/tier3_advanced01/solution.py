@@ -12,11 +12,34 @@ stay the entry point these tests import from.
 """
 
 
+from decimal import Decimal
+import math
+
+
 price_each_text = "19.99"
 quantity_text = "7"
-
-raise NotImplementedError  # delete this line once you've written the code below
 
 # Write your code here: cast price_each_text/quantity_text, compute
 # float_total and exact_total (Decimal built FROM THE STRINGS), the two
 # totals_are_* comparisons, and the 0.1+0.2 textbook demo. See README.md.
+
+
+price_each_float : float = float(price_each_text)
+quantity: int = int(quantity_text)
+
+float_total = price_each_float * quantity
+
+exact_total : Decimal = Decimal(price_each_text) * Decimal(quantity_text)
+
+totals_are_exactly_equal : bool = float(exact_total) == float_total
+
+totals_are_close : bool = math.isclose(float(exact_total),float_total)
+
+point_one_plus_point_two: float = 0.1 + 0.2
+
+is_exactly_point_three: bool = point_one_plus_point_two == 0.3
+
+is_close_to_point_three: bool = math.isclose(point_one_plus_point_two, 0.3)
+
+print(f"exact_total: {exact_total}, float_total: {float_total}, totals_are_exactly_equal: {totals_are_exactly_equal}, totals_are_close: {totals_are_close}")
+print(f"0.1 + 0.2 = {point_one_plus_point_two}, equal to 0.3: {is_exactly_point_three}, close to 0.3: {is_close_to_point_three}")
