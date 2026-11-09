@@ -12,6 +12,24 @@ Usage (from the repo root):
 
 Run `python tools/attendance_report.py --help` for every option.
 
+Multiple groups
+-----------------------------
+If the given path contains subfolders, each subfolder is treated as a
+separate group (e.g. different cohorts/classes), and each subfolder's
+own CSV files are that group's sessions. In that case the workbook gets
+one Summary/Attendance/Duration sheet set per group, plus:
+
+- An "Overview" sheet listing every group's totals.
+- A "Group Comparison" sheet with a trend chart comparing groups --
+  but only over the session days two or more groups share, since a day
+  only one group met on isn't a fair point of comparison between groups.
+- An "Outliers" sheet listing those single-group-only days separately,
+  so that data isn't lost, just kept out of the cross-group comparison.
+
+If the path has no subfolders with recognized attendance files, it's
+treated as a single group (the original, pre-groups behavior) and the
+workbook is just Summary/Attendance/Duration, unchanged.
+
 What it expects
 -----------------------------
 One CSV file per session in the given folder (matching --pattern, default
@@ -61,7 +79,7 @@ try:
     import openpyxl
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.formatting.rule import ColorScaleRule
-    from openpyxl.chart import BarChart, Reference
+    from openpyxl.chart import BarChart, LineChart, Reference
 except ImportError:
     print(
         "openpyxl is required to write the .xlsx report -- "
@@ -244,6 +262,24 @@ def discover_csv_files(folder: Path, pattern: str) -> list:
     return sorted(folder.glob(pattern))
 
 
+def discover_groups(folder: Path, pattern: str) -> dict:
+    """{group_name: [files]}. Subfolders of `folder` that contain files
+    matching `pattern` are each one group, named after the subfolder.
+    If none do, `folder` itself is treated as a single group (the
+    original, no-groups behavior) -- loose files directly in `folder`
+    are only used in that fallback case."""
+    groups = {}
+    for sub in sorted(p for p in folder.iterdir() if p.is_dir()):
+        files = discover_csv_files(sub, pattern)
+        if files:
+            groups[sub.name] = files
+    if not groups:
+        files = discover_csv_files(folder, pattern)
+        if files:
+            groups[folder.name or "Attendance"] = files
+    return groups
+
+
 def aggregate_sessions(files: list) -> tuple:
     """Parses every file, merges same-day files together (summing
     duration, union of participants), and returns
@@ -297,12 +333,30 @@ def _autosize(ws, min_width=4, max_width=28):
         ws.column_dimensions[col].width = width
 
 
-def _write_attendance_sheet(wb, date_strs: list, people: dict, present_only: bool):
+INVALID_SHEET_CHARS = re.compile(r'[:\\/?*\[\]]')
+
+
+def _sheet_name(base: str, suffix: str, used: set) -> str:
+    """A valid, unique (<=31 char) Excel sheet name "<base> <suffix>"."""
+    base = INVALID_SHEET_CHARS.sub("_", base).strip(" '") or "Group"
+    budget = 31 - len(suffix) - 1
+    name = f"{base[:budget]} {suffix}"
+    i = 2
+    while name in used:
+        tag = str(i)
+        name = f"{base[:budget - len(tag)]}{tag} {suffix}"
+        i += 1
+    used.add(name)
+    return name
+
+
+def _write_attendance_sheet(wb, date_strs: list, people: dict, present_only: bool, title: str = None):
     """The "exercises-like" grid: one row per person, one column per
     session date. present_only=True -> PASS/FAIL-style Present/blank grid
     (this is "attendance per date"); False -> the same shape with minutes
     attended in each cell instead (a richer duration view)."""
-    title = "Attendance" if present_only else "Duration (minutes)"
+    if title is None:
+        title = "Attendance" if present_only else "Duration (minutes)"
     ws = wb.create_sheet(title)
 
     ws.cell(row=1, column=1, value="Name").font = HEADER_FONT
@@ -346,8 +400,8 @@ def _write_attendance_sheet(wb, date_strs: list, people: dict, present_only: boo
     return ws
 
 
-def _write_summary_sheet(wb, date_strs: list, people: dict):
-    ws = wb.create_sheet("Summary", 0)
+def _write_summary_sheet(wb, date_strs: list, people: dict, title: str = "Summary"):
+    ws = wb.create_sheet(title)
     headers = ["Name", "Email", "Sessions Attended", "Total Sessions", "Attendance %",
                "Total Minutes", "Avg Minutes/Session", "First Session", "Last Session"]
     for c, h in enumerate(headers, start=1):
@@ -425,6 +479,164 @@ def build_workbook(date_strs: list, people: dict) -> "openpyxl.Workbook":
     return wb
 
 
+# --------------------------------------------------------------------------- multi-group aggregation/report
+
+def split_shared_and_outlier_days(group_data: dict) -> tuple:
+    """group_data: {group_name: {"date_strs": [...], ...}}. Returns
+    (shared_dates, outliers) where shared_dates are session days 2+
+    groups met on (fair ground for comparing groups), and outliers is
+    [(date_str, group_name), ...] for days only one group met on."""
+    date_to_groups = defaultdict(set)
+    for name, gd in group_data.items():
+        for d in gd["date_strs"]:
+            date_to_groups[d].add(name)
+
+    shared_dates = sorted(d for d, groups in date_to_groups.items() if len(groups) >= 2)
+    outliers = sorted(
+        (d, next(iter(groups))) for d, groups in date_to_groups.items() if len(groups) == 1
+    )
+    return shared_dates, outliers
+
+
+def _write_overview_sheet(wb, group_data: dict, shared_dates: list, outliers: list):
+    ws = wb.create_sheet("Overview", 0)
+    headers = ["Group", "Sessions", "Unique Attendees", "First Session", "Last Session"]
+    for c, h in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=c, value=h)
+        cell.font = HEADER_FONT
+        cell.fill = HEADER_FILL
+
+    r = 2
+    for name in sorted(group_data):
+        gd = group_data[name]
+        dates = gd["date_strs"]
+        ws.cell(row=r, column=1, value=name)
+        ws.cell(row=r, column=2, value=len(dates))
+        ws.cell(row=r, column=3, value=len(gd["people"]))
+        ws.cell(row=r, column=4, value=dates[0] if dates else "")
+        ws.cell(row=r, column=5, value=dates[-1] if dates else "")
+        r += 1
+
+    all_people = set()
+    for gd in group_data.values():
+        all_people.update(gd["people"])
+    r += 1
+    ws.cell(row=r, column=1, value="Groups:").font = Font(bold=True)
+    ws.cell(row=r, column=2, value=len(group_data))
+    r += 1
+    ws.cell(row=r, column=1, value="Total unique attendees (all groups):").font = Font(bold=True)
+    ws.cell(row=r, column=2, value=len(all_people))
+    r += 1
+    ws.cell(row=r, column=1, value="Shared session days (see Group Comparison):").font = Font(bold=True)
+    ws.cell(row=r, column=2, value=len(shared_dates))
+    r += 1
+    ws.cell(row=r, column=1, value="Outlier days, single group met (see Outliers):").font = Font(bold=True)
+    ws.cell(row=r, column=2, value=len(outliers))
+
+    ws.freeze_panes = "A2"
+    _autosize(ws)
+    return ws
+
+
+def _write_group_comparison_sheet(wb, group_data: dict, shared_dates: list):
+    """Attendance count per group, per shared session day only -- days
+    just one group met on aren't a fair comparison point and are left
+    out (they're on the Outliers sheet instead)."""
+    if not shared_dates:
+        return None
+
+    ws = wb.create_sheet("Group Comparison")
+    ws.cell(row=1, column=1, value="Group").font = HEADER_FONT
+    ws.cell(row=1, column=1).fill = HEADER_FILL
+    for i, d in enumerate(shared_dates):
+        c = ws.cell(row=1, column=2 + i, value=d)
+        c.font = HEADER_FONT
+        c.fill = HEADER_FILL
+        c.alignment = Alignment(horizontal="center")
+
+    names = sorted(group_data)
+    for r, name in enumerate(names, start=2):
+        gd = group_data[name]
+        ws.cell(row=r, column=1, value=name)
+        for i, d in enumerate(shared_dates):
+            met = d in gd["date_strs"]
+            n_present = sum(1 for p in gd["people"].values() if d in p["minutes_by_date"]) if met else None
+            cell = ws.cell(row=r, column=2 + i, value=n_present if met else "")
+            cell.alignment = Alignment(horizontal="center")
+
+    footer_row = len(names) + 2
+    ws.cell(row=footer_row, column=1, value="Total").font = Font(bold=True, italic=True)
+    for i, d in enumerate(shared_dates):
+        col_letter = ws.cell(row=1, column=2 + i).column_letter
+        ws.cell(row=footer_row, column=2 + i, value=f"=SUM({col_letter}2:{col_letter}{len(names) + 1})")
+
+    ws.freeze_panes = "B2"
+    _autosize(ws)
+
+    chart = LineChart()
+    chart.title = "Attendance by group across shared session days"
+    chart.style = 2
+    chart.width = max(18, len(shared_dates) * 1.3)
+    chart.height = max(8, len(names) * 1.2)
+    chart.y_axis.title = "Attendees present"
+    data = Reference(ws, min_col=1, max_col=1 + len(shared_dates), min_row=1, max_row=1 + len(names))
+    chart.add_data(data, titles_from_data=True, from_rows=True)
+    cats = Reference(ws, min_col=2, max_col=1 + len(shared_dates), min_row=1, max_row=1)
+    chart.set_categories(cats)
+    for s in chart.series:
+        s.smooth = False
+    ws.add_chart(chart, f"A{footer_row + 2}")
+    return ws
+
+
+def _write_outliers_sheet(wb, group_data: dict, outliers: list):
+    """Days only one group met on, kept separate from the Group
+    Comparison sheet/chart rather than silently dragging down the other
+    groups' numbers on days they simply had no class."""
+    ws = wb.create_sheet("Outliers")
+    headers = ["Date", "Group", "Title", "Present"]
+    for c, h in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=c, value=h)
+        cell.font = HEADER_FONT
+        cell.fill = HEADER_FILL
+
+    if not outliers:
+        ws.cell(row=2, column=1, value="None -- every session day was shared by 2+ groups.")
+        _autosize(ws)
+        return ws
+
+    for r, (d, name) in enumerate(outliers, start=2):
+        gd = group_data[name]
+        n_present = sum(1 for p in gd["people"].values() if d in p["minutes_by_date"])
+        ws.cell(row=r, column=1, value=d)
+        ws.cell(row=r, column=2, value=name)
+        ws.cell(row=r, column=3, value=gd["titles"].get(d) or "")
+        ws.cell(row=r, column=4, value=n_present)
+
+    ws.freeze_panes = "A2"
+    _autosize(ws)
+    return ws
+
+
+def build_workbook_multi(group_data: dict, shared_dates: list, outliers: list) -> "openpyxl.Workbook":
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    _write_overview_sheet(wb, group_data, shared_dates, outliers)
+
+    used_names = set()
+    for name in sorted(group_data):
+        gd = group_data[name]
+        _write_summary_sheet(wb, gd["date_strs"], gd["people"], title=_sheet_name(name, "Summary", used_names))
+        _write_attendance_sheet(wb, gd["date_strs"], gd["people"], present_only=True,
+                                 title=_sheet_name(name, "Attendance", used_names))
+        _write_attendance_sheet(wb, gd["date_strs"], gd["people"], present_only=False,
+                                 title=_sheet_name(name, "Duration", used_names))
+
+    _write_group_comparison_sheet(wb, group_data, shared_dates)
+    _write_outliers_sheet(wb, group_data, outliers)
+    return wb
+
+
 # --------------------------------------------------------------------------- main
 
 def main():
@@ -438,8 +650,8 @@ def main():
             "  python tools/attendance_report.py /path/to/csvs --pattern \"Attendance-*.csv\"\n"
         ),
     )
-    parser.add_argument("path", help="Folder containing one Teams attendance .csv export per session")
-    parser.add_argument("--pattern", default="*.csv", help='Glob pattern for attendance files within that folder (default: "*.csv")')
+    parser.add_argument("path", help="Folder of attendance .csv exports, or a folder of per-group subfolders of them")
+    parser.add_argument("--pattern", default="*.csv", help='Glob pattern for attendance files within each folder (default: "*.csv")')
     parser.add_argument("--output", default="attendance.xlsx", help="Output .xlsx path (default: attendance.xlsx)")
     args = parser.parse_args()
 
@@ -448,30 +660,52 @@ def main():
         print(f"{folder} is not a directory.", file=sys.stderr)
         sys.exit(1)
 
-    files = discover_csv_files(folder, args.pattern)
-    if not files:
-        print(f"No files matching {args.pattern!r} in {folder}.", file=sys.stderr)
+    groups = discover_groups(folder, args.pattern)
+    if not groups:
+        print(f"No files matching {args.pattern!r} in {folder} or its subfolders.", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Found {len(files)} attendance file(s) in {folder}.")
-    date_strs, titles, people, warnings = aggregate_sessions(files)
+    multi = len(groups) > 1
+    if multi:
+        print(f"Found {len(groups)} group(s) under {folder}: {', '.join(sorted(groups))}")
 
-    for w in warnings:
-        print(f"WARNING: {w}", file=sys.stderr)
+    group_data = {}
+    for name in sorted(groups):
+        files = groups[name]
+        label = f"[{name}] " if multi else ""
+        print(f"{label}Found {len(files)} attendance file(s).")
+        date_strs, titles, people, warnings = aggregate_sessions(files)
+        for w in warnings:
+            print(f"WARNING: {label}{w}", file=sys.stderr)
+        if not date_strs:
+            print(f"{label}No sessions with a recognized participant table were found -- skipped.", file=sys.stderr)
+            continue
+        group_data[name] = {"date_strs": date_strs, "titles": titles, "people": people}
+        print(f"{label}{len(date_strs)} session(s), {len(people)} unique attendee(s).")
+        for d in date_strs:
+            n_present = sum(1 for p in people.values() if d in p["minutes_by_date"])
+            title = f" -- {titles[d]}" if titles.get(d) else ""
+            print(f"  {d}{title}: {n_present} present")
 
-    if not date_strs:
+    if not group_data:
         print("No sessions with a recognized participant table were found -- nothing to report.", file=sys.stderr)
         sys.exit(1)
 
-    print(f"{len(date_strs)} session(s), {len(people)} unique attendee(s).")
-    for d in date_strs:
-        n_present = sum(1 for p in people.values() if d in p["minutes_by_date"])
-        title = f" -- {titles[d]}" if titles.get(d) else ""
-        print(f"  {d}{title}: {n_present} present")
+    if len(group_data) == 1:
+        gd = next(iter(group_data.values()))
+        wb = build_workbook(gd["date_strs"], gd["people"])
+        wb.save(args.output)
+        print(f"\nWrote {args.output} ({len(gd['date_strs'])} sessions, {len(gd['people'])} attendees).")
+        return
 
-    wb = build_workbook(date_strs, people)
+    shared_dates, outliers = split_shared_and_outlier_days(group_data)
+    print(f"\n{len(group_data)} groups, {len(shared_dates)} shared session day(s), "
+          f"{len(outliers)} outlier day(s) (only one group met).")
+    wb = build_workbook_multi(group_data, shared_dates, outliers)
     wb.save(args.output)
-    print(f"\nWrote {args.output} ({len(date_strs)} sessions, {len(people)} attendees).")
+    total_people = len({key for gd in group_data.values() for key in gd["people"]})
+    print(f"\nWrote {args.output} ({len(group_data)} groups, {total_people} attendees total, "
+          f"{len(shared_dates)} shared days, {len(outliers)} outlier days).")
 
 
 if __name__ == "__main__":
