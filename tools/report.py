@@ -12,13 +12,43 @@ results into report.xlsx: one row per student, one column per exercise
 stage) on another, one column per exam on a third, and a Summary sheet
 with solved/total counts for all three.
 
+It also builds a day-by-day telemetry history of exercises solved per
+branch -- see "Daily telemetry" below -- written as three more sheets:
+Daily Progress (a cumulative solved-count table, one column per branch,
+plus a line chart), Daily Delta (the same grid but day-over-day new
+exercises solved, plus a class-wide daily total), and Leaderboard (one
+row per branch -- total solved, first/last commit, days active,
+average/day, best single day -- sorted so the most-progressed branch is
+the top row and the least-progressed is the bottom, plus a bar chart of
+the same ranking).
+
 Usage (from the repo root):
     python tools/report.py
     python tools/report.py --pattern "cohort2025-*/*" --output cohort2025.xlsx
     python tools/report.py --skip-fetch --workers 8
     python tools/report.py --local                     # use local branches, no fetch
+    python tools/report.py --history-days 14            # only the last 2 weeks of history
+    python tools/report.py --no-history                 # skip the daily telemetry pass entirely
 
 Run `python tools/report.py --help` for every option.
+
+Daily telemetry
+-----------------------------
+For each branch, `git log` (cheap -- no worktree needed) finds the latest
+commit on each calendar day. For each of those commits, in a throwaway
+worktree exactly like the current-state pass above, THIS checkout's own
+exercise tests are run to get that day's solved count -- so the history
+is graded by the exact same rubric as the present-day Summary sheet, not
+whatever rubric existed back on that day. Challenges/exams are skipped in
+this historical pass (exercises are what "day to day progress" means
+here, and it roughly halves the number of test runs).
+
+This multiplies the script's running time by roughly the number of
+distinct commit-days across all branches, since each one is its own full
+test run -- `--history-days N` (default 30) bounds how far back to look;
+`--history-days 0` means the branch's entire history; `--no-history`
+skips this pass entirely and produces just the current-state sheets, same
+as before this feature existed.
 
 Why the canonical test suite
 -----------------------------
@@ -47,6 +77,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+from datetime import date, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -57,6 +88,7 @@ try:
     from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
     from openpyxl.utils import get_column_letter
     from openpyxl.formatting.rule import ColorScaleRule
+    from openpyxl.chart import BarChart, LineChart, Reference
 except ImportError:
     print(
         "openpyxl is required to write the .xlsx report -- "
@@ -159,6 +191,154 @@ def _run_one_test_file(worktree_dir: Path, relative_path: str) -> bool:
         cwd=worktree_dir, capture_output=True, text=True,
     )
     return result.returncode == 0
+
+
+# --------------------------------------------------------------------------- daily telemetry
+
+def discover_daily_commits(ref: str, history_days: int) -> dict:
+    """{date: sha} for the latest commit on each calendar day `ref` has at
+    least one commit, newest commit-day first conceptually but returned
+    sorted ascending by date. `git log` is newest-commit-first, so the
+    FIRST time a given day is seen is already that day's latest commit --
+    no need to compare timestamps by hand.
+
+    history_days > 0 keeps only the most recent N calendar days; 0 (or
+    negative) keeps the branch's entire history."""
+    result = subprocess.run(
+        ["git", "log", "--format=%H|%cd", "--date=format:%Y-%m-%d", ref],
+        cwd=REPO_ROOT, capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        return {}
+
+    by_day = {}
+    for line in result.stdout.splitlines():
+        sha, sep, day_str = line.partition("|")
+        if not sep:
+            continue
+        if day_str not in by_day:  # first occurrence = that day's latest commit
+            by_day[day_str] = sha
+
+    if history_days > 0:
+        cutoff = date.today() - timedelta(days=history_days - 1)
+        by_day = {d: sha for d, sha in by_day.items() if date.fromisoformat(d) >= cutoff}
+
+    return dict(sorted(by_day.items()))
+
+
+def run_daily_history(branches: list, exercise_ids: list, history_days: int, workers: int) -> dict:
+    """{(group, user): {date_str: exercises_solved_count}} for every
+    branch, by re-running the canonical exercise tests (never challenges/
+    exams -- see module docstring) against the latest commit of every
+    calendar day in range. One throwaway worktree per (branch, day), same
+    machinery as run_student_tests(), just pointed at a historical sha
+    instead of the branch tip."""
+    work_items = []
+    for group, user, ref in branches:
+        daily_commits = discover_daily_commits(ref, history_days)
+        for day_str, sha in daily_commits.items():
+            work_items.append((group, user, day_str, sha))
+
+    history = {}
+    if not work_items:
+        return history
+
+    def _work(item):
+        group, user, day_str, sha = item
+        outcome = run_student_tests(sha, exercise_ids, [], [])
+        solved = sum(1 for v in outcome["exercises"].values() if v) if not outcome["error"] else None
+        return group, user, day_str, solved
+
+    done = 0
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = [executor.submit(_work, item) for item in work_items]
+        for future in concurrent.futures.as_completed(futures):
+            group, user, day_str, solved = future.result()
+            done += 1
+            with _PRINT_LOCK:
+                print(f"[history {done}/{len(work_items)}] {group}/{user} {day_str}: "
+                      f"{solved if solved is not None else 'ERROR'}/{len(exercise_ids)} exercises")
+            if solved is None:
+                continue
+            history.setdefault((group, user), {})[day_str] = solved
+
+    return history
+
+
+def build_daily_series(branches: list, history: dict) -> tuple:
+    """Forward-fills each branch's {date: cumulative_solved} history across
+    a shared, continuous calendar range (the earliest commit-day seen for
+    any branch, through today) so every branch has one value per date --
+    missing days (no commit that day) just repeat the last known count,
+    making a proper step function instead of a sparse/jagged one. Returns
+    (date_strs, {(group, user): [count_per_date]})."""
+    all_days = sorted({d for per_branch in history.values() for d in per_branch})
+    if not all_days:
+        return [], {}
+
+    start = date.fromisoformat(all_days[0])
+    end = date.today()
+    date_strs = []
+    d = start
+    while d <= end:
+        date_strs.append(d.isoformat())
+        d += timedelta(days=1)
+
+    series = {}
+    for group, user, ref in branches:
+        per_branch = history.get((group, user), {})
+        values = []
+        last = 0
+        for day_str in date_strs:
+            if day_str in per_branch:
+                last = per_branch[day_str]
+            values.append(last)
+        series[(group, user)] = values
+
+    return date_strs, series
+
+
+def compute_branch_stats(branches: list, history: dict, exercise_ids: list) -> list:
+    """One stats dict per branch: total solved "as of today" comes from
+    the most recent day in its own history (not the current-state pass,
+    which also counts challenges/exams), first/last commit day, how many
+    distinct days it actually has a commit on, average new exercises per
+    active day, and its single best day."""
+    stats = []
+    for group, user, ref in branches:
+        per_branch = history.get((group, user), {})
+        if not per_branch:
+            stats.append({
+                "group": group, "user": user, "branch": ref,
+                "total_solved": 0, "first_commit": None, "last_commit": None,
+                "days_active": 0, "avg_per_day": 0.0, "best_day": None, "best_day_count": 0,
+            })
+            continue
+
+        days_sorted = sorted(per_branch)
+        first_commit = days_sorted[0]
+        last_commit = days_sorted[-1]
+        total_solved = per_branch[last_commit]
+
+        prev = 0
+        best_day, best_day_count = None, 0
+        for day_str in days_sorted:
+            delta = max(0, per_branch[day_str] - prev)
+            if delta >= best_day_count:
+                best_day, best_day_count = day_str, delta
+            prev = per_branch[day_str]
+
+        days_active = len(days_sorted)
+        stats.append({
+            "group": group, "user": user, "branch": ref,
+            "total_solved": total_solved, "first_commit": first_commit, "last_commit": last_commit,
+            "days_active": days_active,
+            "avg_per_day": (total_solved / days_active) if days_active else 0.0,
+            "best_day": best_day, "best_day_count": best_day_count,
+        })
+
+    stats.sort(key=lambda s: s["total_solved"], reverse=True)
+    return stats
 
 
 # --------------------------------------------------------------------------- stage grouping
@@ -395,13 +575,179 @@ def _write_summary_sheet(wb, rows: list, n_exercises: int, n_challenges: int, n_
     return ws
 
 
-def build_workbook(rows: list, exercise_ids: list, challenge_ids: list, exam_ids: list):
+def _branch_col_header(group: str, user: str) -> str:
+    return f"{group}/{user}"
+
+
+def _write_daily_progress_sheet(wb, date_strs: list, series: dict, branches: list):
+    """Cumulative exercises-solved-per-day table, one column per branch,
+    plus a line chart of the same data -- the "day to day graph" and its
+    backing table."""
+    ws = wb.create_sheet("Daily Progress")
+    ws.cell(row=1, column=1, value="Date").font = HEADER_FONT
+    ws.cell(row=1, column=1).fill = HEADER_FILL
+
+    branch_cols = {}
+    for i, (group, user, ref) in enumerate(branches):
+        col = 2 + i
+        branch_cols[(group, user)] = col
+        c = ws.cell(row=1, column=col, value=_branch_col_header(group, user))
+        c.font = HEADER_FONT
+        c.fill = HEADER_FILL
+        c.alignment = Alignment(horizontal="center")
+
+    for r, day_str in enumerate(date_strs, start=2):
+        ws.cell(row=r, column=1, value=day_str)
+        for key, col in branch_cols.items():
+            ws.cell(row=r, column=col, value=series[key][r - 2]).alignment = Alignment(horizontal="center")
+
+    last_row = 1 + len(date_strs)
+    ws.freeze_panes = "B2"
+    _autosize(ws)
+
+    if date_strs and branches:
+        chart = LineChart()
+        chart.title = "Cumulative exercises solved, by branch"
+        chart.y_axis.title = "Exercises solved"
+        chart.x_axis.title = "Date"
+        chart.style = 10
+        chart.width = 26
+        chart.height = 14
+        data = Reference(ws, min_col=2, max_col=1 + len(branches), min_row=1, max_row=last_row)
+        cats = Reference(ws, min_col=1, min_row=2, max_row=last_row)
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(cats)
+        ws.add_chart(chart, f"A{last_row + 3}")
+
+    return ws
+
+
+def _write_daily_delta_sheet(wb, date_strs: list, series: dict, branches: list):
+    """Day-over-day NEW exercises solved (the cumulative table's first
+    difference) -- "incremental number ... of exercises" per day, per
+    branch, plus a class-wide daily total column."""
+    ws = wb.create_sheet("Daily Delta")
+    ws.cell(row=1, column=1, value="Date").font = HEADER_FONT
+    ws.cell(row=1, column=1).fill = HEADER_FILL
+
+    branch_cols = {}
+    for i, (group, user, ref) in enumerate(branches):
+        col = 2 + i
+        branch_cols[(group, user)] = col
+        c = ws.cell(row=1, column=col, value=_branch_col_header(group, user))
+        c.font = HEADER_FONT
+        c.fill = HEADER_FILL
+        c.alignment = Alignment(horizontal="center")
+
+    total_col = 2 + len(branches)
+    tc = ws.cell(row=1, column=total_col, value="Class Total")
+    tc.font = HEADER_FONT
+    tc.fill = STAGE_FILL
+    tc.alignment = Alignment(horizontal="center")
+
+    prev = {key: 0 for key in branch_cols}
+    for r, day_str in enumerate(date_strs, start=2):
+        ws.cell(row=r, column=1, value=day_str)
+        day_total = 0
+        for key, col in branch_cols.items():
+            cumulative = series[key][r - 2]
+            delta = max(0, cumulative - prev[key])
+            prev[key] = cumulative
+            day_total += delta
+            cell = ws.cell(row=r, column=col, value=delta)
+            cell.alignment = Alignment(horizontal="center")
+            if delta > 0:
+                cell.fill = PASS_FILL
+        tcell = ws.cell(row=r, column=total_col, value=day_total)
+        tcell.alignment = Alignment(horizontal="center")
+        tcell.font = Font(bold=True)
+
+    ws.freeze_panes = "B2"
+    _autosize(ws)
+    return ws
+
+
+def _write_leaderboard_sheet(wb, stats: list, n_exercises: int):
+    """One row per branch, ranked by total exercises solved (most
+    progress first), with the top and bottom rows highlighted, plus a bar
+    chart of the same ranking -- the "most updated / least updated
+    branch" graph."""
+    ws = wb.create_sheet("Leaderboard")
+    headers = ["Rank", "Group", "User", "Exercises Solved", "Exercises Total", "%",
+               "First Commit", "Last Commit", "Days Active", "Avg New/Day", "Best Day", "Best Day Count"]
+    for c, h in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=c, value=h)
+        cell.font = HEADER_FONT
+        cell.fill = HEADER_FILL
+        cell.alignment = Alignment(horizontal="center")
+
+    MOST_FILL = PatternFill("solid", fgColor="C6EFCE")
+    LEAST_FILL = PatternFill("solid", fgColor="FFC7CE")
+
+    r = 2
+    for rank, s in enumerate(stats, start=1):
+        values = [
+            rank, s["group"], s["user"],
+            s["total_solved"], n_exercises,
+            (s["total_solved"] / n_exercises) if n_exercises else 0,
+            s["first_commit"] or "", s["last_commit"] or "",
+            s["days_active"], round(s["avg_per_day"], 2),
+            s["best_day"] or "", s["best_day_count"],
+        ]
+        for c, v in enumerate(values, start=1):
+            cell = ws.cell(row=r, column=c, value=v)
+            cell.alignment = Alignment(horizontal="center")
+            if c == 6:
+                cell.number_format = "0%"
+            if rank == 1:
+                cell.fill = MOST_FILL
+            elif rank == len(stats) and len(stats) > 1:
+                cell.fill = LEAST_FILL
+        r += 1
+
+    if stats:
+        ws.cell(row=r + 1, column=1, value="Most progress → top row (green); least progress → bottom row (red).").font = Font(italic=True)
+
+    ws.freeze_panes = "A2"
+    _autosize(ws)
+
+    if stats:
+        last_row = 1 + len(stats)
+        chart = BarChart()
+        chart.type = "bar"  # horizontal -- easier to read branch names
+        chart.title = "Exercises solved, ranked (most progress → least)"
+        chart.y_axis.title = "Branch"
+        chart.x_axis.title = "Exercises solved"
+        chart.style = 10
+        chart.width = 24
+        chart.height = max(8, len(stats) * 0.8)
+        data = Reference(ws, min_col=4, max_col=4, min_row=1, max_row=last_row)
+        cats = Reference(ws, min_col=2, max_col=3, min_row=2, max_row=last_row)
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(cats)
+        chart.legend = None
+        ws.add_chart(chart, f"A{last_row + 3}")
+
+    return ws
+
+
+def build_workbook(rows: list, exercise_ids: list, challenge_ids: list, exam_ids: list,
+                    daily: tuple = None, stats: list = None):
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
     _write_summary_sheet(wb, rows, len(exercise_ids), len(challenge_ids), len(exam_ids))
     _write_grid_sheet(wb, "Exercises", rows, exercise_ids, exercise_stage, "exercises")
     _write_grid_sheet(wb, "Challenges", rows, challenge_ids, challenge_stage, "challenges")
     _write_flat_grid_sheet(wb, "Exams", rows, exam_ids, exam_label, "exams")
+
+    if daily is not None:
+        date_strs, series, branches = daily
+        if date_strs:
+            _write_daily_progress_sheet(wb, date_strs, series, branches)
+            _write_daily_delta_sheet(wb, date_strs, series, branches)
+    if stats is not None and stats:
+        _write_leaderboard_sheet(wb, stats, len(exercise_ids))
+
     return wb
 
 
@@ -417,6 +763,8 @@ def main():
             "  python tools/report.py --pattern \"cohort2025-*/*\" --output cohort2025.xlsx\n"
             "  python tools/report.py --skip-fetch --workers 8\n"
             "  python tools/report.py --local\n"
+            "  python tools/report.py --history-days 14\n"
+            "  python tools/report.py --no-history     # current-state sheets only, no daily telemetry\n"
         ),
     )
     parser.add_argument("--remote", default="origin", help="Remote to fetch/read branches from (default: origin)")
@@ -427,6 +775,13 @@ def main():
     parser.add_argument("--workers", type=int, default=4, help="Branches to test in parallel (default: 4)")
     parser.add_argument("--skip-fetch", action="store_true", help="Don't run 'git fetch' first; use what's already local")
     parser.add_argument("--local", action="store_true", help="Read local branches (refs/heads) instead of a remote's")
+    parser.add_argument("--history-days", type=int, default=30,
+                         help="How many calendar days of daily telemetry to compute, counting back from today "
+                              "(default: 30). 0 means the branch's entire history.")
+    parser.add_argument("--no-history", action="store_true",
+                         help="Skip the daily telemetry pass (Daily Progress / Daily Delta / Leaderboard sheets) "
+                              "entirely -- just the current-state Summary/Exercises/Challenges/Exams sheets, "
+                              "and much faster since it skips re-testing every branch's history.")
     args = parser.parse_args()
 
     exclude = [p.strip() for p in args.exclude.split(",") if p.strip()]
@@ -484,7 +839,25 @@ def main():
 
     rows.sort(key=lambda r: (r["group"], r["user"]))
 
-    wb = build_workbook(rows, exercise_ids, challenge_ids, exam_ids)
+    daily = None
+    stats = None
+    if not args.no_history:
+        print(f"\nComputing daily telemetry ({'full history' if args.history_days <= 0 else f'last {args.history_days} days'})...")
+        history = run_daily_history(branches, exercise_ids, args.history_days, args.workers)
+        date_strs, series = build_daily_series(branches, history)
+        daily = (date_strs, series, branches)
+        stats = compute_branch_stats(branches, history, exercise_ids)
+        if stats:
+            leader = stats[0]
+            trailer = stats[-1]
+            print(
+                f"Most progress: {leader['group']}/{leader['user']} "
+                f"({leader['total_solved']}/{len(exercise_ids)} exercises). "
+                f"Least progress: {trailer['group']}/{trailer['user']} "
+                f"({trailer['total_solved']}/{len(exercise_ids)} exercises)."
+            )
+
+    wb = build_workbook(rows, exercise_ids, challenge_ids, exam_ids, daily=daily, stats=stats)
     wb.save(args.output)
     print(f"\nWrote {args.output} ({total} tracked exercises/challenges/exams, {len(rows)} students).")
 

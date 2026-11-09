@@ -582,9 +582,13 @@ python tools/report.py                                        # fetch + grade ev
 python tools/report.py --pattern "cohort2025-*/*"              # only that cohort's branches
 python tools/report.py --output cohort2025.xlsx --workers 8    # faster, custom filename
 python tools/report.py --local                                 # grade branches you already have locally, skip fetching
+python tools/report.py --history-days 14                       # only the last 2 weeks of daily telemetry
+python tools/report.py --no-history                            # current-state sheets only, skip daily telemetry
 ```
 
-The output workbook has four sheets:
+The output workbook has seven sheets -- four current-state sheets (what
+passes right now) and three daily-telemetry sheets (progress over time,
+built by re-grading each branch's history, see below):
 
 - **Summary** -- one row per student (Group, User, Branch, exercises
   solved/total/%, challenges solved/total/%, exams solved/total/%,
@@ -600,6 +604,33 @@ The output workbook has four sheets:
   stage range it covers), also kept on its own sheet -- an exam is a
   checkpoint, not an optional extra like a challenge, so it isn't
   averaged into either of the other two totals either.
+- **Daily Progress** -- one row per calendar day, one column per branch,
+  the cumulative exercises-solved count on that day (carried forward on
+  days with no commit, so it's a proper step function), plus a line
+  chart of the same data -- the day-to-day progress graph.
+- **Daily Delta** -- the same grid, but each cell is that day's *new*
+  exercises solved (the cumulative table's day-over-day difference),
+  plus a "Class Total" column summing every branch's new solves that
+  day -- the incremental-delivery table.
+- **Leaderboard** -- one row per branch (total exercises solved,
+  first/last commit day, days active, average new exercises per active
+  day, best single day), sorted most-progressed first, with the top row
+  highlighted green and the bottom row red, plus a bar chart of the same
+  ranking -- the most-updated-branch / least-updated-branch graph.
+
+The three daily-telemetry sheets come from a second pass: for every
+branch, `git log` (no worktree needed) finds the latest commit on each
+calendar day, and each of those commits gets graded exactly like the
+current-state pass above (same canonical `tests/` overlay, same
+worktree-and-pytest machinery) -- except only against the exercise
+tests, not challenges/exams, since "day to day progress" here means
+exercises specifically. This means the daily-telemetry pass costs
+roughly one full per-branch grading run *for every distinct commit-day*
+across every branch -- `--history-days N` (default 30) bounds how far
+back it looks; `--history-days 0` means the branch's entire history;
+`--no-history` skips this pass entirely (just the four current-state
+sheets, same cost as before this feature existed) when you just need a
+quick current snapshot.
 
 For each matching branch, the script checks it out into a throwaway `git
 worktree` (your own working copy is never touched), overlays **this
