@@ -104,6 +104,7 @@ import concurrent.futures
 import fnmatch
 import re
 import shutil
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -501,6 +502,113 @@ def compute_branch_stats(branches: list, history: dict, exercise_ids: list) -> l
     return stats
 
 
+# --------------------------------------------------------------------------- management/class-wide aggregates
+#
+# Everything below rolls the per-branch data above up to the whole class
+# (or whole cohort/group) -- no student is ever named. This is what the
+# Training Impact / Daily Class Progress / Group Progress sheets are
+# built from: the audience is management ("is the training working, are
+# people engaged"), not a per-trainee scoreboard (that's what Summary/
+# Exercises/Leaderboard are for).
+
+def compute_class_daily_rows(date_strs: list, series: dict, branches: list, n_exercises: int) -> list:
+    """One row per date, class-wide: new exercises solved that day
+    (summed across every student), the running cumulative total, how
+    many students solved something new that day ("active"), what
+    fraction of the roster that is, and the class's cumulative
+    completion rate (solved / possible, across everyone)."""
+    n_students = len(branches)
+    rows = []
+    prev_total = 0
+    prev_value = {key: 0 for key in series}
+    for i, d in enumerate(date_strs):
+        day_total = 0
+        active = 0
+        for key, values in series.items():
+            v = values[i]
+            day_total += v
+            if v > prev_value[key]:
+                active += 1
+            prev_value[key] = v
+        rows.append({
+            "date": d,
+            "new_solved": day_total - prev_total,
+            "cumulative_solved": day_total,
+            "active_students": active,
+            "active_pct": (active / n_students) if n_students else 0.0,
+            "completion_pct": (day_total / (n_students * n_exercises)) if n_students and n_exercises else 0.0,
+        })
+        prev_total = day_total
+    return rows
+
+
+def compute_group_daily_series(date_strs: list, series: dict, branches: list) -> dict:
+    """{group: [cumulative_solved_per_date]} -- the same per-date shape
+    as build_daily_series' per-branch `series`, but summed within each
+    branch-name group (the "group" in "group/user_id") instead of per
+    student, so cohorts can be compared without naming anyone in them."""
+    groups = sorted({group for group, user, ref in branches})
+    totals = {g: [0] * len(date_strs) for g in groups}
+    for group, user, ref in branches:
+        for i, v in enumerate(series[(group, user)]):
+            totals[group][i] += v
+    return totals
+
+
+def compute_management_stats(rows: list, stats: list, n_exercises: int, recent_days: int = 7) -> dict:
+    """Class-wide, name-free figures for the Training Impact sheet:
+    completion-rate distribution and totals (from `rows`, the
+    current-state pass, always available), plus engagement/pace figures
+    that need the daily-telemetry `stats` (compute_branch_stats'
+    output) -- left as None if --no-history skipped that pass."""
+    ok_rows = [r for r in rows if not r["error"]]
+    n_students = len(ok_rows)
+    pct_per_student = [
+        (sum(1 for v in r["exercises"].values() if v) / n_exercises) if n_exercises else 0.0
+        for r in ok_rows
+    ]
+
+    buckets = [
+        ("0% (not started)", lambda p: p == 0),
+        ("1-24%", lambda p: 0 < p < 0.25),
+        ("25-49%", lambda p: 0.25 <= p < 0.5),
+        ("50-74%", lambda p: 0.5 <= p < 0.75),
+        ("75-99%", lambda p: 0.75 <= p < 1),
+        ("100% (complete)", lambda p: p >= 1),
+    ]
+    distribution = [(label, sum(1 for p in pct_per_student if test(p))) for label, test in buckets]
+
+    out = {
+        "n_students": n_students,
+        "n_errors": len(rows) - n_students,
+        "total_solved": round(sum(pct_per_student) * n_exercises) if n_exercises else 0,
+        "avg_completion_pct": (sum(pct_per_student) / n_students) if n_students else 0.0,
+        "median_completion_pct": statistics.median(pct_per_student) if pct_per_student else 0.0,
+        "distribution": distribution,
+        "recently_active": None, "recently_active_pct": None,
+        "first_activity": None, "last_activity": None,
+        "class_days_elapsed": None, "avg_new_per_day": None,
+    }
+
+    if stats:
+        cutoff = (date.today() - timedelta(days=recent_days - 1)).isoformat()
+        recently_active = sum(1 for s in stats if s["last_commit"] and s["last_commit"] >= cutoff)
+        out["recently_active"] = recently_active
+        out["recently_active_pct"] = recently_active / len(stats)
+
+        first_days = [s["first_commit"] for s in stats if s["first_commit"]]
+        last_days = [s["last_commit"] for s in stats if s["last_commit"]]
+        if first_days and last_days:
+            first_activity, last_activity = min(first_days), max(last_days)
+            elapsed = (date.fromisoformat(last_activity) - date.fromisoformat(first_activity)).days + 1
+            out["first_activity"] = first_activity
+            out["last_activity"] = last_activity
+            out["class_days_elapsed"] = elapsed
+            out["avg_new_per_day"] = (out["total_solved"] / elapsed) if elapsed else 0.0
+
+    return out
+
+
 # --------------------------------------------------------------------------- stage grouping
 
 def exercise_stage(exercise_id: str) -> str:
@@ -687,8 +795,178 @@ def _write_flat_grid_sheet(wb, title: str, rows: list, ids: list, label_of, resu
     return ws
 
 
+def _write_training_impact_sheet(wb, mgmt: dict, n_exercises: int):
+    """The management-facing overview: class-wide totals, a completion-
+    rate distribution across students, and engagement figures -- no
+    student's name appears anywhere on this sheet."""
+    ws = wb.create_sheet("Training Impact")
+    ws.cell(row=1, column=1, value="Training Impact Overview").font = Font(bold=True, size=14)
+
+    r = 3
+
+    def _stat(label, value, number_format=None):
+        nonlocal r
+        ws.cell(row=r, column=1, value=label).font = Font(bold=True)
+        cell = ws.cell(row=r, column=2, value=value)
+        if number_format:
+            cell.number_format = number_format
+        r += 1
+
+    _stat("Students graded", mgmt["n_students"])
+    if mgmt["n_errors"]:
+        _stat("Students with a grading error", mgmt["n_errors"])
+    _stat("Exercises tracked", n_exercises)
+    _stat("Total exercises solved (class-wide)", mgmt["total_solved"])
+    _stat("Average completion per student", mgmt["avg_completion_pct"], "0%")
+    _stat("Median completion per student", mgmt["median_completion_pct"], "0%")
+    if mgmt["class_days_elapsed"] is not None:
+        _stat("First exercise solved (class)", mgmt["first_activity"])
+        _stat("Most recent exercise solved (class)", mgmt["last_activity"])
+        _stat("Training days elapsed so far", mgmt["class_days_elapsed"])
+        _stat("Average new exercises solved per day (class)", round(mgmt["avg_new_per_day"], 2))
+    if mgmt["recently_active"] is not None:
+        _stat("Students active in the last 7 days", mgmt["recently_active"])
+        _stat("% of class active in the last 7 days", mgmt["recently_active_pct"], "0%")
+
+    r += 1
+    ws.cell(row=r, column=1, value="Completion distribution (students, not exercises)").font = Font(bold=True)
+    r += 1
+    header_row = r
+    ws.cell(row=r, column=1, value="Bucket").font = HEADER_FONT
+    ws.cell(row=r, column=1).fill = HEADER_FILL
+    ws.cell(row=r, column=2, value="Students").font = HEADER_FONT
+    ws.cell(row=r, column=2).fill = HEADER_FILL
+    r += 1
+    first_data_row = r
+    for label, count in mgmt["distribution"]:
+        ws.cell(row=r, column=1, value=label)
+        ws.cell(row=r, column=2, value=count)
+        r += 1
+    last_data_row = r - 1
+
+    _autosize(ws)
+
+    if mgmt["n_students"]:
+        chart = BarChart()
+        chart.title = "Students by completion level"
+        chart.y_axis.title = "Students"
+        chart.style = 10
+        chart.width = 20
+        chart.height = 10
+        data = Reference(ws, min_col=2, max_col=2, min_row=header_row, max_row=last_data_row)
+        cats = Reference(ws, min_col=1, max_col=1, min_row=first_data_row, max_row=last_data_row)
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(cats)
+        chart.legend = None
+        ws.add_chart(chart, f"D{header_row}")
+
+    return ws
+
+
+def _write_daily_class_sheet(wb, class_rows: list):
+    """Class-wide day-to-day table -- new/cumulative exercises solved,
+    how many students were active, and the class's cumulative
+    completion rate, with no student named or broken out -- plus a
+    training-impact line chart and a participation/engagement one."""
+    ws = wb.create_sheet("Daily Class Progress")
+    headers = ["Date", "New Solved (Class)", "Cumulative Solved (Class)",
+               "Students Active", "% Active", "Cumulative Completion %"]
+    for c, h in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=c, value=h)
+        cell.font = HEADER_FONT
+        cell.fill = HEADER_FILL
+        cell.alignment = Alignment(horizontal="center")
+
+    for r, row in enumerate(class_rows, start=2):
+        ws.cell(row=r, column=1, value=row["date"])
+        ws.cell(row=r, column=2, value=row["new_solved"])
+        ws.cell(row=r, column=3, value=row["cumulative_solved"])
+        ws.cell(row=r, column=4, value=row["active_students"])
+        ws.cell(row=r, column=5, value=row["active_pct"]).number_format = "0%"
+        ws.cell(row=r, column=6, value=row["completion_pct"]).number_format = "0%"
+
+    last_row = 1 + len(class_rows)
+    ws.freeze_panes = "A2"
+    _autosize(ws)
+
+    if class_rows:
+        impact = LineChart()
+        impact.title = "Cumulative exercises solved -- whole class (training impact)"
+        impact.y_axis.title = "Exercises solved"
+        impact.x_axis.title = "Date"
+        impact.style = 10
+        impact.width = 24
+        impact.height = 12
+        data = Reference(ws, min_col=3, max_col=3, min_row=1, max_row=last_row)
+        cats = Reference(ws, min_col=1, min_row=2, max_row=last_row)
+        impact.add_data(data, titles_from_data=True)
+        impact.set_categories(cats)
+        impact.legend = None
+        ws.add_chart(impact, "H1")
+
+        engagement = LineChart()
+        engagement.title = "Students active per day (engagement)"
+        engagement.y_axis.title = "Active students"
+        engagement.x_axis.title = "Date"
+        engagement.style = 12
+        engagement.width = 24
+        engagement.height = 12
+        data2 = Reference(ws, min_col=4, max_col=4, min_row=1, max_row=last_row)
+        engagement.add_data(data2, titles_from_data=True)
+        engagement.set_categories(cats)
+        engagement.legend = None
+        ws.add_chart(engagement, "H26")
+
+    return ws
+
+
+def _write_group_progress_sheet(wb, date_strs: list, group_series: dict):
+    """Cumulative exercises solved per day, one column per GROUP/cohort
+    -- never per student -- mirroring attendance_report.py's Group
+    Comparison sheet. Only called when there's more than one group to
+    compare (see build_workbook)."""
+    ws = wb.create_sheet("Group Progress")
+    ws.cell(row=1, column=1, value="Date").font = HEADER_FONT
+    ws.cell(row=1, column=1).fill = HEADER_FILL
+
+    groups = sorted(group_series)
+    group_cols = {}
+    for i, g in enumerate(groups):
+        col = 2 + i
+        group_cols[g] = col
+        c = ws.cell(row=1, column=col, value=g)
+        c.font = HEADER_FONT
+        c.fill = HEADER_FILL
+        c.alignment = Alignment(horizontal="center")
+
+    for r, d in enumerate(date_strs, start=2):
+        ws.cell(row=r, column=1, value=d)
+        for g, col in group_cols.items():
+            ws.cell(row=r, column=col, value=group_series[g][r - 2]).alignment = Alignment(horizontal="center")
+
+    last_row = 1 + len(date_strs)
+    ws.freeze_panes = "B2"
+    _autosize(ws)
+
+    if date_strs and groups:
+        chart = LineChart()
+        chart.title = "Cumulative exercises solved, by group"
+        chart.y_axis.title = "Exercises solved"
+        chart.x_axis.title = "Date"
+        chart.style = 2
+        chart.width = 24
+        chart.height = max(10, len(groups) * 1.2)
+        data = Reference(ws, min_col=2, max_col=1 + len(groups), min_row=1, max_row=last_row)
+        cats = Reference(ws, min_col=1, min_row=2, max_row=last_row)
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(cats)
+        ws.add_chart(chart, f"A{last_row + 3}")
+
+    return ws
+
+
 def _write_summary_sheet(wb, rows: list, n_exercises: int, n_challenges: int, n_exams: int):
-    ws = wb.create_sheet("Summary", 0)
+    ws = wb.create_sheet("Summary")
     headers = ["Group", "User", "Branch", "Exercises Solved", "Exercises Total", "Exercises %",
                "Challenges Solved", "Challenges Total", "Challenges %",
                "Exams Solved", "Exams Total", "Exams %", "Status"]
@@ -892,9 +1170,22 @@ def _write_leaderboard_sheet(wb, stats: list, n_exercises: int):
 
 
 def build_workbook(rows: list, exercise_ids: list, challenge_ids: list, exam_ids: list,
-                    daily: tuple = None, stats: list = None):
+                    daily: tuple = None, stats: list = None,
+                    class_daily: list = None, group_daily: tuple = None):
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
+
+    # Management-facing, class-wide sheets first -- see "management/
+    # class-wide aggregates" above the stats functions that feed these.
+    mgmt = compute_management_stats(rows, stats, len(exercise_ids))
+    _write_training_impact_sheet(wb, mgmt, len(exercise_ids))
+    if class_daily:
+        _write_daily_class_sheet(wb, class_daily)
+    if group_daily is not None:
+        date_strs, group_series = group_daily
+        if len(group_series) > 1:
+            _write_group_progress_sheet(wb, date_strs, group_series)
+
     _write_summary_sheet(wb, rows, len(exercise_ids), len(challenge_ids), len(exam_ids))
     _write_grid_sheet(wb, "Exercises", rows, exercise_ids, exercise_stage, "exercises")
     _write_grid_sheet(wb, "Challenges", rows, challenge_ids, challenge_stage, "challenges")
@@ -1031,6 +1322,8 @@ def main():
 
     daily = None
     stats = None
+    class_daily = None
+    group_daily = None
     if not args.no_history:
         print(f"\nComputing daily telemetry ({'full history' if args.history_days <= 0 else f'last {args.history_days} days'})...")
         passing_by_branch = {(r["group"], r["user"]): r["exercises"] for r in rows if not r["error"]}
@@ -1038,6 +1331,9 @@ def main():
         date_strs, series = build_daily_series(branches, history)
         daily = (date_strs, series, branches)
         stats = compute_branch_stats(branches, history, exercise_ids)
+        if date_strs:
+            class_daily = compute_class_daily_rows(date_strs, series, branches, len(exercise_ids))
+            group_daily = (date_strs, compute_group_daily_series(date_strs, series, branches))
         if stats:
             leader = stats[0]
             trailer = stats[-1]
@@ -1048,7 +1344,8 @@ def main():
                 f"({trailer['total_solved']}/{len(exercise_ids)} exercises)."
             )
 
-    wb = build_workbook(rows, exercise_ids, challenge_ids, exam_ids, daily=daily, stats=stats)
+    wb = build_workbook(rows, exercise_ids, challenge_ids, exam_ids,
+                         daily=daily, stats=stats, class_daily=class_daily, group_daily=group_daily)
     wb.save(args.output)
     print(f"\nWrote {args.output} ({total} tracked exercises/challenges/exams, {len(rows)} students).")
 

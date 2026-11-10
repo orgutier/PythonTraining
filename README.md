@@ -588,10 +588,31 @@ python tools/report.py --reference origin/main                 # diff baseline (
 python tools/report.py --no-diff-skip                          # test every file for every branch (slower, for debugging)
 ```
 
-The output workbook has seven sheets -- four current-state sheets (what
-passes right now) and three daily-telemetry sheets (progress over time,
-built by re-grading each branch's history, see below):
+The output workbook has ten sheets -- two or three management-facing,
+class-wide sheets (first, no student named anywhere -- these are the
+"how is the training doing overall" view), four current-state sheets
+(what passes right now, per student), and three daily-telemetry sheets
+(per-student progress over time, built by re-grading each branch's
+history, see below):
 
+- **Training Impact** -- the class-wide overview: students graded, total
+  exercises solved across everyone, average/median completion per
+  student, first/most-recent exercise solved and training days elapsed,
+  how many students were active in the last 7 days, and a completion-rate
+  distribution (how many students are at 0%, 1-24%, ..., 100%) with a bar
+  chart -- aggregate numbers only, nothing broken out by individual.
+- **Daily Class Progress** -- one row per calendar day: that day's *new*
+  exercises solved class-wide, the running cumulative total, how many
+  students were active that day, what % of the roster that is, and the
+  class's cumulative completion rate -- plus a line chart of the
+  cumulative total (training impact over time) and one of daily active
+  students (engagement over time). Still no per-student breakdown.
+- **Group Progress** -- only present when branches span more than one
+  `group` (the "group" in "group/user_id", e.g. different cohorts):
+  cumulative exercises solved per day, one column per *group*, plus a
+  line chart comparing them -- a cohort-vs-cohort view, same idea as
+  `attendance_report.py`'s Group Comparison sheet, still never naming a
+  student.
 - **Summary** -- one row per student (Group, User, Branch, exercises
   solved/total/%, challenges solved/total/%, exams solved/total/%,
   Status), color-scaled so the weakest and strongest students stand out
