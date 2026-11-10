@@ -32,6 +32,7 @@ Usage (from the repo root):
     python tools/report.py --reference origin/main      # diff baseline (this is already the default)
     python tools/report.py --no-diff-skip               # test every file for every branch (slower, for debugging)
     python tools/report.py --no-baseline-cache           # always re-test the reference branch, ignore any cache
+    python tools/report.py --no-branch-cache             # always re-test every student branch, ignore any cache
     python tools/report.py --assume-reference-fails      # skip testing the reference branch, assume it fails everything
 
 Run `python tools/report.py --help` for every option.
@@ -60,18 +61,26 @@ id, for every branch. `--no-diff-skip` disables this and tests every file
 for every branch, as this script always worked before this optimization.
 
 The reference run itself can't skip anything -- there's nothing to diff
-it against -- so it's cached on disk, keyed by the reference branch's
-*resolved commit*, in .cache/report_reference_baseline.json (gitignored).
-A second run against the same commit reuses it for free; a new commit on
-the reference branch (e.g. this week's exercises just got published)
-invalidates it automatically and triggers exactly one fresh recompute.
-`--no-baseline-cache` ignores the cache unconditionally. `--assume-
-reference-fails` skips testing the reference branch at all, trusting
-that it's always an unsolved skeleton (true by how this course is run --
-everyone branches from it) -- fastest even on an uncached first run, but
-silently wrong the moment that assumption isn't (e.g. --reference points
-somewhere that already has working code). Prefer the cache; reach for
-this flag only when you're confident and want to skip even that.
+it against -- so every ref's result (the reference branch's, and every
+student branch's) is cached on disk in .cache/report_test_cache/
+(gitignored) under that ref's *resolved commit*. A later run against a
+commit that's already cached -- a student branch nobody has touched
+since last time, just as much as the reference branch itself -- skips
+re-testing it entirely: not even the diff against the reference branch,
+let alone pytest. The cache key also folds in this checkout's own
+tests/+conftest.py content (see tests_fingerprint), so fixing a test
+invalidates every cached result that fix could affect, rather than a
+stale pass/fail surviving a rubric change; a new commit on a branch, or
+a changed set of tracked ids, invalidates it the same way. `--no-
+baseline-cache` ignores the cache for the reference branch specifically;
+`--no-branch-cache` ignores it for every student branch; either forces a
+fresh test regardless of what's on disk. `--assume-reference-fails`
+skips testing the reference branch at all, trusting that it's always an
+unsolved skeleton (true by how this course is run -- everyone branches
+from it) -- fastest even on an uncached first run, but silently wrong
+the moment that assumption isn't (e.g. --reference points somewhere
+that already has working code). Prefer the cache; reach for that flag
+only when you're confident and want to skip even that.
 
 Daily telemetry
 -----------------------------
@@ -118,6 +127,7 @@ limitation: this reports what currently passes, not intent or timing.
 import argparse
 import concurrent.futures
 import fnmatch
+import hashlib
 import json
 import re
 import shutil
@@ -237,33 +247,53 @@ def _resolve_sha(ref: str) -> str:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
-def _reference_baseline_cache_path() -> Path:
-    return REPO_ROOT / ".cache" / "report_reference_baseline.json"
+def _commit_cache_path(sha: str) -> Path:
+    """One cache file per commit (not one shared file) -- cheap, and
+    lets many branches' results be saved concurrently (ThreadPoolExecutor
+    workers each touch their own branch's own sha's file, so there's no
+    shared-file write race to guard against)."""
+    return REPO_ROOT / ".cache" / "report_test_cache" / f"{sha}.json"
 
 
-def load_reference_baseline(reference_ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list):
-    """A cached reference_outcome from a previous run (see
-    save_reference_baseline), reused only if the reference branch's
-    *resolved commit* and the exact set of tracked ids both still match
-    what's cached -- a new commit on `reference_ref` (e.g. this week's
-    exercises just got published) or any change to what's tracked
-    invalidates it automatically, so a stale baseline is never served.
-    Returns None on any miss: no cache yet, sha/ids changed, a bad ref,
-    or a corrupt/unreadable cache file."""
-    sha = _resolve_sha(reference_ref)
+def tests_fingerprint() -> str:
+    """A content hash of THIS checkout's own tests/ + conftest.py -- the
+    canonical overlay every worktree gets (see "Why the canonical test
+    suite"). Part of every cache key below, so editing a test (fixing a
+    bug in one, say) invalidates every cached result that rubric change
+    could affect, rather than a stale pass/fail surviving it."""
+    digest = hashlib.sha256()
+    paths = sorted((REPO_ROOT / "tests").rglob("*.py")) + [REPO_ROOT / "conftest.py"]
+    for p in paths:
+        digest.update(p.read_bytes())
+    return digest.hexdigest()
+
+
+def load_cached_outcome(ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list,
+                        tests_fp: str):
+    """A cached test outcome for `ref`'s exact current commit (see
+    save_cached_outcome), reused only if the exact set of tracked ids
+    AND this checkout's tests/+conftest.py (`tests_fp`, see
+    tests_fingerprint) both still match what was cached -- any change to
+    either invalidates it, so a stale result is never served. A ref --
+    the reference branch or any student branch -- whose commit hasn't
+    changed since it was last graded doesn't need re-testing at all: not
+    even the diff against the reference branch, let alone pytest.
+    Returns None on any miss: no cache yet, ids/tests changed, a bad
+    ref, or a corrupt/unreadable cache file."""
+    sha = _resolve_sha(ref)
     if not sha:
         return None
-    path = _reference_baseline_cache_path()
+    path = _commit_cache_path(sha)
     if not path.exists():
         return None
     try:
         cached = json.loads(path.read_text())
     except (json.JSONDecodeError, OSError):
         return None
-    if (cached.get("sha") != sha
-            or cached.get("exercise_ids") != exercise_ids
+    if (cached.get("exercise_ids") != exercise_ids
             or cached.get("challenge_ids") != challenge_ids
-            or cached.get("exam_ids") != exam_ids):
+            or cached.get("exam_ids") != exam_ids
+            or cached.get("tests_fingerprint") != tests_fp):
         return None
     outcome = cached.get("outcome")
     if not isinstance(outcome, dict):
@@ -276,30 +306,36 @@ def load_reference_baseline(reference_ref: str, exercise_ids: list, challenge_id
     }
 
 
-def save_reference_baseline(reference_ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list,
-                             outcome: dict) -> None:
-    """Persists a freshly-computed reference_outcome to disk (see
-    load_reference_baseline) keyed by the reference branch's current
-    commit, so the next run against the same commit can skip re-testing
-    it entirely. Silently does nothing if the ref won't resolve."""
-    sha = _resolve_sha(reference_ref)
+def save_cached_outcome(ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list,
+                         outcome: dict, tests_fp: str) -> None:
+    """Persists a freshly-computed, error-free test outcome to disk (see
+    load_cached_outcome) keyed by `ref`'s current commit and this
+    checkout's tests_fp, so a later run against that same commit with
+    that same rubric -- this same branch untouched since last time, or
+    any other ref that happens to share it -- can skip re-testing it
+    entirely. Silently does nothing if the ref won't resolve or the
+    outcome carries an error (never cache a failed run)."""
+    if outcome.get("error"):
+        return
+    sha = _resolve_sha(ref)
     if not sha:
         return
-    path = _reference_baseline_cache_path()
+    path = _commit_cache_path(sha)
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
-        "reference_ref": reference_ref,
+        "ref": ref,
         "sha": sha,
         "exercise_ids": exercise_ids,
         "challenge_ids": challenge_ids,
         "exam_ids": exam_ids,
+        "tests_fingerprint": tests_fp,
         "outcome": {
             "exercises": outcome["exercises"],
             "challenges": outcome["challenges"],
             "exams": outcome["exams"],
         },
     }
-    tmp_path = path.with_suffix(".tmp")
+    tmp_path = path.with_suffix(f".{threading.get_ident()}.tmp")
     tmp_path.write_text(json.dumps(payload))
     tmp_path.replace(path)
 
@@ -1332,9 +1368,14 @@ def main():
                               "branch (slower; useful if you suspect the diff-skip is hiding a problem).")
     parser.add_argument("--no-baseline-cache", action="store_true",
                          help="Always re-test the reference branch, even if a cached result from its current "
-                              "commit is on disk (see .cache/report_reference_baseline.json). Use this if you "
-                              "suspect the cache is stale for some reason other than a new commit on the "
-                              "reference branch.")
+                              "commit is on disk (see .cache/report_test_cache/). Use this if you suspect the "
+                              "cache is stale for some reason other than a new commit on the reference branch.")
+    parser.add_argument("--no-branch-cache", action="store_true",
+                         help="Always re-test every student branch, even if a cached result from its exact "
+                              "current commit is on disk (see .cache/report_test_cache/) -- i.e. even one that "
+                              "hasn't changed at all since the last time this script graded it. Use this if "
+                              "you suspect a branch's cached result is stale for some reason other than the "
+                              "branch's own commit changing (e.g. tests/ itself changed).")
     parser.add_argument("--assume-reference-fails", action="store_true",
                          help="Skip testing the reference branch entirely and assume every tracked "
                               "exercise/challenge/exam fails on it, trusting that it's always an unsolved "
@@ -1366,6 +1407,8 @@ def main():
     exam_ids = list(EXAMS)
     total = len(exercise_ids) + len(challenge_ids) + len(exam_ids)
 
+    tests_fp = tests_fingerprint()
+
     reference_ref = args.reference or (f"{args.remote}/main" if not args.local else "main")
     reference_outcome = None
     if args.assume_reference_fails:
@@ -1380,8 +1423,8 @@ def main():
             "error": None,
         }
     elif not args.no_diff_skip:
-        reference_outcome = None if args.no_baseline_cache else load_reference_baseline(
-            reference_ref, exercise_ids, challenge_ids, exam_ids)
+        reference_outcome = None if args.no_baseline_cache else load_cached_outcome(
+            reference_ref, exercise_ids, challenge_ids, exam_ids, tests_fp)
         if reference_outcome is not None:
             print(f"Reusing cached baseline results for reference branch {reference_ref} "
                   "(same commit, same tracked ids as last time).")
@@ -1402,7 +1445,7 @@ def main():
                 )
                 reference_outcome = None
             else:
-                save_reference_baseline(reference_ref, exercise_ids, challenge_ids, exam_ids, reference_outcome)
+                save_cached_outcome(reference_ref, exercise_ids, challenge_ids, exam_ids, reference_outcome, tests_fp)
 
     rows = []
     done = 0
@@ -1411,9 +1454,20 @@ def main():
         group, user, ref = item
         with _PRINT_LOCK:
             print(f"[{group}/{user}] starting ({ref})...")
+
+        if not args.no_branch_cache:
+            cached = load_cached_outcome(ref, exercise_ids, challenge_ids, exam_ids, tests_fp)
+            if cached is not None:
+                with _PRINT_LOCK:
+                    print(f"[{group}/{user}] unchanged since last time (same commit, same tests/) -- "
+                          "reusing its cached result, no testing needed.")
+                return group, user, ref, cached
+
         changed_paths = discover_changed_paths(reference_ref, ref) if reference_outcome is not None else None
         outcome = run_student_tests(ref, exercise_ids, challenge_ids, exam_ids,
                                      reference_outcome=reference_outcome, changed_paths=changed_paths)
+        if not outcome["error"]:
+            save_cached_outcome(ref, exercise_ids, challenge_ids, exam_ids, outcome, tests_fp)
         return group, user, ref, outcome
 
     print(f"\nTesting {len(branches)} branch(es) ({args.workers} at a time)...")
