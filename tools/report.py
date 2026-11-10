@@ -29,26 +29,57 @@ Usage (from the repo root):
     python tools/report.py --local                     # use local branches, no fetch
     python tools/report.py --history-days 14            # only the last 2 weeks of history
     python tools/report.py --no-history                 # skip the daily telemetry pass entirely
+    python tools/report.py --reference origin/main      # diff baseline (this is already the default)
+    python tools/report.py --no-diff-skip               # test every file for every branch (slower, for debugging)
 
 Run `python tools/report.py --help` for every option.
 
+Skipping untouched files
+-----------------------------
+Before grading any student branch, the reference branch (`--reference`,
+default "origin/main", or "main" with --local) is graded once itself --
+one worktree-and-pytest run, same as any other branch. Then, for each
+student branch, a single cheap `git diff --name-only` (no worktree)
+against that reference finds which exercise/challenge/exam solution.py
+files actually differ from it.
+
+A solution.py the student hasn't touched is byte-identical to the
+reference's own copy, and since both are graded against the exact same
+overlaid tests/ (see "Why the canonical test suite" below), an unchanged
+file is *guaranteed* to produce whatever result the reference branch
+itself got for that id -- so it's never re-tested; that id's result is
+just copied from the one-time reference run. Only files a student has
+actually edited get their own pytest run. Early in a rolling course, most
+of a branch's tree (every stage they haven't reached yet) is still an
+untouched copy of the reference's skeleton, so this tends to cut the
+current-state pass down to roughly "one pytest run per file the student
+has actually written" rather than one per tracked exercise/challenge/exam
+id, for every branch. `--no-diff-skip` disables this and tests every file
+for every branch, as this script always worked before this optimization.
+
 Daily telemetry
 -----------------------------
-For each branch, `git log` (cheap -- no worktree needed) finds the latest
-commit on each calendar day. For each of those commits, in a throwaway
-worktree exactly like the current-state pass above, THIS checkout's own
-exercise tests are run to get that day's solved count -- so the history
-is graded by the exact same rubric as the present-day Summary sheet, not
-whatever rubric existed back on that day. Challenges/exams are skipped in
-this historical pass (exercises are what "day to day progress" means
-here, and it roughly halves the number of test runs).
+Re-grading a branch's entire history, one worktree-and-pytest run per
+distinct commit-day, used to be how this pass worked -- correct, but
+expensive enough to multiply the script's total running time by roughly
+the number of distinct commit-days across all branches.
 
-This multiplies the script's running time by roughly the number of
-distinct commit-days across all branches, since each one is its own full
-test run -- `--history-days N` (default 30) bounds how far back to look;
-`--history-days 0` means the branch's entire history; `--no-history`
-skips this pass entirely and produces just the current-state sheets, same
-as before this feature existed.
+It doesn't need to run pytest at all. The current-state pass above
+already knows, as of each branch's tip, exactly which exercises pass. For
+each of those *passing* exercises, `git log --follow --name-only` (one
+call per branch, no worktree) finds the last commit date its own
+solution.py was modified on that branch. Since that file hasn't changed
+since that date, and it's known to pass as of the tip (same content,
+same overlaid tests/), it necessarily already passed as of that date too
+-- so that date IS the day the exercise became solved, with no need to
+re-test anything to find out. Challenges/exams are still left out of this
+pass (exercises are what "day to day progress" means here).
+
+`--history-days N` (default 30) bounds how far back the resulting sheets
+show; `--history-days 0` means the branch's entire history (now cheap
+either way, since it no longer re-tests anything). `--no-history` skips
+this pass entirely and produces just the current-state sheets, same as
+before this feature existed.
 
 Why the canonical test suite
 -----------------------------
@@ -77,6 +108,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+from collections import defaultdict
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -141,13 +173,71 @@ def fetch_remote(remote: str) -> None:
 
 # --------------------------------------------------------------------------- per-student test run
 
-def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list) -> dict:
+def _solution_path(id_: str, kind: str) -> str:
+    """Repo-relative path (git-diff/git-log style, forward slashes) to the
+    one solution.py a given exercise/challenge/exam id's test file
+    imports -- see "Why the canonical test suite": every test file in
+    tests/ imports exactly one solution.py, so that file's own history is
+    all that matters for diffing or dating that id. `kind` is one of
+    "exercises"/"challenges"/"exams" (matching run_student_tests' outcome
+    dict keys)."""
+    if kind == "exercises":
+        stage, _, name = id_.partition("_")
+        return f"exercises/{stage}/{name}/solution.py"
+    if kind == "challenges":
+        return f"challenges/{id_}/solution.py"
+    return f"exams/{id_}/solution.py"
+
+
+def discover_changed_paths(ref_a: str, ref_b: str):
+    """Repo-relative paths whose content differs between two refs -- a
+    plain tree-to-tree `git diff`, no worktree needed. Returns None if the
+    diff itself fails (e.g. a bad ref), signaling the caller to fall back
+    to testing everything rather than silently trust a broken diff."""
+    result = subprocess.run(
+        ["git", "diff", "--name-only", ref_a, ref_b],
+        cwd=REPO_ROOT, capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        return None
+    return set(result.stdout.splitlines())
+
+
+def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list,
+                       reference_outcome: dict = None, changed_paths: set = None) -> dict:
     """Check out `ref` into a throwaway worktree, overlay this checkout's
     tests/ + conftest.py, run every exercise's, challenge's, and exam's own
     test file, and return {"exercises": {id: bool}, "challenges": {id: bool},
-    "exams": {id: bool}, "error": str | None}."""
-    worktree_dir = Path(tempfile.mkdtemp(prefix="pt-report-"))
+    "exams": {id: bool}, "error": str | None}.
+
+    reference_outcome/changed_paths (see discover_changed_paths, and
+    "Skipping untouched files" in the module docstring) let a caller skip
+    pytest entirely for any id whose solution.py is identical between
+    `ref` and the reference branch that produced reference_outcome: that
+    id's result is just copied from reference_outcome instead. Pass
+    neither (both None, the default) to test every id, as before."""
     outcome = {"exercises": {}, "challenges": {}, "exams": {}, "error": None}
+    can_reuse = changed_paths is not None and reference_outcome is not None
+
+    def _to_test(ids: list, kind: str) -> list:
+        if not can_reuse:
+            return list(ids)
+        pending = []
+        for id_ in ids:
+            if _solution_path(id_, kind) in changed_paths:
+                pending.append(id_)
+            else:
+                outcome[kind][id_] = reference_outcome[kind][id_]
+        return pending
+
+    exercises_to_test = _to_test(exercise_ids, "exercises")
+    challenges_to_test = _to_test(challenge_ids, "challenges")
+    exams_to_test = _to_test(exam_ids, "exams")
+
+    if not (exercises_to_test or challenges_to_test or exams_to_test):
+        return outcome  # every file identical to the reference branch -- nothing to actually test
+
+    worktree_dir = Path(tempfile.mkdtemp(prefix="pt-report-"))
     added = False
     try:
         with _WORKTREE_LOCK:
@@ -164,11 +254,11 @@ def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list, exam_id
         shutil.copytree(REPO_ROOT / "tests", worktree_dir / "tests")
         shutil.copy2(REPO_ROOT / "conftest.py", worktree_dir / "conftest.py")
 
-        for ex_id in exercise_ids:
+        for ex_id in exercises_to_test:
             outcome["exercises"][ex_id] = _run_one_test_file(worktree_dir, f"tests/test_{ex_id}.py")
-        for ch_id in challenge_ids:
+        for ch_id in challenges_to_test:
             outcome["challenges"][ch_id] = _run_one_test_file(worktree_dir, f"tests/test_{ch_id}.py")
-        for exam_id in exam_ids:
+        for exam_id in exams_to_test:
             outcome["exams"][exam_id] = _run_one_test_file(worktree_dir, f"tests/test_{exam_id}.py")
     except Exception as e:  # noqa: BLE001 -- one bad branch must not kill the whole report run
         outcome["error"] = f"{type(e).__name__}: {e}"
@@ -195,72 +285,96 @@ def _run_one_test_file(worktree_dir: Path, relative_path: str) -> bool:
 
 # --------------------------------------------------------------------------- daily telemetry
 
-def discover_daily_commits(ref: str, history_days: int) -> dict:
-    """{date: sha} for the latest commit on each calendar day `ref` has at
-    least one commit, newest commit-day first conceptually but returned
-    sorted ascending by date. `git log` is newest-commit-first, so the
-    FIRST time a given day is seen is already that day's latest commit --
-    no need to compare timestamps by hand.
-
-    history_days > 0 keeps only the most recent N calendar days; 0 (or
-    negative) keeps the branch's entire history."""
+def discover_file_last_modified(ref: str, paths: list) -> dict:
+    """{path: date_str} the last commit date each of `paths` was modified
+    on `ref` -- one `git log --name-only` call covering every path at
+    once (no worktree). `git log` is newest-commit-first, so the FIRST
+    time a path is seen in --name-only output is already its last
+    modification date; paths never touched in `ref`'s history are simply
+    absent from the result."""
+    if not paths:
+        return {}
     result = subprocess.run(
-        ["git", "log", "--format=%H|%cd", "--date=format:%Y-%m-%d", ref],
+        ["git", "log", "--format=__commit__%cd", "--date=format:%Y-%m-%d", "--name-only", ref, "--", *paths],
         cwd=REPO_ROOT, capture_output=True, text=True,
     )
     if result.returncode != 0:
         return {}
 
-    by_day = {}
+    found = {}
+    wanted = set(paths)
+    current_date = None
     for line in result.stdout.splitlines():
-        sha, sep, day_str = line.partition("|")
-        if not sep:
-            continue
-        if day_str not in by_day:  # first occurrence = that day's latest commit
-            by_day[day_str] = sha
-
-    if history_days > 0:
-        cutoff = date.today() - timedelta(days=history_days - 1)
-        by_day = {d: sha for d, sha in by_day.items() if date.fromisoformat(d) >= cutoff}
-
-    return dict(sorted(by_day.items()))
+        if line.startswith("__commit__"):
+            current_date = line[len("__commit__"):]
+        elif line in wanted and line not in found:
+            found[line] = current_date
+    return found
 
 
-def run_daily_history(branches: list, exercise_ids: list, history_days: int, workers: int) -> dict:
-    """{(group, user): {date_str: exercises_solved_count}} for every
-    branch, by re-running the canonical exercise tests (never challenges/
-    exams -- see module docstring) against the latest commit of every
-    calendar day in range. One throwaway worktree per (branch, day), same
-    machinery as run_student_tests(), just pointed at a historical sha
-    instead of the branch tip."""
-    work_items = []
-    for group, user, ref in branches:
-        daily_commits = discover_daily_commits(ref, history_days)
-        for day_str, sha in daily_commits.items():
-            work_items.append((group, user, day_str, sha))
+def _first_commit_date(ref: str) -> str:
+    result = subprocess.run(
+        ["git", "log", "--format=%cd", "--date=format:%Y-%m-%d", "--reverse", ref],
+        cwd=REPO_ROOT, capture_output=True, text=True,
+    )
+    lines = result.stdout.splitlines()
+    return lines[0] if lines else date.today().isoformat()
 
+
+def run_daily_history(branches: list, exercise_ids: list, passing_by_branch: dict,
+                       history_days: int, workers: int) -> dict:
+    """{(group, user): {date_str: cumulative_exercises_solved}} built with
+    no pytest runs at all -- see "Daily telemetry" in the module
+    docstring. `passing_by_branch` is {(group, user): {exercise_id: bool}}
+    from the current-state pass that already ran (run_student_tests);
+    for each branch's *passing* exercises, one `git log` call (no
+    worktree) finds when each one's solution.py was last modified, and
+    that date is necessarily the day it became solved."""
     history = {}
-    if not work_items:
+    if not branches:
         return history
 
     def _work(item):
-        group, user, day_str, sha = item
-        outcome = run_student_tests(sha, exercise_ids, [], [])
-        solved = sum(1 for v in outcome["exercises"].values() if v) if not outcome["error"] else None
-        return group, user, day_str, solved
+        group, user, ref = item
+        passing = passing_by_branch.get((group, user), {})
+        wanted_paths = {ex_id: _solution_path(ex_id, "exercises") for ex_id in exercise_ids if passing.get(ex_id)}
+        if not wanted_paths:
+            return group, user, {}
+
+        last_modified = discover_file_last_modified(ref, list(set(wanted_paths.values())))
+        fallback = None
+        counts = defaultdict(int)
+        for path in wanted_paths.values():
+            day_str = last_modified.get(path)
+            if day_str is None:
+                if fallback is None:
+                    fallback = _first_commit_date(ref)
+                day_str = fallback
+            counts[day_str] += 1
+
+        cumulative = {}
+        running_total = 0
+        for day_str in sorted(counts):
+            running_total += counts[day_str]
+            cumulative[day_str] = running_total
+
+        if history_days > 0:
+            cutoff = date.today() - timedelta(days=history_days - 1)
+            cumulative = {d: c for d, c in cumulative.items() if date.fromisoformat(d) >= cutoff}
+        return group, user, cumulative
 
     done = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = [executor.submit(_work, item) for item in work_items]
+        futures = [executor.submit(_work, item) for item in branches]
         for future in concurrent.futures.as_completed(futures):
-            group, user, day_str, solved = future.result()
+            group, user, cumulative = future.result()
             done += 1
             with _PRINT_LOCK:
-                print(f"[history {done}/{len(work_items)}] {group}/{user} {day_str}: "
-                      f"{solved if solved is not None else 'ERROR'}/{len(exercise_ids)} exercises")
-            if solved is None:
-                continue
-            history.setdefault((group, user), {})[day_str] = solved
+                solved = max(cumulative.values()) if cumulative else 0
+                print(f"[history {done}/{len(branches)}] {group}/{user}: "
+                      f"{solved}/{len(exercise_ids)} exercises, {len(cumulative)} progress day(s)")
+            if cumulative:
+                history[(group, user)] = cumulative
 
     return history
 
@@ -780,8 +894,14 @@ def main():
                               "(default: 30). 0 means the branch's entire history.")
     parser.add_argument("--no-history", action="store_true",
                          help="Skip the daily telemetry pass (Daily Progress / Daily Delta / Leaderboard sheets) "
-                              "entirely -- just the current-state Summary/Exercises/Challenges/Exams sheets, "
-                              "and much faster since it skips re-testing every branch's history.")
+                              "entirely -- just the current-state Summary/Exercises/Challenges/Exams sheets.")
+    parser.add_argument("--reference", default=None,
+                         help="Branch/ref each student branch is diffed against to skip re-testing files they "
+                              "haven't touched (see \"Skipping untouched files\" in this script's docstring). "
+                              "Default: 'origin/main', or 'main' with --local.")
+    parser.add_argument("--no-diff-skip", action="store_true",
+                         help="Disable the reference-branch diff optimization and test every file for every "
+                              "branch (slower; useful if you suspect the diff-skip is hiding a problem).")
     args = parser.parse_args()
 
     exclude = [p.strip() for p in args.exclude.split(",") if p.strip()]
@@ -805,12 +925,27 @@ def main():
     exam_ids = list(EXAMS)
     total = len(exercise_ids) + len(challenge_ids) + len(exam_ids)
 
+    reference_ref = args.reference or (f"{args.remote}/main" if not args.local else "main")
+    reference_outcome = None
+    if not args.no_diff_skip:
+        print(f"Computing baseline results from reference branch {reference_ref}...")
+        reference_outcome = run_student_tests(reference_ref, exercise_ids, challenge_ids, exam_ids)
+        if reference_outcome["error"]:
+            print(
+                f"WARNING: couldn't test reference branch {reference_ref} ({reference_outcome['error']}) -- "
+                "skipping the diff optimization, testing every file for every branch.",
+                file=sys.stderr,
+            )
+            reference_outcome = None
+
     rows = []
     done = 0
 
     def _work(item):
         group, user, ref = item
-        outcome = run_student_tests(ref, exercise_ids, challenge_ids, exam_ids)
+        changed_paths = discover_changed_paths(reference_ref, ref) if reference_outcome is not None else None
+        outcome = run_student_tests(ref, exercise_ids, challenge_ids, exam_ids,
+                                     reference_outcome=reference_outcome, changed_paths=changed_paths)
         return group, user, ref, outcome
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
@@ -843,7 +978,8 @@ def main():
     stats = None
     if not args.no_history:
         print(f"\nComputing daily telemetry ({'full history' if args.history_days <= 0 else f'last {args.history_days} days'})...")
-        history = run_daily_history(branches, exercise_ids, args.history_days, args.workers)
+        passing_by_branch = {(r["group"], r["user"]): r["exercises"] for r in rows if not r["error"]}
+        history = run_daily_history(branches, exercise_ids, passing_by_branch, args.history_days, args.workers)
         date_strs, series = build_daily_series(branches, history)
         daily = (date_strs, series, branches)
         stats = compute_branch_stats(branches, history, exercise_ids)

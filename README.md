@@ -584,6 +584,8 @@ python tools/report.py --output cohort2025.xlsx --workers 8    # faster, custom 
 python tools/report.py --local                                 # grade branches you already have locally, skip fetching
 python tools/report.py --history-days 14                       # only the last 2 weeks of daily telemetry
 python tools/report.py --no-history                            # current-state sheets only, skip daily telemetry
+python tools/report.py --reference origin/main                 # diff baseline (already the default)
+python tools/report.py --no-diff-skip                          # test every file for every branch (slower, for debugging)
 ```
 
 The output workbook has seven sheets -- four current-state sheets (what
@@ -618,20 +620,6 @@ built by re-grading each branch's history, see below):
   highlighted green and the bottom row red, plus a bar chart of the same
   ranking -- the most-updated-branch / least-updated-branch graph.
 
-The three daily-telemetry sheets come from a second pass: for every
-branch, `git log` (no worktree needed) finds the latest commit on each
-calendar day, and each of those commits gets graded exactly like the
-current-state pass above (same canonical `tests/` overlay, same
-worktree-and-pytest machinery) -- except only against the exercise
-tests, not challenges/exams, since "day to day progress" here means
-exercises specifically. This means the daily-telemetry pass costs
-roughly one full per-branch grading run *for every distinct commit-day*
-across every branch -- `--history-days N` (default 30) bounds how far
-back it looks; `--history-days 0` means the branch's entire history;
-`--no-history` skips this pass entirely (just the four current-state
-sheets, same cost as before this feature existed) when you just need a
-quick current snapshot.
-
 For each matching branch, the script checks it out into a throwaway `git
 worktree` (your own working copy is never touched), overlays **this
 checkout's own `tests/` and `conftest.py`** on top of the student's
@@ -645,14 +633,46 @@ exercise/challenge/exam (e.g. it was created before Stage 14 existed)
 simply doesn't have that folder yet, so it's counted as not solved --
 this reports what currently passes, not intent or timing.
 
+Before grading any student branch, though, the **reference branch**
+(`--reference`, default `origin/main`, or `main` with `--local`) gets
+graded once, the same way. Then, for each student branch, a single cheap
+`git diff --name-only` against that reference (no worktree) finds which
+exercise/challenge/exam `solution.py` files actually differ from it. A
+file the student hasn't touched is byte-identical to the reference's own
+copy, and since both get graded against the exact same overlaid `tests/`,
+an unchanged file is *guaranteed* to produce whatever result the
+reference branch itself got for that id -- so it's never re-tested; the
+result is just copied from that one reference run. Only files a student
+has actually edited get their own `pytest` run, which in a rolling
+course (where most of a branch's tree, every stage not yet reached, is
+still an untouched copy of the reference's skeleton) cuts the
+current-state pass down to roughly one `pytest` run per file the student
+has actually written, instead of one per tracked id, for every branch.
+`--no-diff-skip` disables this and tests every file for every branch,
+the way this script always worked before the optimization.
+
 By default it excludes `main`, `master`, `HEAD`, and a few common
 non-student prefixes (`claude/*`, `dependabot/*`, `renovate/*`,
 `gh-pages`) so it's safe to run with no arguments even against this
 template repo's own branches; scope `--pattern` to your actual group
-keyword(s) for a large, busy repo. Grading ~100 exercises/challenges/exams
-takes roughly 20-30 seconds per student sequentially -- `--workers` (a
-handful of branches at a time is a reasonable default) parallelizes
-across students, each in its own worktree.
+keyword(s) for a large, busy repo. `--workers` (a handful of branches at
+a time is a reasonable default) parallelizes across students, each in
+its own worktree.
+
+The three daily-telemetry sheets come from a second pass that, as of the
+diff-skip optimization above, runs **no pytest at all**: the
+current-state pass already knows exactly which exercises pass as of each
+branch's tip, and for each of those, one `git log --name-only` call (no
+worktree) finds the last commit date its own `solution.py` was modified.
+Since that file hasn't changed since then, and it's known to pass at the
+tip, it necessarily already passed as of that date too -- so that date
+*is* the day the exercise became solved, with nothing left to actually
+test. Challenges/exams are still left out of this pass (exercises are
+what "day to day progress" means here). `--history-days N` (default 30)
+bounds how far back the resulting sheets show; `--history-days 0` means
+the branch's entire history (cheap either way now); `--no-history` skips
+this pass entirely (just the four current-state sheets) when you want
+only a current snapshot.
 
 ## On book references
 
