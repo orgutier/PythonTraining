@@ -108,6 +108,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 from collections import defaultdict
 from datetime import date, timedelta
 from pathlib import Path
@@ -128,6 +129,14 @@ except ImportError:
         file=sys.stderr,
     )
     raise
+
+# stdout is fully block-buffered (not line-buffered) whenever it isn't a
+# terminal -- piped to a file/tee, or captured by a CI/log viewer. Without
+# this, a long silent stretch (the reference-branch baseline below; any
+# slow pytest run) just sits in the buffer and only appears once it's
+# flushed, which can make a script that's actually working look hung.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(line_buffering=True)
 
 DEFAULT_EXCLUDE = ["HEAD", "main", "master", "claude/*", "dependabot/*", "renovate/*", "gh-pages"]
 
@@ -204,7 +213,8 @@ def discover_changed_paths(ref_a: str, ref_b: str):
 
 
 def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list,
-                       reference_outcome: dict = None, changed_paths: set = None) -> dict:
+                       reference_outcome: dict = None, changed_paths: set = None,
+                       on_step=None) -> dict:
     """Check out `ref` into a throwaway worktree, overlay this checkout's
     tests/ + conftest.py, run every exercise's, challenge's, and exam's own
     test file, and return {"exercises": {id: bool}, "challenges": {id: bool},
@@ -215,7 +225,20 @@ def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list, exam_id
     pytest entirely for any id whose solution.py is identical between
     `ref` and the reference branch that produced reference_outcome: that
     id's result is just copied from reference_outcome instead. Pass
-    neither (both None, the default) to test every id, as before."""
+    neither (both None, the default) to test every id, as before.
+
+    on_step, if given, is called with a one-line str at every major step
+    (worktree created, overlay done, each test file's own result) --
+    this function is otherwise silent while it runs (a worktree add or a
+    slow pytest file gives no output of its own), so a caller grading
+    just one ref on its own -- the reference-branch baseline in main(),
+    not the many-branches-at-once loop, which already logs one line per
+    *branch* -- should pass one to actually see it working rather than
+    staring at a blank terminal until it's done."""
+    def _step(msg: str) -> None:
+        if on_step:
+            on_step(msg)
+
     outcome = {"exercises": {}, "challenges": {}, "exams": {}, "error": None}
     can_reuse = changed_paths is not None and reference_outcome is not None
 
@@ -233,13 +256,22 @@ def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list, exam_id
     exercises_to_test = _to_test(exercise_ids, "exercises")
     challenges_to_test = _to_test(challenge_ids, "challenges")
     exams_to_test = _to_test(exam_ids, "exams")
+    total_to_test = len(exercises_to_test) + len(challenges_to_test) + len(exams_to_test)
+
+    if can_reuse:
+        _step(f"{total_to_test} file(s) differ from the reference branch "
+              f"(out of {len(exercise_ids) + len(challenge_ids) + len(exam_ids)} tracked) -- "
+              "the rest are reused from the reference run.")
 
     if not (exercises_to_test or challenges_to_test or exams_to_test):
+        _step("Nothing to test -- no worktree needed.")
         return outcome  # every file identical to the reference branch -- nothing to actually test
 
     worktree_dir = Path(tempfile.mkdtemp(prefix="pt-report-"))
     added = False
     try:
+        _step(f"Creating worktree for {ref}...")
+        t0 = time.time()
         with _WORKTREE_LOCK:
             result = subprocess.run(
                 ["git", "worktree", "add", "--detach", "--force", str(worktree_dir), ref],
@@ -247,23 +279,37 @@ def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list, exam_id
             )
         if result.returncode != 0:
             outcome["error"] = f"git worktree add failed: {result.stderr.strip()}"
+            _step(f"git worktree add failed: {result.stderr.strip()}")
             return outcome
         added = True
+        _step(f"Worktree ready ({time.time() - t0:.1f}s).")
 
+        _step("Overlaying this checkout's tests/ and conftest.py...")
         shutil.rmtree(worktree_dir / "tests", ignore_errors=True)
         shutil.copytree(REPO_ROOT / "tests", worktree_dir / "tests")
         shutil.copy2(REPO_ROOT / "conftest.py", worktree_dir / "conftest.py")
 
-        for ex_id in exercises_to_test:
-            outcome["exercises"][ex_id] = _run_one_test_file(worktree_dir, f"tests/test_{ex_id}.py")
-        for ch_id in challenges_to_test:
-            outcome["challenges"][ch_id] = _run_one_test_file(worktree_dir, f"tests/test_{ch_id}.py")
-        for exam_id in exams_to_test:
-            outcome["exams"][exam_id] = _run_one_test_file(worktree_dir, f"tests/test_{exam_id}.py")
+        done = 0
+        for kind, ids, outcome_key in (
+            ("exercise", exercises_to_test, "exercises"),
+            ("challenge", challenges_to_test, "challenges"),
+            ("exam", exams_to_test, "exams"),
+        ):
+            if not ids:
+                continue
+            _step(f"Running pytest for {len(ids)} {kind}(s)...")
+            for id_ in ids:
+                t0 = time.time()
+                passed = _run_one_test_file(worktree_dir, f"tests/test_{id_}.py")
+                outcome[outcome_key][id_] = passed
+                done += 1
+                _step(f"  [{done}/{total_to_test}] {id_}: {'PASS' if passed else 'FAIL'} ({time.time() - t0:.1f}s)")
     except Exception as e:  # noqa: BLE001 -- one bad branch must not kill the whole report run
         outcome["error"] = f"{type(e).__name__}: {e}"
+        _step(f"ERROR: {outcome['error']}")
     finally:
         if added:
+            _step("Removing worktree...")
             with _WORKTREE_LOCK:
                 subprocess.run(
                     ["git", "worktree", "remove", "--force", str(worktree_dir)],
@@ -928,8 +974,14 @@ def main():
     reference_ref = args.reference or (f"{args.remote}/main" if not args.local else "main")
     reference_outcome = None
     if not args.no_diff_skip:
-        print(f"Computing baseline results from reference branch {reference_ref}...")
-        reference_outcome = run_student_tests(reference_ref, exercise_ids, challenge_ids, exam_ids)
+        print(f"Computing baseline results from reference branch {reference_ref} "
+              f"({total} files to test, no diff to skip against on this one)...")
+        t0 = time.time()
+        reference_outcome = run_student_tests(
+            reference_ref, exercise_ids, challenge_ids, exam_ids,
+            on_step=lambda msg: print(f"  [baseline] {msg}"),
+        )
+        print(f"Baseline done in {time.time() - t0:.1f}s.")
         if reference_outcome["error"]:
             print(
                 f"WARNING: couldn't test reference branch {reference_ref} ({reference_outcome['error']}) -- "
@@ -943,11 +995,14 @@ def main():
 
     def _work(item):
         group, user, ref = item
+        with _PRINT_LOCK:
+            print(f"[{group}/{user}] starting ({ref})...")
         changed_paths = discover_changed_paths(reference_ref, ref) if reference_outcome is not None else None
         outcome = run_student_tests(ref, exercise_ids, challenge_ids, exam_ids,
                                      reference_outcome=reference_outcome, changed_paths=changed_paths)
         return group, user, ref, outcome
 
+    print(f"\nTesting {len(branches)} branch(es) ({args.workers} at a time)...")
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
         futures = [executor.submit(_work, item) for item in branches]
         for future in concurrent.futures.as_completed(futures):
