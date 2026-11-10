@@ -31,6 +31,8 @@ Usage (from the repo root):
     python tools/report.py --no-history                 # skip the daily telemetry pass entirely
     python tools/report.py --reference origin/main      # diff baseline (this is already the default)
     python tools/report.py --no-diff-skip               # test every file for every branch (slower, for debugging)
+    python tools/report.py --no-baseline-cache           # always re-test the reference branch, ignore any cache
+    python tools/report.py --assume-reference-fails      # skip testing the reference branch, assume it fails everything
 
 Run `python tools/report.py --help` for every option.
 
@@ -56,6 +58,20 @@ current-state pass down to roughly "one pytest run per file the student
 has actually written" rather than one per tracked exercise/challenge/exam
 id, for every branch. `--no-diff-skip` disables this and tests every file
 for every branch, as this script always worked before this optimization.
+
+The reference run itself can't skip anything -- there's nothing to diff
+it against -- so it's cached on disk, keyed by the reference branch's
+*resolved commit*, in .cache/report_reference_baseline.json (gitignored).
+A second run against the same commit reuses it for free; a new commit on
+the reference branch (e.g. this week's exercises just got published)
+invalidates it automatically and triggers exactly one fresh recompute.
+`--no-baseline-cache` ignores the cache unconditionally. `--assume-
+reference-fails` skips testing the reference branch at all, trusting
+that it's always an unsolved skeleton (true by how this course is run --
+everyone branches from it) -- fastest even on an uncached first run, but
+silently wrong the moment that assumption isn't (e.g. --reference points
+somewhere that already has working code). Prefer the cache; reach for
+this flag only when you're confident and want to skip even that.
 
 Daily telemetry
 -----------------------------
@@ -102,6 +118,7 @@ limitation: this reports what currently passes, not intent or timing.
 import argparse
 import concurrent.futures
 import fnmatch
+import json
 import re
 import shutil
 import statistics
@@ -211,6 +228,80 @@ def discover_changed_paths(ref_a: str, ref_b: str):
     if result.returncode != 0:
         return None
     return set(result.stdout.splitlines())
+
+
+def _resolve_sha(ref: str) -> str:
+    """The commit `ref` currently points at, or None if `ref` doesn't
+    resolve (a bad branch name, etc.)."""
+    result = subprocess.run(["git", "rev-parse", ref], cwd=REPO_ROOT, capture_output=True, text=True)
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def _reference_baseline_cache_path() -> Path:
+    return REPO_ROOT / ".cache" / "report_reference_baseline.json"
+
+
+def load_reference_baseline(reference_ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list):
+    """A cached reference_outcome from a previous run (see
+    save_reference_baseline), reused only if the reference branch's
+    *resolved commit* and the exact set of tracked ids both still match
+    what's cached -- a new commit on `reference_ref` (e.g. this week's
+    exercises just got published) or any change to what's tracked
+    invalidates it automatically, so a stale baseline is never served.
+    Returns None on any miss: no cache yet, sha/ids changed, a bad ref,
+    or a corrupt/unreadable cache file."""
+    sha = _resolve_sha(reference_ref)
+    if not sha:
+        return None
+    path = _reference_baseline_cache_path()
+    if not path.exists():
+        return None
+    try:
+        cached = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return None
+    if (cached.get("sha") != sha
+            or cached.get("exercise_ids") != exercise_ids
+            or cached.get("challenge_ids") != challenge_ids
+            or cached.get("exam_ids") != exam_ids):
+        return None
+    outcome = cached.get("outcome")
+    if not isinstance(outcome, dict):
+        return None
+    return {
+        "exercises": outcome.get("exercises", {}),
+        "challenges": outcome.get("challenges", {}),
+        "exams": outcome.get("exams", {}),
+        "error": None,
+    }
+
+
+def save_reference_baseline(reference_ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list,
+                             outcome: dict) -> None:
+    """Persists a freshly-computed reference_outcome to disk (see
+    load_reference_baseline) keyed by the reference branch's current
+    commit, so the next run against the same commit can skip re-testing
+    it entirely. Silently does nothing if the ref won't resolve."""
+    sha = _resolve_sha(reference_ref)
+    if not sha:
+        return
+    path = _reference_baseline_cache_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "reference_ref": reference_ref,
+        "sha": sha,
+        "exercise_ids": exercise_ids,
+        "challenge_ids": challenge_ids,
+        "exam_ids": exam_ids,
+        "outcome": {
+            "exercises": outcome["exercises"],
+            "challenges": outcome["challenges"],
+            "exams": outcome["exams"],
+        },
+    }
+    tmp_path = path.with_suffix(".tmp")
+    tmp_path.write_text(json.dumps(payload))
+    tmp_path.replace(path)
 
 
 def run_student_tests(ref: str, exercise_ids: list, challenge_ids: list, exam_ids: list,
@@ -1239,6 +1330,19 @@ def main():
     parser.add_argument("--no-diff-skip", action="store_true",
                          help="Disable the reference-branch diff optimization and test every file for every "
                               "branch (slower; useful if you suspect the diff-skip is hiding a problem).")
+    parser.add_argument("--no-baseline-cache", action="store_true",
+                         help="Always re-test the reference branch, even if a cached result from its current "
+                              "commit is on disk (see .cache/report_reference_baseline.json). Use this if you "
+                              "suspect the cache is stale for some reason other than a new commit on the "
+                              "reference branch.")
+    parser.add_argument("--assume-reference-fails", action="store_true",
+                         help="Skip testing the reference branch entirely and assume every tracked "
+                              "exercise/challenge/exam fails on it, trusting that it's always an unsolved "
+                              "skeleton (true by how this course is run: everyone branches from it). Fastest "
+                              "option, but silently wrong the moment that's not true -- e.g. a reference "
+                              "branch that isn't really an unsolved skeleton, or one accidental merge of a "
+                              "working solution into it. Prefer the on-disk cache (the default) unless you "
+                              "specifically want to skip even the first, cache-populating run.")
     args = parser.parse_args()
 
     exclude = [p.strip() for p in args.exclude.split(",") if p.strip()]
@@ -1264,22 +1368,41 @@ def main():
 
     reference_ref = args.reference or (f"{args.remote}/main" if not args.local else "main")
     reference_outcome = None
-    if not args.no_diff_skip:
-        print(f"Computing baseline results from reference branch {reference_ref} "
-              f"({total} files to test, no diff to skip against on this one)...")
-        t0 = time.time()
-        reference_outcome = run_student_tests(
-            reference_ref, exercise_ids, challenge_ids, exam_ids,
-            on_step=lambda msg: print(f"  [baseline] {msg}"),
+    if args.assume_reference_fails:
+        print(
+            f"Assuming reference branch {reference_ref} fails every tracked id (--assume-reference-fails) -- "
+            "skipping its pytest run entirely."
         )
-        print(f"Baseline done in {time.time() - t0:.1f}s.")
-        if reference_outcome["error"]:
-            print(
-                f"WARNING: couldn't test reference branch {reference_ref} ({reference_outcome['error']}) -- "
-                "skipping the diff optimization, testing every file for every branch.",
-                file=sys.stderr,
+        reference_outcome = {
+            "exercises": {i: False for i in exercise_ids},
+            "challenges": {i: False for i in challenge_ids},
+            "exams": {i: False for i in exam_ids},
+            "error": None,
+        }
+    elif not args.no_diff_skip:
+        reference_outcome = None if args.no_baseline_cache else load_reference_baseline(
+            reference_ref, exercise_ids, challenge_ids, exam_ids)
+        if reference_outcome is not None:
+            print(f"Reusing cached baseline results for reference branch {reference_ref} "
+                  "(same commit, same tracked ids as last time).")
+        else:
+            print(f"Computing baseline results from reference branch {reference_ref} "
+                  f"({total} files to test, no diff to skip against on this one)...")
+            t0 = time.time()
+            reference_outcome = run_student_tests(
+                reference_ref, exercise_ids, challenge_ids, exam_ids,
+                on_step=lambda msg: print(f"  [baseline] {msg}"),
             )
-            reference_outcome = None
+            print(f"Baseline done in {time.time() - t0:.1f}s.")
+            if reference_outcome["error"]:
+                print(
+                    f"WARNING: couldn't test reference branch {reference_ref} ({reference_outcome['error']}) -- "
+                    "skipping the diff optimization, testing every file for every branch.",
+                    file=sys.stderr,
+                )
+                reference_outcome = None
+            else:
+                save_reference_baseline(reference_ref, exercise_ids, challenge_ids, exam_ids, reference_outcome)
 
     rows = []
     done = 0

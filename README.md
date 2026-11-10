@@ -586,6 +586,8 @@ python tools/report.py --history-days 14                       # only the last 2
 python tools/report.py --no-history                            # current-state sheets only, skip daily telemetry
 python tools/report.py --reference origin/main                 # diff baseline (already the default)
 python tools/report.py --no-diff-skip                          # test every file for every branch (slower, for debugging)
+python tools/report.py --no-baseline-cache                     # always re-test the reference branch, ignore any cache
+python tools/report.py --assume-reference-fails                # skip testing the reference branch, assume it fails everything
 ```
 
 The output workbook has ten sheets -- two or three management-facing,
@@ -671,6 +673,21 @@ current-state pass down to roughly one `pytest` run per file the student
 has actually written, instead of one per tracked id, for every branch.
 `--no-diff-skip` disables this and tests every file for every branch,
 the way this script always worked before the optimization.
+
+The reference branch's own run can't skip anything the same way --
+there's nothing to diff it against -- so instead it's cached on disk
+(`.cache/report_reference_baseline.json`, gitignored), keyed by the
+reference branch's *resolved commit*. A later run against the same
+commit reuses it for free; a new commit on the reference branch (a new
+week's exercises published, say) invalidates it automatically and costs
+exactly one fresh recompute. `--no-baseline-cache` ignores the cache
+unconditionally. `--assume-reference-fails` skips testing the reference
+branch at all and just assumes it fails every tracked id -- trusting
+that it's always an unsolved skeleton, which is true by how this course
+is run (everyone branches from it), but silently wrong the moment that's
+not the case (e.g. `--reference` pointed at a branch with working code
+on it). Prefer the cache; use this flag only when you're confident and
+want to skip even the first, cache-populating run.
 
 By default it excludes `main`, `master`, `HEAD`, and a few common
 non-student prefixes (`claude/*`, `dependabot/*`, `renovate/*`,
